@@ -2,8 +2,15 @@ Changelog
 =========
 
 
+0.1.2 (2023-07-11)
+------------------
+- Merge branch 'main' of https://github.com/Mcsavvy/CookGPT. [mcsavvy]
+- Release: version 0.1.1 🚀 [mcsavvy]
+
+
 0.1.1 (2023-07-11)
 ------------------
+- Refactor tests and release workflows. [mcsavvy]
 - Add release workflow and update code formatting and linting. [mcsavvy]
 - Update Python version to 3.10.5. [mcsavvy]
 - Modified main workflow. [mcsavvy]
