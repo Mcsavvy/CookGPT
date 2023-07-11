@@ -1,6 +1,8 @@
 .ONESHELL:
 ENV_PREFIX=$(shell if [ -z "$$PIPENV_ACTIVE" ]; then pipenv --venv; else echo "$$ENV_PREFIX"; fi)/bin
 DEV_MODE=$(shell grep "FLASK_ENV=development" .env && echo "true")
+FILES="."
+
 
 .PHONY: help
 help:             ## Show the help.
@@ -35,17 +37,14 @@ run:              ## Run the project.
 
 .PHONY: fmt
 fmt:              ## Format code using black & isort.
-	$(ENV_PREFIX)/isort cookgpt/
-	$(ENV_PREFIX)/black -l 79 cookgpt/
-	$(ENV_PREFIX)/black -l 79 tests/
+	$(ENV_PREFIX)/isort $(FILES)
+	$(ENV_PREFIX)/black -l 79 $(FILES)
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)/flake8 cookgpt/
-	$(ENV_PREFIX)/flake8 tests/
-	$(ENV_PREFIX)/black -l 79 --check cookgpt/
-	$(ENV_PREFIX)/black -l 79 --check tests/
-	$(ENV_PREFIX)/mypy --ignore-missing-imports cookgpt/
+	$(ENV_PREFIX)/flake8 $(FILES)
+	$(ENV_PREFIX)/black -l 79 --check $(FILES)
+	$(ENV_PREFIX)/mypy --ignore-missing-imports $(FILES)
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.
@@ -76,13 +75,13 @@ clean:            ## Clean unused files.
 
 .PHONY: release
 release:          ## Create a new tag for release.
-	@echo "WARNING: This operation will create s version tag and push to github"
+	@echo "WARNING: This operation will create a version tag and push to github"
 	@read -p "Version? (provide the next x.y.z semver) : " TAG
 	@echo "creating git tag : $${TAG}"
-	@git tag $${TAG}
-	@echo "$${TAG}" > cookgpt/VERSION
-	@$(ENV_PREFIX)/gitchangelog > HISTORY.md
-	@git add cookgpt/VERSION HISTORY.md
-	@git commit -m "release: version $${TAG} 🚀"
-	@git push -u origin HEAD --tags
-	@echo "Github Actions will detect the new tag and release the new version."
+	# @git tag $${TAG}
+	# @echo "$${TAG}" > cookgpt/VERSION
+	# @$(ENV_PREFIX)/gitchangelog > HISTORY.md
+	# @git add cookgpt/VERSION HISTORY.md
+	# @git commit -m "release: version $${TAG} 🚀"
+	# @git push -u origin HEAD --tags
+	# @echo "Github Actions will detect the new tag and release the new version."

@@ -1,8 +1,6 @@
 from flask_admin import Admin
 from flask_admin.base import AdminIndexView
 from flask_admin.contrib import sqla
-from werkzeug.security import generate_password_hash
-
 from cookgpt.ext.database import db
 from cookgpt.user.models import User
 

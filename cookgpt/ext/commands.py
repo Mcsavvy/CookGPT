@@ -1,5 +1,3 @@
-import click
-
 from cookgpt.ext.database import db
 
 

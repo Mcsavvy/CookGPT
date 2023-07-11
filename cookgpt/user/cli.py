@@ -15,7 +15,7 @@ def create_user(fname, lname, email, username, password):
     )
 
 
-@app.cli.command()
+@app.cli.command()  # type: ignore
 @click.option("--fname", "-f", required=True)
 @click.option("--lname", "-l", required=True)
 @click.option("--email", "-e", required=True)

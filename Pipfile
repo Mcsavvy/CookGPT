@@ -35,6 +35,7 @@ pytest-flask = "*"
 pytest-cov = "*"
 gitchangelog = "*"
 codecov = "*"
+types-setuptools = "*"
 
 [requires]
 python_version = "3.10"

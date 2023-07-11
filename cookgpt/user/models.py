@@ -4,7 +4,7 @@ from cookgpt.base import BaseModelMixin
 from cookgpt.ext.database import db
 
 
-class User(db.Model, BaseModelMixin):
+class User(db.Model, BaseModelMixin):  # type: ignore
     """User model"""
 
     first_name = db.Column(db.String(40), nullable=False)
