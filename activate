@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# activate the virtualenv
+# if it's not already activated
+
+ENV_PREFIX="$(pipenv --venv 2>/dev/null)"
+
+
+# if the virtualenv is already activated
+# then reactivate it
+if ! [ -z "$VIRTUAL_ENV" ]; then
+	deactivate
+	unalias deactivate
+fi
+
+echo "Activating virtualenv $(basename $ENV_PREFIX)"
+
+# set the pipenv active flag
+export PIPENV_ACTIVE=1
+
+# activate virtualenv
+source $ENV_PREFIX/bin/activate
+
+# create a wrapper around the `deactivate` command
+# to unset the PIPENV_ACTIVE flag
+alias deactivate="unset PIPENV_ACTIVE; deactivate"
+
+# load env vars
+export $(cat .env | xargs)
