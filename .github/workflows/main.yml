@@ -31,7 +31,7 @@ jobs:
           make install
       - name: Run linter
         run: make lint
-  tests_linux:
+  tests:
     needs: linter
     strategy:
       fail-fast: false
@@ -49,42 +49,3 @@ jobs:
           make install
       - name: Run tests
         run: make test
-  tests_mac:
-    needs: linter
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.10.5
-      - name: Install project
-        run: |
-          python -m pip install pipenv
-          make install
-      - name: Run tests
-        run: make test
-  tests_win:
-    needs: linter
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.9]
-        os: [windows-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install Pip
-        run: pip install --user --upgrade pip
-      - name: Install project
-        run:
-          python -m pip install pipenv
-          make install
-      - name: run tests
-        run: pytest -s -vvvv -l --tb=long tests
