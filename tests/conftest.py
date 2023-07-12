@@ -1,27 +1,21 @@
 import sys
+
 import pytest
 
 from cookgpt import create_app
-from cookgpt.ext.commands import populate_db
 from cookgpt.ext.database import db
+from cookgpt.user.models import User  # noqa: F401
 
 
 @pytest.fixture(scope="session")
 def app():
     app = create_app(FORCE_ENV_FOR_DYNACONF="testing")
     with app.app_context():
-        db.create_all(app=app)
+        db.create_all()
         yield app
-        db.drop_all(app=app)
+        db.drop_all()
 
 
-@pytest.fixture(scope="session")
-def products(app):
-    with app.app_context():
-        return populate_db()
-
-
-# each test runs on cwd to its temp dir
 @pytest.fixture(autouse=True)
 def go_to_tmpdir(request):
     # Get the fixture dynamically by its name.
