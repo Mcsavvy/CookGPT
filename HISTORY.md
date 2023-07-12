@@ -2,6 +2,13 @@ Changelog
 =========
 
 
+0.1.4 (2023-07-12)
+------------------
+- Refactor test_api.py and conftest.py. [mcsavvy]
+- Added githooks. [mcsavvy]
+- Release: version 0.1.3 🚀 [mcsavvy]
+
+
 0.1.3 (2023-07-11)
 ------------------
 - Release: version 0.1.2 🚀 [mcsavvy]
