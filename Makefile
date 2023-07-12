@@ -78,10 +78,14 @@ release:          ## Create a new tag for release.
 	@echo "WARNING: This operation will create a version tag and push to github"
 	@read -p "Version? (provide the next x.y.z semver) : " TAG
 	@echo "creating git tag : $${TAG}"
-	# @git tag $${TAG}
-	# @echo "$${TAG}" > cookgpt/VERSION
-	# @$(ENV_PREFIX)/gitchangelog > HISTORY.md
-	# @git add cookgpt/VERSION HISTORY.md
-	# @git commit -m "release: version $${TAG} 🚀"
-	# @git push -u origin HEAD --tags
-	# @echo "Github Actions will detect the new tag and release the new version."
+	@git tag $${TAG}
+	@echo "$${TAG}" > cookgpt/VERSION
+	@$(ENV_PREFIX)/gitchangelog > HISTORY.md
+	@git add cookgpt/VERSION HISTORY.md
+	@git commit --no-verify -m "release: version $${TAG} 🚀"
+	@git push -u origin HEAD --tags
+	@echo "Github Actions will detect the new tag and release the new version."
+
+.PHONY: hooks
+hooks:            ## Add git hooks to local environment
+	@ln -f .githooks/pre-commit .git/hooks/pre-commit
