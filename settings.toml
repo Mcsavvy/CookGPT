@@ -2,7 +2,6 @@
 DEBUG = false
 FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"
 FLASK_ADMIN_SWATCH = 'cerulean'
-SQLALCHEMY_DATABASE_URI = 'sqlite:///development.db'
 TITLE = "cookgpt"
 SECRET_KEY = "Pl3453Ch4ng3"
 PASSWORD_SCHEMES = ['pbkdf2_sha512', 'md5_crypt']
@@ -15,16 +14,37 @@ EXTENSIONS = [
 ]
 BLUEPRINTS = [
     "cookgpt.user:app",
+    "cookgpt.auth:app",
 ]
+
+JWT_SECRET_KEY = "Pl3453Ch4ng3"
+JWT_TOKEN_LOCATION = ['headers', 'cookies']
+JWT_HEADER_NAME = 'Authorization'
+JWT_HEADER_TYPE = 'Bearer'
+JWT_ACCESS_COOKIE_NAME = 'x_access_token'
+JWT_REFRESH_COOKIE_NAME = 'x_refresh_token'
+JWT_COOKIE_SAMESITE = 'Lax'
+JWT_COOKIE_SECURE = false
+JWT_COOKIE_CSRF_PROTECT = false
+
 
 [development]
 DEBUG = true
+SQLALCHEMY_DATABASE_URI = 'sqlite:///development.db'
+JWT_ACCESS_TOKEN_EXPIRES = {days = 1}
+JWT_ACCESS_TOKEN_LEEWAY = {hours = 12}
 
 
 [testing]
 TESTING = true
 DEBUG = true
 SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'
+JWT_ACCESS_TOKEN_EXPIRES = {minutes = 2}
+JWT_ACCESS_TOKEN_LEEWAY = {minutes = 1}
 
 [production]
 SQLALCHEMY_DATABASE_URI = 'sqlite:///production.db'
+JWT_ACCESS_TOKEN_EXPIRES = {days = 7}
+JWT_ACCESS_TOKEN_LEEWAY = {days = 5}
+JWT_COOKIE_SAMESITE = 'None'
+JWT_COOKIE_SECURE = true
