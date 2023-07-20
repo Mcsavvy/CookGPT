@@ -42,14 +42,13 @@ fmt:              ## Format code using black & isort.
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)/flake8 $(FILES)
-	$(ENV_PREFIX)/black -l 79 --check $(FILES)
-	$(ENV_PREFIX)/mypy --ignore-missing-imports $(FILES)
+	$(ENV_PREFIX)/flake8 $(FILES) || exit $?
+	$(ENV_PREFIX)/black -l 79 --check $(FILES) || exit $?
+	$(ENV_PREFIX)/mypy --ignore-missing-imports $(FILES) || exit $?
 
 .PHONY: test
-test: lint        ## Run tests and generate coverage report.
-	$(ENV_PREFIX)/pytest -v --cov-config .coveragerc --cov=cookgpt -l --tb=short --maxfail=1 tests/
-	$(ENV_PREFIX)/coverage xml
+test:             ## Run tests and generate coverage report.
+	$(ENV_PREFIX)/pytest -v --cov-config .coveragerc --cov=cookgpt -l --tb=short tests/ 
 	$(ENV_PREFIX)/coverage html
 
 .PHONY: watch
