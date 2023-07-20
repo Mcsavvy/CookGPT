@@ -24,7 +24,7 @@ class JwtToken(db.Model, BaseModelMixin):  # type: ignore
     def serializable_keys(self) -> "set[str]":
         """Serializable keys"""
         s_keys: "set[str]" = super().serializable_keys
-        return s_keys.union({"is_expired", "user_id", "revoked"})
+        return s_keys.union({"active", "user_id", "revoked", "access_token"})
 
     @property
     def is_expired(self):
