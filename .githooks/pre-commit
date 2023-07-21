@@ -3,15 +3,16 @@
 echo "Running pre-commit hook"
 
 CHANGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
-PYTHON_FILES=$(echo "$CHANGED_FILES" | grep -E '\.py$')
+PYTHON_FILES=$(echo "$CHANGED_FILES" | grep -E '\.py$' | tr '\n' ' ')
 
 # If a python file changed, format it with black then run linting
 if [[ "$PYTHON_FILES" ]]; then
 	echo "Formatting python files"
 	make fmt FILES="$PYTHON_FILES"
 	echo "Linting python files"
-	make lint FILES="$PYTHON_FILES"
-	git add "$PYTHON_FILES"
+	make lint FILES="$PYTHON_FILES" || exit $? # Exit if linting fails
+	echo "Adding formatted python files to commit"
+	git add $PYTHON_FILES
 fi
 
 # If Pipfile or Pipfile.lock changed, generate requirement files
