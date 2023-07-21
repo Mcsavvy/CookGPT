@@ -1,6 +1,7 @@
 from flask_admin import Admin
 from flask_admin.base import AdminIndexView
 from flask_admin.contrib import sqla
+
 from cookgpt.ext.database import db
 from cookgpt.user.models import User
 
