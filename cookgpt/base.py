@@ -9,6 +9,12 @@ from cookgpt.ext.database import db
 class BaseModelMixin(SerializerMixin):
     """Base model"""
 
+    class CreateError(Exception):
+        """Create error"""
+
+    class UpdateError(Exception):
+        """Update error"""
+
     id = db.Column(db.Uuid, primary_key=True, default=uuid4)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(
@@ -17,6 +23,11 @@ class BaseModelMixin(SerializerMixin):
 
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.id}>"
+
+    @property
+    def serializable_keys(self) -> "set[str]":
+        """Serializable keys"""
+        return {"id", "created_at", "updated_at"}
 
     @classmethod
     def create(cls, commit=True, **kwargs):
