@@ -17,6 +17,7 @@ openai = "*"
 dynaconf = "*"
 flask-bcrypt = "*"
 flask-jwt-extended = "*"
+flask-migrate = "*"
 
 [dev-packages]
 ipython = "*"
