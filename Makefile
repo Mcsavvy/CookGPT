@@ -48,8 +48,7 @@ lint:             ## Run pep8, black, mypy linters.
 
 .PHONY: test
 test:             ## Run tests and generate coverage report.
-	$(ENV_PREFIX)/pytest -v --cov-config .coveragerc --cov=cookgpt -l --tb=short tests/ 
-	$(ENV_PREFIX)/coverage html
+	$(ENV_PREFIX)/pytest -v --cov-config .coveragerc --cov-report xml:cov.xml --cov=cookgpt -l --tb=short tests/
 
 .PHONY: watch
 watch:            ## Run tests on every change.
