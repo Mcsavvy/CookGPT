@@ -2,7 +2,15 @@
 # activate the virtualenv
 # if it's not already activated
 
-export ENV_PREFIX="$(pipenv --venv 2>/dev/null)"
+if [ -f ".venv" ]; then
+	ENV_PREFIX="$(cat .venv)"
+else
+	ENV_PREFIX="$(pipenv --venv 2>/dev/null)"
+	echo "$ENV_PREFIX" > .venv
+fi
+
+
+export ENV_PREFIX
 
 
 # if the virtualenv is already activated
