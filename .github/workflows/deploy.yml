@@ -1,0 +1,35 @@
+name: Release A New Version
+
+permissions: write-all
+
+on:
+  pull_request:
+    types: [ opened ]
+    branches: [ main ]
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: pascalgn/automerge-action@v0.15.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_METHOD: merge
+          MERGE_COMMIT_MESSAGE: Automerge pull request #${{ github.event.number }} into main
+          MERGE_DELETE_BRANCH: true
+          PULL_REQUEST: ${{ github.event.number }}
+          PULL_REQUEST_BRANCH: ${{ github.event.pull_request.head.ref }}
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy
+        id: deploy
+        uses: pinkasey/cpanel-deploy-action@v1.1.1
+        with:
+          hostname: 'https://mkpbackend.com'
+          repository_root: '/home2/mkpbacke/api_v1'
+          branch: main
+          cpanel_token: '${{ secrets.CPANEL_TOKEN }}'
+          cpanel_username: 'mkpbacke'
+      - name: echo deploy-duration
+        run: echo "Deployment took ${{ steps.deploy.outputs.duration }} milliseconds"
