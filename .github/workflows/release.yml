@@ -38,8 +38,8 @@ jobs:
           title: bump version to ${{ github.ref }}
           body: |
             This is an auto-generated PR to release a new version of the project.
-          branch: main
-          base: dev
+          branch: dev
+          base: main
           branch-suffix: release
           delete-branch: false
           signoff: true
