@@ -2,6 +2,37 @@ Changelog
 =========
 
 
+0.1.8 (2023-07-24)
+------------------
+- Automerge pull request. [† dave †]
+- Add SQLA to Flask Admin. [mcsavvy]
+- Added Tests For Authentication. [mcsavvy]
+- Added Validators For User Data. [mcsavvy]
+- Fix linter and test commands in Makefile. [mcsavvy]
+- Refactored User Model. [mcsavvy]
+
+  - Added Serialization
+  - Added Validation
+  - Added support for jwt tokens
+- Refactored BaseModel. [mcsavvy]
+
+  - Added CreateError & UpdateError
+  - Added serializable_keys attribute
+- Refactor auth initialization and user loader. [mcsavvy]
+- Add cov.xml to .gitignore. [mcsavvy]
+- Use .venv file for virtual environment prefix. [mcsavvy]
+- Added Git pre-commit Hook. [mcsavvy]
+- Added Dependency For Migrations. [mcsavvy]
+- Run tests with coverage report in XML format. [mcsavvy]
+- Add "active" and "access_token" to serializable keys. [mcsavvy]
+- Added Authentication Blueprint. [mcsavvy]
+- Update JWT configuration and database URIs. [mcsavvy]
+- Add VS Code launch and settings configurations. [mcsavvy]
+- Added Migration & Customized Database Class. [mcsavvy]
+- Update lint and test targets in Makefile. [mcsavvy]
+- Release: version 0.1.4 🚀 [mcsavvy]
+
+
 0.1.4 (2023-07-12)
 ------------------
 - Refactor test_api.py and conftest.py. [mcsavvy]
