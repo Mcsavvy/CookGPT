@@ -16,7 +16,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MERGE_METHOD: merge
           MERGE_COMMIT_MESSAGE: Automerge pull request #${{ github.event.number }} into main
-          MERGE_DELETE_BRANCH: true
+          MERGE_DELETE_BRANCH: false
           PULL_REQUEST: ${{ github.event.number }}
           PULL_REQUEST_BRANCH: ${{ github.event.pull_request.head.ref }}
   deploy:

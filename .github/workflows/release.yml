@@ -6,7 +6,6 @@ on:
   push:
     # Sequence of patterns matched against refs/tags
     tags: [ '*.*.*' ]
-    branches: [ dev ]
 
 jobs:
   release:
@@ -30,17 +29,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Generate Changelog
+        run: .github/release_message.sh > pr_body.md
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v3
-        with:
-          token: ${{ secrets.PAT }}
-          commit-message: bump version to ${{ github.ref }}
-          title: bump version to ${{ github.ref }}
-          body: |
-            This is an auto-generated PR to release a new version of the project.
-          branch: dev
-          base: main
-          branch-suffix: release
-          delete-branch: false
-          signoff: true
+        run: |
+          TAG=$(git tag -l | tail -1)
+          TITLE="Bump version to $TAG"
+          BODY=$(cat pr_body.md)
+          gh pr create -B main -H dev -l automerge -b "$BODY" -t "$TITLE"
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
           
