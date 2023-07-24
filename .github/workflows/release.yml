@@ -1,17 +1,15 @@
-name: Upload Python Package
+name: Release A New Version
+
+permissions: write-all
 
 on:
   push:
     # Sequence of patterns matched against refs/tags
-    tags:
-      - '*' # Push events to matching v*, i.e. v1.0, v20.15.10
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+    tags: [ '*.*.*' ]
 
 jobs:
   release:
-    name: Create Release
+    name: Create New Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -25,3 +23,20 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body_path: release_message.md
+  pull-request:
+    name: Pr To Main
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate Changelog
+        run: .github/release_message.sh > pr_body.md
+      - name: Create Pull Request
+        run: |
+          TAG=$(git tag -l | tail -1)
+          TITLE="Bump version to $TAG"
+          BODY=$(cat pr_body.md)
+          gh pr create -B main -H dev -l automerge -b "$BODY" -t "$TITLE"
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+          
