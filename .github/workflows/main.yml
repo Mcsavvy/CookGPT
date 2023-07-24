@@ -1,22 +1,30 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# This is a basic workflow to help you get started with Actions
 
-name: QA
+name: CI
 
+# Controls when the workflow will run
 on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
   pull_request:
-    branches: [ dev ]
+    branches: [ main ]
 
-permissions: write-all
-
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   linter:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9.16
+          python-version: 3.10.5
       - name: Install project
         run: |
           python -m pip install pipenv
@@ -25,26 +33,19 @@ jobs:
         run: make lint
   tests:
     needs: linter
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9.16
+          python-version: 3.10.5
       - name: Install project
         run: |
           python -m pip install pipenv
           make install
       - name: Run tests
         run: make test
-  automerge:
-    needs: tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: pascalgn/automerge-action@v0.15.6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MERGE_METHOD: squash
-          MERGE_COMMIT_MESSAGE: Automerge pull request #${{ github.event.number }} into dev
-          MERGE_DELETE_BRANCH: true
-          PULL_REQUEST: ${{ github.event.number }}

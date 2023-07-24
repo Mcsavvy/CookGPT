@@ -74,17 +74,14 @@ clean:            ## Clean unused files.
 .PHONY: release
 release:          ## Create a new tag for release.
 	@echo "WARNING: This operation will create a version tag and push to github"
-	PREV_BRANCH=$$(git rev-parse --abbrev-ref HEAD)
-	@git checkout dev || exit $$?
-	@read -p "Version? (provide the next x.y.z semver) : " TAG || exit $$?
+	@read -p "Version? (provide the next x.y.z semver) : " TAG
 	@echo "creating git tag : $${TAG}"
-	@git tag $${TAG} || exit $$?
+	@git tag $${TAG}
 	@echo "$${TAG}" > cookgpt/VERSION
-	@$(ENV_PREFIX)/gitchangelog > HISTORY.md || exit $$?
+	@$(ENV_PREFIX)/gitchangelog > HISTORY.md
 	@git add cookgpt/VERSION HISTORY.md
-	@git commit --no-verify -m "release: version $${TAG} 🚀" || exit $$?
-	@git push -u origin HEAD --tags || exit $$?
-	@git checkout $${PREV_BRANCH} || exit $$?
+	@git commit --no-verify -m "release: version $${TAG} 🚀"
+	@git push -u origin HEAD --tags
 	@echo "Github Actions will detect the new tag and release the new version."
 
 .PHONY: hooks

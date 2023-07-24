@@ -2,16 +2,6 @@ Changelog
 =========
 
 
-0.1.6 (2023-07-23)
-------------------
-- Update Python version to 3.9.16. [mcsavvy]
-- Removed Python Version Constraint. [mcsavvy]
-- Release a new version and create a PR to main branch. [mcsavvy]
-- Add automerge action for pull requests into dev branch. [mcsavvy]
-- Added Deployment Workflow. [mcsavvy]
-- Release: version 0.1.5 🚀 [mcsavvy]
-
-
 0.1.5 (2023-07-21)
 ------------------
 - Updated Permissions For Release Workflow. [mcsavvy]
