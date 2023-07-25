@@ -2,9 +2,35 @@ Changelog
 =========
 
 
+0.1.9 (2023-07-25)
+------------------
+- Update Heroku app name to "my-kitchen-power" [mcsavvy]
+- Automerge pull request. [† dave †]
+- Release: version 0.1.8 🚀 [mcsavvy]
+
+
 0.1.8 (2023-07-24)
 ------------------
 - Automerge pull request. [† dave †]
+
+
+0.1.6 (2023-07-23)
+------------------
+- Update Python version to 3.9.16. [mcsavvy]
+- Removed Python Version Constraint. [mcsavvy]
+- Release a new version and create a PR to main branch. [mcsavvy]
+- Add automerge action for pull requests into dev branch. [mcsavvy]
+- Added Deployment Workflow. [mcsavvy]
+
+
+0.1.7 (2023-07-21)
+------------------
+- Release: version 0.1.5 🚀 [mcsavvy]
+
+
+0.1.5 (2023-07-21)
+------------------
+- Updated Permissions For Release Workflow. [mcsavvy]
 - Add SQLA to Flask Admin. [mcsavvy]
 - Added Tests For Authentication. [mcsavvy]
 - Added Validators For User Data. [mcsavvy]
