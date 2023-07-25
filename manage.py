@@ -1,7 +1,7 @@
 import click
 from flask.cli import FlaskGroup
 
-from . import create_app_wsgi
+from cookgpt import create_app_wsgi
 
 
 @click.group(cls=FlaskGroup, create_app=create_app_wsgi)
