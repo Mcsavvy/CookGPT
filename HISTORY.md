@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+0.1.12 (2023-07-25)
+-------------------
+- Fixed Workflow. [mcsavvy]
+- Release: version 0.1.11 🚀 [mcsavvy]
+
+
 0.1.11 (2023-07-25)
 -------------------
 - Added Python Version Constraint. [mcsavvy]
