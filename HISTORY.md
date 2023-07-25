@@ -2,6 +2,24 @@ Changelog
 =========
 
 
+0.1.12 (2023-07-25)
+-------------------
+- Fixed Workflow. [mcsavvy]
+- Release: version 0.1.11 🚀 [mcsavvy]
+
+
+0.1.11 (2023-07-25)
+-------------------
+- Added Python Version Constraint. [mcsavvy]
+- Release: version 0.1.10 🚀 [mcsavvy]
+
+
+0.1.10 (2023-07-25)
+-------------------
+- Added Heroku Git Remote. [mcsavvy]
+- Release: version 0.1.9 🚀 [mcsavvy]
+
+
 0.1.9 (2023-07-25)
 ------------------
 - Update Heroku app name to "my-kitchen-power" [mcsavvy]
