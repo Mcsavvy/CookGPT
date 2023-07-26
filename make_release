@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+# This script is used to make a release of the project.
+./manage.py db upgrade
