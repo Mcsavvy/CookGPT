@@ -16,9 +16,14 @@ class BaseModelMixin(SerializerMixin):
         """Update error"""
 
     id = db.Column(db.Uuid, primary_key=True, default=uuid4)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(
+        db.DateTime, default=datetime.utcnow, nullable=False
+    )
     updated_at = db.Column(
-        db.DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow
+        db.DateTime,
+        default=datetime.utcnow(),
+        onupdate=datetime.utcnow,
+        nullable=False,
     )
 
     def __repr__(self):
