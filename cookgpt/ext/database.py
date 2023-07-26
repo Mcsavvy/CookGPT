@@ -1,10 +1,6 @@
-from typing import TYPE_CHECKING
-
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-
-if TYPE_CHECKING:
-    from sqlalchemy.orm.scoping import scoped_session
+from sqlalchemy.orm.scoping import scoped_session
 
 
 class Database(SQLAlchemy):

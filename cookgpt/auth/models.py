@@ -15,9 +15,9 @@ if TYPE_CHECKING:
 class JwtToken(db.Model, BaseModelMixin):  # type: ignore
     """JwtToken model"""
 
-    access_token = db.Column(db.Text, nullable=True, unique=True)
+    access_token = db.Column(db.Text, nullable=False, unique=True)
     revoked = db.Column(db.Boolean, nullable=False, default=False)
-    active = db.Column(db.Boolean, nullable=True, default=True)
+    active = db.Column(db.Boolean, nullable=False, default=True)
     user_id = db.Column(db.Uuid, db.ForeignKey("user.id"), nullable=False)
 
     @property
