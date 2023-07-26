@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import click
 from flask.cli import FlaskGroup
 
