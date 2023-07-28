@@ -2,6 +2,25 @@ Changelog
 =========
 
 
+0.1.13 (2023-07-28)
+-------------------
+- Tested Config Extension. [mcsavvy]
+- Refactor config.py to use lowercase env variable. [mcsavvy]
+- Refactored BaseModel. [mcsavvy]
+
+  - made  not nullable
+  - made  not nullable
+- Added Config Extension. [mcsavvy]
+- Added Management Script. [mcsavvy]
+- Added Release Command To Procfile. [mcsavvy]
+- Refactored JtwToken Model. [mcsavvy]
+
+  - made `access_token` not nullable
+  - made `active` not nullable
+- Added Initial Migration. [mcsavvy]
+- Release: version 0.1.12 🚀 [mcsavvy]
+
+
 0.1.12 (2023-07-25)
 -------------------
 - Fixed Workflow. [mcsavvy]
