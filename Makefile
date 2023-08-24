@@ -2,6 +2,7 @@
 ENV_PREFIX=$(shell if [ -z "$$PIPENV_ACTIVE" ]; then pipenv --venv; else echo "$$ENV_PREFIX"; fi)/bin
 DEV_MODE=$(shell grep "FLASK_ENV=development" .env && echo "true")
 FILES="."
+PYTEST_ARGS=--cov-config .coveragerc --cov-report xml:cov.xml --cov=cookgpt --cov-append --cov-report term-missing --cov-fail-under=90 --no-cov-on-fail
 
 
 .PHONY: help
@@ -32,23 +33,26 @@ requirements:     ## Generate requirements.txt.
 	@pipenv requirements --dev-only >> requirements-dev.txt
 
 .PHONY: run
-run:              ## Run the project.
-	@if [ "$(DEV_MODE)" ]; then $(ENV_PREFIX)/flask run; else $(ENV_PREFIX)/gunicorn; fi
+run:              ## Run the project.	
+	$(ENV_PREFIX)/gunicorn -c gunicorn.conf.py
 
 .PHONY: fmt
 fmt:              ## Format code using black & isort.
+	$(ENV_PREFIX)/ruff check --fix $(FILES)
 	$(ENV_PREFIX)/isort $(FILES)
-	$(ENV_PREFIX)/black -l 79 $(FILES)
+	$(ENV_PREFIX)/black $(FILES)
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)/flake8 $(FILES) || exit $$?
-	$(ENV_PREFIX)/black -l 79 --check $(FILES) || exit $$?
-	$(ENV_PREFIX)/mypy --ignore-missing-imports $(FILES) || exit $$?
+	$(ENV_PREFIX)/ruff check $(FILES) || exit $$?
+	$(ENV_PREFIX)/black --check $(FILES) || exit $$?
+	$(ENV_PREFIX)/mypy $(FILES) || exit $$?
 
 .PHONY: test
 test:             ## Run tests and generate coverage report.
-	$(ENV_PREFIX)/pytest -v --cov-config .coveragerc --cov-report xml:cov.xml --cov=cookgpt -l --tb=short tests/ || exit $$?
+	export FLASK_ENV=testing
+	$(ENV_PREFIX)/coverage erase
+	$(ENV_PREFIX)/pytest $(PYTEST_ARGS) tests/ || exit $$?
 
 .PHONY: watch
 watch:            ## Run tests on every change.
