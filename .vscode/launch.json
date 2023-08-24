@@ -1,25 +1,57 @@
 {
-	// Use IntelliSense to learn about possible attributes.
-	// Hover to view descriptions of existing attributes.
-	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-	"version": "0.2.0",
-	"configurations": [
-		{
-			"name": "Python: Flask",
-			"type": "python",
-			"request": "launch",
-			"module": "flask",
-			"env": {
-				"FLASK_APP": "cookgpt:create_wsgi_app",
-				"FLASK_DEBUG": "1"
-			},
-			"args": [
-				"run",
-				"--no-debugger",
-				"--no-reload"
-			],
-			"jinja": false,
-			"justMyCode": true
-		}
-	]
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Flask",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "wsgi:app",
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "1"
+            },
+            "args": [
+                "run",
+                // "--no-debugger",
+                // "--no-reload"
+            ],
+            "jinja": false
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "env": {
+                "FLASK_APP": "wsgi:app",
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "1"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Pytest: Flask",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": false,
+            "python": "${command:python.interpreterPath}",
+            "module": "pytest",
+            "args": [
+                "-v",
+                "-s",
+            ],
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "FLASK_APP": "wsgi:app",
+                "FLASK_ENV": "testing",
+                "FLASK_DEBUG": "1"
+            },
+            "redirectOutput": true,
+            "showReturnValue": true,
+        }
+    ]
 }
