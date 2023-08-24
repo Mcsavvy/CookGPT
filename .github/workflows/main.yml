@@ -16,11 +16,11 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9.16
+          python-version: 3.10.5
       - name: Install project
         run: |
           python -m pip install pipenv
-          make install
+          pipenv install --dev
       - name: Run linter
         run: make lint
   tests:
@@ -30,13 +30,16 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.9.16
+          python-version: 3.10.5
       - name: Install project
         run: |
           python -m pip install pipenv
-          make install
+          pipenv install --dev
       - name: Run tests
-        run: make test
+        run: |
+          export FLASK_SECRET_KEY=testing
+          export FLASK_SQLALCHEMY_DATABASE_URI=sqlite:///testing.db
+          make test
   automerge:
     needs: tests
     runs-on: ubuntu-latest
@@ -45,6 +48,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MERGE_METHOD: squash
-          MERGE_COMMIT_MESSAGE: Automerge pull request #${{ github.event.number }} into dev
+          MERGE_COMMIT_MESSAGE: ${{ github.event.pull_request.title }}
           MERGE_DELETE_BRANCH: true
           PULL_REQUEST: ${{ github.event.number }}
