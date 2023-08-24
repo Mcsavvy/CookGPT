@@ -1,29 +1,77 @@
-from os import getenv
-
-from apiflask import APIFlask
+from dynaconf import Dynaconf
 
 
-def configure_secret_key(app: "APIFlask"):
-    if not app.config["SECRET_KEY"]:
+def secret_key_hook(config: Dynaconf):
+    """configure application secret key"""
+    if not config("SECRET_KEY"):
         raise RuntimeError("SECRET_KEY not set.")
-    env = app.config.current_env.lower()  # type: ignore
-    if env == "production":
-        if not getenv("APP_SECRET_KEY"):
-            raise RuntimeError("APP_SECRET_KEY not set.")
-        app.config["SECRET_KEY"] = getenv("APP_SECRET_KEY")
 
 
-def configure_db_uri(app: "APIFlask"):
-    if not app.config["SQLALCHEMY_DATABASE_URI"]:
+def db_uri_hook(config: Dynaconf):
+    """configure database url"""
+    if not config("SQLALCHEMY_DATABASE_URI"):
         raise RuntimeError("SQLALCHEMY_DATABASE_URI not set.")
-    env = app.config.current_env.lower()  # type: ignore
-    if env == "production":
-        if not getenv("APP_DATABASE_URL"):
-            raise RuntimeError("APP_DATABASE_URL not set.")
-        app.config["SQLALCHEMY_DATABASE_URI"] = getenv("APP_DATABASE_URL")
+
+
+def timedeltas_hook(config: Dynaconf):
+    """convert config vars into timedeltas"""
+    from datetime import timedelta
+
+    TIMEDELTAS = [
+        "JWT_ACCESS_TOKEN_LEEWAY",
+        "JWT_ACCESS_TOKEN_EXPIRES",
+        "JWT_REFRESH_TOKEN_EXPIRES",
+        "JWT_REFRESH_TOKEN_LEEWAY",
+    ]
+    new_conf = {}
+
+    def convert_to_timedelta(key: str):
+        val = config.get(key)
+        if isinstance(val, dict):
+            new_conf[key] = timedelta(**val)
+        elif isinstance(val, (float, int)):
+            new_conf[key] = timedelta(seconds=val)
+        elif isinstance(val, timedelta):  # pragma: no cover
+            new_conf[key] = val
+        if key not in new_conf:
+            raise ValueError(f"{key} cannot be converted to timedelta")
+
+    for key in TIMEDELTAS:
+        convert_to_timedelta(key)
+
+    return new_conf
+
+
+def export_to_env_hook(config: Dynaconf):
+    """export specific config vars to the environment"""
+    import os
+
+    if "OPENAI_API_KEY" in config:
+        os.environ["OPENAI_API_KEY"] = config.OPENAI_API_KEY
+
+
+def langchain_verbosity_hook(config: Dynaconf):
+    """configure langchain verbosity"""
+    import langchain
+
+    langchain.verbose = config.LANGCHAIN_VERBOSE
+
+
+config = Dynaconf(
+    ENVVAR_PREFIX="FLASK",
+    ENV_SWITCHER="FLASK_ENV",
+    LOAD_DOTENV=False,
+    ENVIRONMENTS=True,
+    SETTINGS_FILES=["settings.toml", ".secrets.toml"],
+    post_hooks=[
+        secret_key_hook,
+        timedeltas_hook,
+        db_uri_hook,
+        export_to_env_hook,
+        langchain_verbosity_hook,
+    ],
+)
 
 
 def init_app(app):
-    # configure app
-    for config in [configure_secret_key, configure_db_uri]:
-        config(app)
+    pass
