@@ -1,49 +1,84 @@
 [default]
 DEBUG = false
-FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"
-FLASK_ADMIN_SWATCH = 'cerulean'
-TITLE = "cookgpt"
-SECRET_KEY = "Pl3453Ch4ng3"
-PASSWORD_SCHEMES = ['pbkdf2_sha512', 'md5_crypt']
 EXTENSIONS = [
     "cookgpt.ext.config:init_app",
     "cookgpt.ext.database:init_app",
     "cookgpt.ext.auth:init_app",
-    "cookgpt.ext.admin:init_app",
-    "cookgpt.ext.commands:init_app",
-    "cookgpt.ext.cors:init_app",
+    # "cookgpt.ext.admin:init_app",
 ]
+
 BLUEPRINTS = [
-    "cookgpt.user:app",
     "cookgpt.auth:app",
+    "cookgpt.chatbot:app",
 ]
+PASSWORD_SCHEMES = ['pbkdf2_sha512', 'md5_crypt']
 
-JWT_TOKEN_LOCATION = ['headers', 'cookies']
+# OpenAPI
+OPENAPI_VERSION = "3.0.2"
+SPEC_FORMAT = "json"
+LOCAL_SPEC_PATH = "openapi.json"
+SYNC_LOCAL_SPEC = true
+VALIDATION_ERROR_STATUS_CODE = 406
+VALIDATION_ERROR_DESCRIPTION = "could not validate input data"
+AUTH_ERROR_STATUS_CODE = 403
+AUTH_ERROR_DESCRIPTION = "insufficient permissions"
+AUTO_SERVERS = true
+SERVERS = [{name = "local", url = "http://localhost:8000"}]
+
+# AI
+MAX_CHAT_COST = 2500
+MAX_RESPONSE_TOKENS = 200
+CHATBOT_MEMORY_KEY = 'thread'
+CHATBOT_MEMORY_HUMAN_PREFIX = 'Human'
+CHATBOT_MEMORY_AI_PREFIX = 'CookGPT'
+CHATBOT_CHAIN_INPUT_KEY = "query"
+USE_OPENAI = true
+LANGCHAIN_VERBOSE = false
+
+# Flask
+FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"
+FLASK_ADMIN_SWATCH = 'cerulean'
+
+
+# JWT-Extended
+JWT_TOKEN_LOCATION = ['headers']
 JWT_HEADER_NAME = 'Authorization'
-JWT_HEADER_TYPE = 'Bearer'
-JWT_ACCESS_COOKIE_NAME = 'x_access_token'
-JWT_REFRESH_COOKIE_NAME = 'x_refresh_token'
-JWT_COOKIE_SAMESITE = 'Lax'
-JWT_COOKIE_SECURE = false
-JWT_COOKIE_CSRF_PROTECT = false
 
+# Cross Origin Resource Sharing
+FLASK_CORS_ALLOW_HEADERS = '*'
+FLASK_CORS_EXPOSE_HEADERS = '*'
+FLASK_CORS_ORIGINS = '*'
+FLASK_CORS_SUPPORTS_CREDENTIALS = true
 
 [development]
 DEBUG = true
-SQLALCHEMY_DATABASE_URI = 'sqlite:///development.db'
 JWT_ACCESS_TOKEN_EXPIRES = {days = 1}
 JWT_ACCESS_TOKEN_LEEWAY = {hours = 12}
+JWT_REFRESH_TOKEN_EXPIRES = {days = 5}
+JWT_REFRESH_TOKEN_LEEWAY = {minutes = 15}
+
+EXTENSIONS = [
+    "dynaconf_merge",
+    # "quick_tests:init_app"
+]
 
 
 [testing]
-SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'
 TESTING = true
 DEBUG = true
 JWT_ACCESS_TOKEN_EXPIRES = {minutes = 2}
 JWT_ACCESS_TOKEN_LEEWAY = {minutes = 1}
+JWT_REFRESH_TOKEN_EXPIRES = {minutes = 30}
+JWT_REFRESH_TOKEN_LEEWAY = {minutes = 5}
+USE_OPENAI = false
 
 [production]
 JWT_ACCESS_TOKEN_EXPIRES = {days = 7}
 JWT_ACCESS_TOKEN_LEEWAY = {days = 5}
-JWT_COOKIE_SAMESITE = 'None'
-JWT_COOKIE_SECURE = true
+JWT_REFRESH_TOKEN_EXPIRES = {days = 30}
+JWT_REFRESH_TOKEN_LEEWAY = {minutes = 30}
+
+EXTENSIONS = [
+    "dynaconf_merge",
+    "cookgpt.ext.cors:init_app"
+]
