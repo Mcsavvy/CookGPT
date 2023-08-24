@@ -1,51 +1,79 @@
-import warnings
+from importlib.metadata import EntryPoint
+from pathlib import Path
+from socket import gethostname
 
-import pkg_resources
 from apiflask import APIFlask
-from dynaconf.contrib.flask_dynaconf import DynaconfConfig, FlaskDynaconf
+from dynaconf import Dynaconf, FlaskDynaconf
+
+from cookgpt import docs
+from cookgpt.ext.config import config
+
+VERSION = Path(__file__).parent.joinpath("VERSION").read_text().strip()
+
+
+def schema_name_resolver(schema):  # pragma: no cover
+    name = schema.__class__.__qualname__.replace(
+        ".", ":"
+    )  # get schema class name
+    if name.endswith("Schema"):  # remove the "Schema" suffix
+        name = name[:-6] or name
+    if schema.partial:  # add a "Update" suffix for partial schema
+        name += "Update"
+    return name
 
 
 class App(APIFlask):
     """App class that extends APIFlask and FlaskDynaconf"""
 
-    config: DynaconfConfig
+    config: "Dynaconf"
 
     def __init__(self, *args, **kwargs):
+        kwargs.update(title="Cookgpt", version=VERSION)
         super().__init__(*args, **kwargs)
-        FlaskDynaconf(self)
+        self.schema_name_resolver = schema_name_resolver
+        self.description = docs.APP
+        FlaskDynaconf(self, dynaconf_instance=config)
 
-    def _load_blueprints(self, key="BLUEPRINTS"):
+    def __repr__(self) -> str:
+        return f"<App '{self.import_name}' env='{self.config.current_env}'>"
+
+    def load_blueprints(self, key="BLUEPRINTS"):
         """Load blueprints from settings.toml"""
-        blueprints = self.config.get(key)
-        if blueprints is None:
-            warnings.warn(
-                f"Settings is missing {key} to load blueprints",
-                RuntimeWarning,
-            )
-            return
-
-        for object_reference in self.config[key]:
-            # add a placeholder `name` to create a valid entry point
-            entry_point_spec = f"__name = {object_reference}"
+        blueprints = self.config.get(key, [])
+        for object_reference in blueprints:
             # parse the entry point specification
-            entry_point = pkg_resources.EntryPoint.parse(entry_point_spec)
-            # dynamically resolve the entry point
-            blueprint = entry_point.resolve()
+            entry_point = EntryPoint(
+                name=None, group=None, value=object_reference  # type: ignore
+            )
+            # dynamically resolve the blueprint
+            blueprint = entry_point.load()
             # register the blueprint
             self.register_blueprint(blueprint)
 
 
+def add_application_info(response):
+    """Add application info to response headers"""
+    response.headers["X-HostName"] = gethostname()
+    response.headers["X-Application"] = "Cookgpt"
+    response.headers["X-Version"] = VERSION
+    return response
+
+
 def create_app(**config):
+    import os
+
+    os.environ.setdefault("FLASK_ENV", "PRODUCTION")
+
     app = App(__name__)
-    app.config.load_extensions(
-        "EXTENSIONS"
-    )  # Load extensions from settings.toml
     app.config.update(config)  # Override with passed config
-    app._load_blueprints()  # Load blueprints from settings.toml
+    app.config.load_extensions()  # Load extensions
+    app.load_blueprints()  # Load blueprints
+    app.config._settings.reload()
+    app.after_request(add_application_info)
     return app
 
 
-def create_app_wsgi():
+def create_app_wsgi():  # pragma: no cover
     # workaround for Flask issue
     # that doesn't allow **config
     # to be passed to create_app
