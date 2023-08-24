@@ -1,0 +1,55 @@
+[tool.ruff]
+line-length = 80
+exclude = [
+    ".git",
+    "__pycache__",
+    "tests/old",
+    "zingela/old",
+    "migrations/*"
+]
+
+[tool.black]
+line-length = 79
+exclude = """
+(
+    \\.git
+    | \\.mypy_cache
+    | __pycache__
+    | tests/old/.*
+    | zingela/old/.*
+    | migrations
+)
+"""
+
+[tool.mypy]
+ignore_missing_imports = true
+warn_unused_configs = true
+exclude = [
+    "\\.git",
+    "\\.mypy_cache",
+    "__pycache__",
+    "migrations/.*",
+]
+
+[tool.pytest.ini_options]
+addopts = "-v -l --tb=short"
+console_output_style = "progress"
+testpaths = "tests"
+
+
+[tool.coverage.report]
+exclude_also = [
+    "def __repr__",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+omit = [
+    "migrations/*",
+    "cookgpt/ext/cors.py",
+    "cookgpt/ext/admin.py",
+    "cookgpt/ext/database.py",
+]
