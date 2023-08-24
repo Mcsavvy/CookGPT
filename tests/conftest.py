@@ -1,42 +1,40 @@
-import os
-import sys
+from random import randint
+from typing import TYPE_CHECKING, Generator
 
 import pytest
 
+from tests.utils import Random
 from cookgpt import create_app
+from cookgpt.auth.models import User
+from cookgpt.chatbot.models import Chat, MessageType, Thread
+from cookgpt.ext import config
 from cookgpt.ext.database import db
-from cookgpt.user.models import User  # noqa: F401
+
+if TYPE_CHECKING:  # pragma: no cover
+    from cookgpt.app import App
 
 
 @pytest.fixture(scope="session")
-def app():
-    os.environ["FLASK_ENV"] = "testing"
-    app = create_app(FORCE_ENV_FOR_DYNACONF="testing")
-    with app.app_context():
-        db.create_all()
+def app() -> Generator["App", None, None]:
+    """An instance of the Flask application"""
+    old_env = config.current_env
+    config.setenv("testing")
+    app = create_app()
+    app_ctx = app.app_context()
+    app_ctx.push()
+    db.create_all()
+    try:
         yield app
+    finally:
         db.session.rollback()
         db.drop_all()
-
-
-@pytest.fixture(autouse=True)
-def go_to_tmpdir(request):
-    # Get the fixture dynamically by its name.
-    tmpdir = request.getfixturevalue("tmpdir")
-    # ensure local test created packages can be imported
-    sys.path.insert(0, str(tmpdir))
-    # Chdir only for the duration of the test.
-    with tmpdir.as_cwd():
-        yield
-
-
-@pytest.fixture(scope="session")
-def client(app):
-    return app.test_client()
+        app_ctx.pop()
+        config.setenv(old_env)
 
 
 @pytest.fixture(scope="function")
-def user(app):
+def user(app: "App") -> Generator[User, None, None]:
+    """An instance of a User"""
     user = User.create(
         first_name="John",
         last_name="Doe",
@@ -47,3 +45,83 @@ def user(app):
     )
     yield user
     user.delete()
+
+
+@pytest.fixture(scope="session")
+@pytest.mark.usefixtures("app")
+def random_user():
+    """A random user"""
+    user = Random.user()
+    yield user
+    user.delete()
+
+
+@pytest.fixture(scope="session")
+def faker_seed():
+    """A seed for the faker instance"""
+    return randint(1000, 99999)
+
+
+@pytest.fixture(scope="session")
+def faker():
+    """An instance of the Faker class"""
+    from faker import Faker
+
+    return Faker()
+
+
+@pytest.fixture(scope="function")
+def access_token(user: User) -> str:
+    """A valid access token for the user"""
+    return user.create_token().access_token
+
+
+@pytest.fixture(scope="function")
+def thread(user: User) -> Generator[Thread, None, None]:
+    """An instance of a Thread"""
+    thread = Thread.create(
+        user_id=user.id,
+        title="Test Thread",
+        default=True,
+        commit=True,
+    )
+    yield thread
+    thread.delete()
+
+
+@pytest.fixture(scope="function")
+def response(thread: Thread):
+    """An AI response"""
+    response = Chat.create(
+        content="Hello, how are you doing today?",
+        cost=10,
+        chat_type=MessageType.RESPONSE,
+        thread_id=thread.id,
+        order=1,
+        commit=True,
+    )
+    yield response
+    response.delete()
+
+
+@pytest.fixture(scope="function")
+def query(thread: Thread):
+    """A user query"""
+    query = Chat.create(
+        content="Hi!",
+        cost=5,
+        chat_type=MessageType.QUERY,
+        thread_id=thread.id,
+        order=0,
+        commit=True,
+    )
+    yield query
+    query.delete()
+
+
+@pytest.fixture(scope="function")
+def random_chat(thread: Thread):
+    """A random chat"""
+    chat = Random.chat(thread_id=thread.id)
+    yield chat
+    chat.delete()
