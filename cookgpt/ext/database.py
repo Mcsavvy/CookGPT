@@ -13,14 +13,14 @@ class Database(SQLAlchemy):
 
     def create_all(self, *args, **kwargs):
         """Creates all"""
-        from cookgpt.auth.models import Token, User, UserInfo  # noqa: F401
+        from cookgpt.auth.models import Token, User  # noqa: F401
         from cookgpt.chatbot.models import Chat, Thread  # noqa: F401
 
         super().create_all(*args, **kwargs)
 
     def drop_all(self, *args, **kwargs):
         """Drops all"""
-        from cookgpt.auth.models import Token, User, UserInfo  # noqa: F401
+        from cookgpt.auth.models import Token, User  # noqa: F401
         from cookgpt.chatbot.models import Chat, Thread  # noqa: F401
 
         super().drop_all(*args, **kwargs)

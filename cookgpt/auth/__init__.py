@@ -13,4 +13,4 @@ app = APIBlueprint(
 
 from cookgpt.auth import cli  # noqa: E402, F401
 from cookgpt.auth import views  # noqa: E402, F401
-from cookgpt.auth.models import Token, User, UserInfo  # noqa: E402, F401
+from cookgpt.auth.models import Token, User  # noqa: E402, F401

@@ -57,46 +57,6 @@ def Password(**attrs):
     )
 
 
-def Height(**attrs):
-    return fields.String(
-        validate=v.Height(),
-        metadata={"description": "user's height", "example": ex.Height},
-        **attrs
-    )
-
-
-def Weight(**attrs):
-    return fields.String(
-        validate=v.Weight(),
-        metadata={"description": "user's weight", "example": ex.Weight},
-        **attrs
-    )
-
-
-def Dob(**attrs):
-    return fields.Date(
-        validate=v.DOB(),
-        metadata={"description": "user's date of birth", "example": ex.Dob},
-        **attrs
-    )
-
-
-def Gender(**attrs):
-    return fields.String(
-        validate=v.Gender(),
-        metadata={"description": "user's gender", "example": ex.Gender},
-        **attrs
-    )
-
-
-def BloodType(**attrs):
-    return fields.String(
-        validate=v.BloodType(),
-        metadata={"description": "user's blood type", "example": ex.BloodType},
-        **attrs
-    )
-
-
 def AuthToken(**attrs):
     return fields.String(
         metadata={
@@ -135,11 +95,6 @@ class User:
         last_name = LastName()
         username = Username()
         email = Email()
-        height = Height()
-        weight = Weight()
-        dob = Dob()
-        gender = Gender()
-        blood_type = BloodType()
         max_chat_cost = fields.Integer(
             metadata={
                 "description": "the maximum cost of a user's chat",
@@ -217,11 +172,6 @@ class UserUpdate:
         email = Email()
         password = Password()
         username = Username()
-        height = Height()
-        weight = Weight()
-        dob = Dob()
-        gender = Gender()
-        blood_type = BloodType()
 
     class Out(Schema):
         message = fields.String()
