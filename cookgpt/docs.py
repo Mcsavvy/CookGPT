@@ -2,7 +2,7 @@
 
 # ruff: noqa
 
-APP = """Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered health assistance service.
+APP = """Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered cooking assistance.
 
 The API allows you to perform various actions such as user authentication, managing user information, and interacting with the AI chat functionality.
 
@@ -25,9 +25,7 @@ AUTH_LOGIN = """Use this endpoint to authenticate a user and get authentication 
 
 The expiry time of  both tokens are also returned. If the refresh token expires, the user will have to login again. Use the expiry to check and refresh the access token before it expires.
 
-The access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.
-
-The `user_type` field is used to determine the type of user that is logged in. This can be used to determine the permissions of the user."""
+The access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication."""
 
 
 AUTH_REFRESH = """Use this endpoint to refresh an access token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires. 
@@ -43,7 +41,7 @@ AUTH_LOGOUT = """Use this endpoint to logout a user. This will invalidate the us
 AUTH_SIGNUP = """Use this endpoint to register a new user. If an error occurs, the error message will be returned in the response body."""
 
 
-CHAT = """The AI chat functionality allows users to interact with an AI-powered health assistant. The assistant can answer questions about health and wellness, and can also provide information about the user's health status.
+CHAT = """The AI chat functionality allows users to interact with an AI-powered cooking assistant. The assistant can be used to create recipes, get cooking advice, and more.
 
 Chats with the AI are organized into threads. Each thread has a unique ID that is used to identify the thread. The thread ID is used to get the chat messages in the thread, and to send messages to the thread.
 
