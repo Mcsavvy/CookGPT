@@ -1,0 +1,865 @@
+{
+  "info": {
+    "description": "Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered cooking assistance.\n\nThe API allows you to perform various actions such as user authentication, managing user information, and interacting with the AI chat functionality.\n\nThe API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.",
+    "title": "Cookgpt",
+    "version": "0.1.13"
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "This section contains information about user authentication and user management."
+    },
+    {
+      "name": "chat",
+      "description": "The AI chat functionality allows users to interact with an AI-powered cooking assistant. The assistant can be used to create recipes, get cooking advice, and more.\n\nChats with the AI are organized into threads. Each thread has a unique ID that is used to identify the thread. The thread ID is used to get the chat messages in the thread, and to send messages to the thread.\n\nEvery user has a default thread which would be used for all interactions with the AI assistant.\n\n> Subsequent versions of the API will allow users to create new threads and interact with the AI assistant in multiple threads.\n\n---\n\nEach user has a `max_chat_cost` which is the total number of tokens that he/she is allowed to spend on chats with the AI assistant. The cost of a chat is the number of tokens used in the query and the response.\n\n> Subsequent versions of the API will allow users to purchase more tokens.\n\n### Chat Memory Optimization\nFor now, the AI's memory has not been optimized and it remembers all chats that it has had with the user. This means that the AI's memory will grow linearly as the user interact with it. This will be fixed in subsequent versions of the API."
+    }
+  ],
+  "servers": [
+    {
+      "name": "local",
+      "url": "http://localhost:8000",
+      "_bypass_evaluation": false
+    }
+  ],
+  "paths": {
+    "/chat/chat": {
+      "post": {
+        "parameters": [],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat:Out"
+                },
+                "example": {
+                  "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "content": "I have a headache",
+                  "chat_type": "query",
+                  "cost": 0,
+                  "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "sent_time": "2021-01-01 00:00:00",
+                  "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                }
+              }
+            },
+            "description": "The chatbot's response"
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "could not validate input data"
+          },
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat:Out"
+                },
+                "example": {
+                  "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "content": "I have a headache",
+                  "chat_type": "query",
+                  "cost": 0,
+                  "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "sent_time": "2021-01-01 00:00:00",
+                  "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                }
+              }
+            },
+            "description": "A dummy response"
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "summary": "Send a message to the chatbot.",
+        "description": "Use this endpoint to send a message to the AI assistant. The message will be sent to the AI assistant and the response will be returned in the response body. The response will also be saved in the database.\n\nIf the user does not have enough tokens to send the message, a dummy response will be returned in the response body. Neither the query nor the dummy response will not be saved in the database.\n\n> INFO: To identify a dummy response, check if the `cost` field is `0`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Chat:Send"
+              },
+              "example": {
+                "content": "I have a headache"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLogin:Out"
+                },
+                "example": {
+                  "message": "Successfully logged in",
+                  "atoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                  "atoken_expiry": "2021-01-01 00:00:00",
+                  "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                  "rtoken_expiry": "2021-01-01 00:00:00",
+                  "user_type": "cook",
+                  "auth_type": "Bearer"
+                }
+              }
+            },
+            "description": "Authentication info"
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "could not validate input data"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLogin:Unauthorized"
+                },
+                "example": {
+                  "message": "Cannot authenticate"
+                }
+              }
+            },
+            "description": "Error message if password is incorrect"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLogin:NotFound"
+                },
+                "example": {
+                  "message": "Cannot authenticate"
+                }
+              }
+            },
+            "description": "Error message if user does not exist"
+          }
+        },
+        "tags": [
+          "auth"
+        ],
+        "summary": "Log a user into the system.",
+        "description": "Use this endpoint to authenticate a user and get authentication info. This endpoint returns an access token and a refresh token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires via the `/auth/refresh` endpoint.\n\nThe expiry time of  both tokens are also returned. If the refresh token expires, the user will have to login again. Use the expiry to check and refresh the access token before it expires.\n\nThe access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin:In"
+              },
+              "example": {
+                "login": "johndoe",
+                "password": "Password123!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLogout:Out"
+                },
+                "example": {
+                  "message": "Logged out user"
+                }
+              }
+            },
+            "description": "Success message"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          }
+        },
+        "tags": [
+          "auth"
+        ],
+        "summary": "Log a user out of the system.",
+        "description": "Use this endpoint to logout a user. This will invalidate the user's refresh token and access token. The user will have to login again to get a new authentication info.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "parameters": [],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreate:Out"
+                },
+                "example": {
+                  "message": "Successfully signed up"
+                }
+              }
+            },
+            "description": "Success message"
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "could not validate input data"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserCreate:Error"
+                },
+                "example": {
+                  "message": "email is taken"
+                }
+              }
+            },
+            "description": "Error message while creating user"
+          }
+        },
+        "tags": [
+          "auth"
+        ],
+        "summary": "Signup a new user.",
+        "description": "Use this endpoint to register a new user. If an error occurs, the error message will be returned in the response body.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate:In"
+              },
+              "example": {
+                "first_name": "John",
+                "last_name": "Doe",
+                "username": "johndoe",
+                "email": "johndoe@example.com",
+                "password": "Password123!"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chat/thread": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chats:Get"
+                },
+                "example": {
+                  "chat": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "content": "I have a headache",
+                    "chat_type": "query",
+                    "cost": 0,
+                    "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "sent_time": "2021-01-01 00:00:00",
+                    "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                  }
+                }
+              }
+            },
+            "description": "All messages in the thread"
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "summary": "Get all messages in a thread.",
+        "description": "Use this endpoint to get a list of all chats that the user has participated in. The chats are sorted in descending order of the last message sent in the chat."
+      },
+      "delete": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat:Delete"
+                },
+                "example": {
+                  "message": "all messages deleted"
+                }
+              }
+            },
+            "description": "Success message"
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "summary": "Delete all messages in a thread.",
+        "description": "Use this endpoint to delete all chats in the thread. **This action cannot be undone**."
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenRefresh:Out"
+                },
+                "example": {
+                  "message": "Refreshed access token",
+                  "atoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                  "atoken_expiry": "2021-01-01 00:00:00",
+                  "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                  "rtoken_expiry": "2021-01-01 00:00:00",
+                  "user_type": "cook",
+                  "auth_type": "Bearer"
+                }
+              }
+            },
+            "description": "Authentication info"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          }
+        },
+        "tags": [
+          "auth"
+        ],
+        "summary": "Refresh the access token.",
+        "description": "Use this endpoint to refresh an access token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires. \n\nThe refresh token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.\n\nThe output of this endpoint is similar to the `/auth/login` endpoint.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/chat/chat/{chat_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chat_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat:Out"
+                },
+                "example": {
+                  "chat": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "content": "I have a headache",
+                    "chat_type": "query",
+                    "cost": 0,
+                    "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "sent_time": "2021-01-01 00:00:00",
+                    "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                  }
+                }
+              }
+            },
+            "description": "A single chat"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Not found"
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "summary": "Get a single chat from a thread.",
+        "description": "Use this endpoint to get a specific chat in the thread. You need to specify the chat ID in the URL."
+      },
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chat_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chat:Delete"
+                },
+                "example": {
+                  "message": "all messages deleted"
+                }
+              }
+            },
+            "description": "Success message"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Not found"
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "summary": "Delete a single chat from a thread.",
+        "description": "Use this endpoint to delete a specific chat in the thread. **This action cannot be undone**. You need to specify the chat ID in the URL."
+      }
+    }
+  },
+  "openapi": "3.0.2",
+  "components": {
+    "schemas": {
+      "ValidationError": {
+        "properties": {
+          "detail": {
+            "type": "object",
+            "properties": {
+              "<location>": {
+                "type": "object",
+                "properties": {
+                  "<field_name>": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HTTPError": {
+        "properties": {
+          "detail": {
+            "type": "object"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Chat:Send": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "chat content",
+            "example": "I have a headache"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      },
+      "Chat:Out": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "content": {
+            "type": "string",
+            "description": "chat content",
+            "example": "I have a headache"
+          },
+          "chat_type": {
+            "description": "chat type",
+            "example": "query",
+            "type": "string",
+            "enum": [
+              "QUERY",
+              "RESPONSE"
+            ]
+          },
+          "cost": {
+            "type": "integer",
+            "description": "chat cost",
+            "example": 100
+          },
+          "previous_chat_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "previous chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "next_chat_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "next chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "sent_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "time message was sent",
+            "example": "2021-01-01 00:00:00"
+          },
+          "thread_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "chat's thread id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          }
+        }
+      },
+      "UserLogin:In": {
+        "type": "object",
+        "properties": {
+          "login": {
+            "type": "string",
+            "description": "user's username or email",
+            "example": "johndoe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "user's password",
+            "example": "Password123!"
+          }
+        },
+        "required": [
+          "login",
+          "password"
+        ]
+      },
+      "UserLogin:Out": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "atoken": {
+            "type": "string",
+            "description": "a JWT to authenticate as a user to the backend",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+          },
+          "atoken_expiry": {
+            "type": "string",
+            "format": "date-time",
+            "description": "a datetime",
+            "example": "2021-01-01 00:00:00"
+          },
+          "rtoken": {
+            "type": "string",
+            "description": "a JWT to refresh a user's access token",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+          },
+          "rtoken_expiry": {
+            "type": "string",
+            "format": "date-time",
+            "description": "a datetime",
+            "example": "2021-01-01 00:00:00"
+          },
+          "user_type": {
+            "type": "string",
+            "description": "the type of user",
+            "example": "cook"
+          },
+          "auth_type": {
+            "type": "string"
+          }
+        }
+      },
+      "UserLogin:Unauthorized": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "UserLogin:NotFound": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "UserLogout:Out": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "UserCreate:In": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "user's first name",
+            "example": "John"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "user's last name",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "description": "user's email address",
+            "example": "johndoe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "user's password",
+            "example": "Password123!"
+          },
+          "username": {
+            "type": "string",
+            "nullable": true,
+            "description": "user's username",
+            "example": "johndoe"
+          }
+        },
+        "required": [
+          "email",
+          "first_name",
+          "last_name",
+          "password"
+        ]
+      },
+      "UserCreate:Out": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "UserCreate:Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Chats:Get": {
+        "type": "object",
+        "properties": {
+          "chats": {
+            "type": "array",
+            "description": "list of chats",
+            "example": [
+              {
+                "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "content": "I have a headache",
+                "chat_type": "query",
+                "cost": 0,
+                "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "sent_time": "2021-01-01 00:00:00",
+                "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+              },
+              {
+                "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "content": "I have a headache",
+                "chat_type": "query",
+                "cost": 0,
+                "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "sent_time": "2021-01-01 00:00:00",
+                "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+              }
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Chat:Out"
+            }
+          }
+        }
+      },
+      "Chat:Delete": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "content": {
+            "type": "string",
+            "description": "chat content",
+            "example": "I have a headache"
+          },
+          "chat_type": {
+            "description": "chat type",
+            "example": "query",
+            "type": "string",
+            "enum": [
+              "QUERY",
+              "RESPONSE"
+            ]
+          },
+          "cost": {
+            "type": "integer",
+            "description": "chat cost",
+            "example": 100
+          },
+          "previous_chat_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "previous chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "next_chat_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "next chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "sent_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "time message was sent",
+            "example": "2021-01-01 00:00:00"
+          },
+          "thread_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "chat's thread id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "message": {
+            "type": "string",
+            "description": "message",
+            "example": "chat deleted"
+          }
+        }
+      },
+      "TokenRefresh:Out": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "atoken": {
+            "type": "string",
+            "description": "a JWT to authenticate as a user to the backend",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+          },
+          "atoken_expiry": {
+            "type": "string",
+            "format": "date-time",
+            "description": "a datetime",
+            "example": "2021-01-01 00:00:00"
+          },
+          "rtoken": {
+            "type": "string",
+            "description": "a JWT to refresh a user's access token",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+          },
+          "rtoken_expiry": {
+            "type": "string",
+            "format": "date-time",
+            "description": "a datetime",
+            "example": "2021-01-01 00:00:00"
+          },
+          "user_type": {
+            "type": "string",
+            "description": "the type of user",
+            "example": "cook"
+          },
+          "auth_type": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "The API incorporates a secure authentication mechanism using JSON Web Tokens (JWT). To access user-specific functionalities, such as managing personal information and interacting with the AI chat functionality, you need to include a JWT bearer token in the `Authorization` header of your API requests.\n\nInclude the user's authentication token in the `Authorization` header of the request. The header should be in the following format\n\n```\nAuthorization: Bearer <authentication-token>\n```"
+      }
+    }
+  }
+}
