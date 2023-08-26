@@ -6,6 +6,12 @@ responses = [
     "are there any specific dietary preferences I should consider?",
     "do you have any favorite cuisines or types of dishes?",
     "any ingredients you'd like to include or exclude?",
-    "I'm here to assist with cooking and recipes. How can I help you create a delicious dish today?",
-    "it sounds like you're looking for cooking advice. Feel free to ask me about recipes or ingredients!",
+    (
+        "I'm here to assist with cooking and recipes."
+        "How can I help you create a delicious dish today?"
+    ),
+    (
+        "It sounds like you're looking for cooking advice."
+        "Feel free to ask me about recipes or ingredients!",
+    ),
 ]
