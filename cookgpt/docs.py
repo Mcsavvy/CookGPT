@@ -25,7 +25,9 @@ AUTH_LOGIN = """Use this endpoint to authenticate a user and get authentication 
 
 The expiry time of  both tokens are also returned. If the refresh token expires, the user will have to login again. Use the expiry to check and refresh the access token before it expires.
 
-The access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication."""
+The access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.
+
+The `user_type` field is used to determine the type of user that is logged in. This can be used to determine the permissions of the user."""
 
 
 AUTH_REFRESH = """Use this endpoint to refresh an access token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires. 
