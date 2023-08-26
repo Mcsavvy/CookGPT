@@ -31,7 +31,7 @@ class User(
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(30), nullable=False)
     user_type = db.Column(
-        db.Enum(UserType), nullable=False, default=UserType.PATIENT
+        db.Enum(UserType), nullable=False, default=UserType.COOK
     )
     username = db.Column(db.String(80), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)

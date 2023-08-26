@@ -1,6 +1,6 @@
 """schema and fields examples"""
 
-UserType = "patient"
+UserType = "cook"
 FirstName = "John"
 LastName = "Doe"
 Username = "johndoe"

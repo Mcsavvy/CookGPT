@@ -25,7 +25,7 @@ from cookgpt.auth.models import User
 @click.option(
     "--user-type",
     "-t",
-    type=click.Choice(["ADMIN", "PATIENT", "MEDIC"], False),
+    type=click.Choice(["ADMIN", "COOK"], False),
 )
 def create_user(
     fname: str,
@@ -34,7 +34,7 @@ def create_user(
     password: str,
     username: str,
     allow_existing: bool,
-    user_type: Literal["ADMIN", "PATIENT", "MEDIC"],
+    user_type: Literal["ADMIN", "COOK"],
 ):
     """Create a new user"""
     user = None
@@ -111,25 +111,25 @@ def create_admin(fname, lname, email, password, username, allow_existing):
         password=password,
         username=username,
         allow_existing=allow_existing,
-        user_type="admin",
+        user_type="ADMIN",
     )  # type: ignore
 
 
-@app.cli.command("create-medic")
-@click.option("--fname", "-f", required=True, help="first name of the medic")
-@click.option("--lname", "-l", required=True, help="last name of the medic")
-@click.option("--email", "-e", required=True, help="medic's email")
-@click.option("--password", "-p", required=True, help="medic's password")
-@click.option("--username", "-u", help="medic's username")
+@app.cli.command("create-cook")
+@click.option("--fname", "-f", required=True, help="first name of the cook")
+@click.option("--lname", "-l", required=True, help="last name of the cook")
+@click.option("--email", "-e", required=True, help="cook's email")
+@click.option("--password", "-p", required=True, help="cook's password")
+@click.option("--username", "-u", help="cook's username")
 @click.option(
     "--allow-existing",
     "-a",
     is_flag=True,
     flag_value=True,
-    help="don't raise an error is medic already exists",
+    help="don't raise an error if cook already exists",
 )
-def create_medic(fname, lname, email, password, username, allow_existing):
-    """Create medical personnel"""
+def create_cook(fname, lname, email, password, username, allow_existing):
+    """Create a cook"""
     create_user.callback(
         fname=fname,
         lname=lname,
@@ -137,33 +137,7 @@ def create_medic(fname, lname, email, password, username, allow_existing):
         password=password,
         username=username,
         allow_existing=allow_existing,
-        user_type="medic",
-    )  # type: ignore
-
-
-@app.cli.command("create-patient")
-@click.option("--fname", "-f", required=True, help="first name of the patient")
-@click.option("--lname", "-l", required=True, help="last name of the patient")
-@click.option("--email", "-e", required=True, help="patient's email")
-@click.option("--password", "-p", required=True, help="patient's password")
-@click.option("--username", "-u", help="patient's username")
-@click.option(
-    "--allow-existing",
-    "-a",
-    is_flag=True,
-    flag_value=True,
-    help="don't raise an error is patient already exists",
-)
-def create_patient(fname, lname, email, password, username, allow_existing):
-    """Create patiental personnel"""
-    create_user.callback(
-        fname=fname,
-        lname=lname,
-        email=email,
-        password=password,
-        username=username,
-        allow_existing=allow_existing,
-        user_type="patient",
+        user_type="COOK",
     )  # type: ignore
 
 

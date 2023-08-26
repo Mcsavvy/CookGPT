@@ -5,5 +5,4 @@ class UserType(Enum):
     """different user types"""
 
     ADMIN = "admin"
-    PATIENT = "patient"
-    MEDIC = "medic"
+    COOK = "cook"
