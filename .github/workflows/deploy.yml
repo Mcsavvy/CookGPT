@@ -1,4 +1,4 @@
-name: Deploy New Version
+name: Deploy To Heroku
 
 permissions: write-all
 

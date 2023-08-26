@@ -1,4 +1,4 @@
-name: Release A New Version
+name: Create Release
 
 permissions: write-all
 
