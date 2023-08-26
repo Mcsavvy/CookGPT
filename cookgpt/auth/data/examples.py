@@ -1,16 +1,11 @@
 """schema and fields examples"""
 
-UserType = "patient"
+UserType = "cook"
 FirstName = "John"
 LastName = "Doe"
 Username = "johndoe"
 Email = "johndoe@example.com"
 Password = "Password123!"
-Height = "1.78m"
-Weight = "81.6kg"
-Dob = "1990-01-01"
-Gender = "male"
-BloodType = "A+"
 AuthToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
 Uuid = "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
 DateTime = "2021-01-01 00:00:00"
@@ -27,12 +22,6 @@ class User:
         "first_name": FirstName,
         "last_name": LastName,
         "username": Username,
-        "email": Email,
-        "height": Height,
-        "weight": Weight,
-        "dob": Dob,
-        "gender": Gender,
-        "blood_type": BloodType,
         "max_chat_cost": MaxChatCost,
         "total_chat_cost": TotalChatCost,
     }
@@ -61,11 +50,6 @@ class UserUpdate:
         "username": Username,
         "email": Email,
         "password": Password,
-        "height": Height,
-        "weight": Weight,
-        "dob": Dob,
-        "gender": Gender,
-        "blood_type": BloodType,
     }
     Out = {
         "message": "Successfully updated",

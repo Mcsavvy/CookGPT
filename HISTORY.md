@@ -2,6 +2,88 @@ Changelog
 =========
 
 
+0.2.0 (2023-08-26)
+------------------
+
+Breaking Changes
+~~~~~~~~~~~~~~~~
+- BREAKING CHANGE: removed user info. [mcsavvy]
+
+  - removed `UserInfo` database model
+  - removed enums and schemas
+
+  User info came from a different app and I do not see a reason to
+  maintain or refactor it.
+
+New
+~~~
+- Feat: add .gitchangelog.rc file. [mcsavvy]
+- Feat(ci): Add API documentation deployment and API diff check.
+  [mcsavvy]
+- Feature: added openapi specifications. [mcsavvy]
+- Feat: Add devcontainer.json for Python 3. [mcsavvy]
+- Feat(utils): add utility functions for API response management.
+  [mcsavvy]
+- Feat: added chatbot  💬🤖 [mcsavvy]
+- Feat: Update dependencies. [mcsavvy]
+
+Changes
+~~~~~~~
+- Refactor: Remove unused make targets and clean up Makefile. [mcsavvy]
+- Chore(deploy.yml): Update env_file to .env.production. [mcsavvy]
+- Chore: Update workflow names. [mcsavvy]
+- Chore: Update activation script for different environments. [mcsavvy]
+- Ci: Upload coverage reports to Codecov. [mcsavvy]
+- Chore: Update prompts for ai chatbot. [mcsavvy]
+- Refactor(auth): modified user types. [mcsavvy]
+
+  - removed patient
+  - replaced  with
+- Refactor(config): move hooks to validators, add custom settings class.
+  [mcsavvy]
+- Refactor(config): remove unused hooks and simplify tests. [mcsavvy]
+- Chore(db): created intial migration script. [mcsavvy]
+- Chore: deleted old tests. [mcsavvy]
+- Chore: pinned project dependencies. [mcsavvy]
+- Refactor(app): refactor app initialization and configuration.
+  [mcsavvy]
+- Refactor: improved authentication logic. [mcsavvy]
+- Chore: moved user logic into auth. [mcsavvy]
+- Chore: Update exclude paths in pyproject.toml. [mcsavvy]
+- Refactor: improve extensions & remove unused. [mcsavvy]
+- Chore: Update VSCode launch and settings configurations. [mcsavvy]
+- Chore: Update settings.toml. [mcsavvy]
+- Refactor(config): refactor config file and add hooks. [mcsavvy]
+- Chore: removed all migration scripts. [mcsavvy]
+- Chore: Update .gitignore file. [mcsavvy]
+- Chore: Remove LICENSE and MANIFEST.in files. [mcsavvy]
+- Chore: Add pyproject.toml configuration file. [mcsavvy]
+- Refactor: improve Makefile formatting and linting. [mcsavvy]
+- Chore: Update python version and install command. [mcsavvy]
+
+Fix
+~~~
+- Export ENV_PREFIX after activation. [mcsavvy]
+
+Docs
+~~~~
+- Docs: Add documentation for user_type field. [mcsavvy]
+- Docs: Update AI assistant description in API documentation. [mcsavvy]
+- Docs: add Openapi Specification Docs. [mcsavvy]
+
+Tests
+~~~~~
+- Tests: tested entire codebase. [mcsavvy]
+
+Style
+~~~~~
+- Style: update formatting of fake_data.py. [mcsavvy]
+- Style: simplify timedelta conversion in to_timedelta function.
+  [mcsavvy]
+- Style: reorder import statements in __init__.py. [mcsavvy]
+- Style: Improve code quality. [mcsavvy]
+
+
 0.1.13 (2023-07-28)
 -------------------
 - Tested Config Extension. [mcsavvy]
@@ -18,37 +100,26 @@ Changelog
   - made `access_token` not nullable
   - made `active` not nullable
 - Added Initial Migration. [mcsavvy]
-- Release: version 0.1.12 🚀 [mcsavvy]
 
 
 0.1.12 (2023-07-25)
 -------------------
 - Fixed Workflow. [mcsavvy]
-- Release: version 0.1.11 🚀 [mcsavvy]
 
 
 0.1.11 (2023-07-25)
 -------------------
 - Added Python Version Constraint. [mcsavvy]
-- Release: version 0.1.10 🚀 [mcsavvy]
 
 
 0.1.10 (2023-07-25)
 -------------------
 - Added Heroku Git Remote. [mcsavvy]
-- Release: version 0.1.9 🚀 [mcsavvy]
 
 
 0.1.9 (2023-07-25)
 ------------------
 - Update Heroku app name to "my-kitchen-power" [mcsavvy]
-- Automerge pull request. [† dave †]
-- Release: version 0.1.8 🚀 [mcsavvy]
-
-
-0.1.8 (2023-07-24)
-------------------
-- Automerge pull request. [† dave †]
 
 
 0.1.6 (2023-07-23)
@@ -58,11 +129,6 @@ Changelog
 - Release a new version and create a PR to main branch. [mcsavvy]
 - Add automerge action for pull requests into dev branch. [mcsavvy]
 - Added Deployment Workflow. [mcsavvy]
-
-
-0.1.7 (2023-07-21)
-------------------
-- Release: version 0.1.5 🚀 [mcsavvy]
 
 
 0.1.5 (2023-07-21)
@@ -93,25 +159,12 @@ Changelog
 - Add VS Code launch and settings configurations. [mcsavvy]
 - Added Migration & Customized Database Class. [mcsavvy]
 - Update lint and test targets in Makefile. [mcsavvy]
-- Release: version 0.1.4 🚀 [mcsavvy]
 
 
 0.1.4 (2023-07-12)
 ------------------
 - Refactor test_api.py and conftest.py. [mcsavvy]
 - Added githooks. [mcsavvy]
-- Release: version 0.1.3 🚀 [mcsavvy]
-
-
-0.1.3 (2023-07-11)
-------------------
-- Release: version 0.1.2 🚀 [mcsavvy]
-
-
-0.1.2 (2023-07-11)
-------------------
-- Merge branch 'main' of https://github.com/Mcsavvy/CookGPT. [mcsavvy]
-- Release: version 0.1.1 🚀 [mcsavvy]
 
 
 0.1.1 (2023-07-11)

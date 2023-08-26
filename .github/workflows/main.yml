@@ -1,6 +1,6 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 
-name: QA
+name: Quality Assurance
 
 on:
   pull_request:
@@ -40,6 +40,10 @@ jobs:
           export FLASK_SECRET_KEY=testing
           export FLASK_SQLALCHEMY_DATABASE_URI=sqlite:///testing.db
           make test
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   automerge:
     needs: tests
     runs-on: ubuntu-latest

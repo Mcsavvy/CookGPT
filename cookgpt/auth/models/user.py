@@ -6,7 +6,6 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from cookgpt.auth.data.enums import UserType
 from cookgpt.auth.models.tokens import TokenMixin
-from cookgpt.auth.models.user_info import UserInfoMixin
 from cookgpt.base import BaseModelMixin
 from cookgpt.chatbot.models import ThreadMixin
 from cookgpt.ext.database import db
@@ -22,7 +21,6 @@ def get_max_chat_cost() -> int:
 class User(
     BaseModelMixin,
     db.Model,  # type: ignore
-    UserInfoMixin,
     TokenMixin,
     ThreadMixin,
 ):
@@ -33,17 +31,11 @@ class User(
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(30), nullable=False)
     user_type = db.Column(
-        db.Enum(UserType), nullable=False, default=UserType.PATIENT
+        db.Enum(UserType), nullable=False, default=UserType.COOK
     )
     username = db.Column(db.String(80), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    info_id = db.Column(db.Uuid, db.ForeignKey("user_info.id"), nullable=True)
-    info = db.relationship(  # type: ignore
-        "UserInfo",
-        backref=db.backref("user", uselist=False),
-        cascade="all, delete",
-    )
     tokens = db.relationship(  # type: ignore
         "Token",
         backref=db.backref("user"),

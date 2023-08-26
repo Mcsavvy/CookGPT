@@ -138,6 +138,3 @@ cov.xml
 
 # Ignore secrets file
 .secrets.toml
-
-# Openapi spec
-openapi.json

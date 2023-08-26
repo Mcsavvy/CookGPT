@@ -1,48 +1,37 @@
-from dynaconf import Dynaconf
+from typing import Any
+
+from dynaconf import Dynaconf, Validator
 
 
-def secret_key_hook(config: Dynaconf):
-    """configure application secret key"""
-    if not config("SECRET_KEY"):
-        raise RuntimeError("SECRET_KEY not set.")
-
-
-def db_uri_hook(config: Dynaconf):
-    """configure database url"""
-    if not config("SQLALCHEMY_DATABASE_URI"):
-        raise RuntimeError("SQLALCHEMY_DATABASE_URI not set.")
-
-
-def timedeltas_hook(config: Dynaconf):
-    """convert config vars into timedeltas"""
+def to_timedelta(value: Any):
     from datetime import timedelta
 
-    TIMEDELTAS = [
-        "JWT_ACCESS_TOKEN_LEEWAY",
-        "JWT_ACCESS_TOKEN_EXPIRES",
-        "JWT_REFRESH_TOKEN_EXPIRES",
-        "JWT_REFRESH_TOKEN_LEEWAY",
-    ]
-    new_conf = {}
-
-    def convert_to_timedelta(key: str):
-        val = config.get(key)
-        if isinstance(val, dict):
-            new_conf[key] = timedelta(**val)
-        elif isinstance(val, (float, int)):
-            new_conf[key] = timedelta(seconds=val)
-        elif isinstance(val, timedelta):  # pragma: no cover
-            new_conf[key] = val
-        if key not in new_conf:
-            raise ValueError(f"{key} cannot be converted to timedelta")
-
-    for key in TIMEDELTAS:
-        convert_to_timedelta(key)
-
-    return new_conf
+    if isinstance(value, (float, int)):  # pragma: no cover
+        value = timedelta(seconds=value)
+    elif isinstance(value, dict):  # pragma: no cover
+        value = timedelta(**value)
+    if not isinstance(value, timedelta):  # pragma: no cover
+        raise ValueError(f"Invalid timedelta value: {value}")
+    return value
 
 
-def export_to_env_hook(config: Dynaconf):
+TIMEDELTAS = Validator(
+    "JWT_ACCESS_TOKEN_LEEWAY",
+    "JWT_ACCESS_TOKEN_EXPIRES",
+    "JWT_REFRESH_TOKEN_EXPIRES",
+    "JWT_REFRESH_TOKEN_LEEWAY",
+    must_exist=True,
+    cast=to_timedelta,
+)
+
+APP_ESSENTIALS = Validator(
+    "SECRET_KEY",
+    "SQLALCHEMY_DATABASE_URI",
+    must_exist=True,
+)
+
+
+def export_to_env(config: Dynaconf):
     """export specific config vars to the environment"""
     import os
 
@@ -50,28 +39,52 @@ def export_to_env_hook(config: Dynaconf):
         os.environ["OPENAI_API_KEY"] = config.OPENAI_API_KEY
 
 
-def langchain_verbosity_hook(config: Dynaconf):
+def set_langchain_verbosity(config: Dynaconf):
     """configure langchain verbosity"""
     import langchain
 
     langchain.verbose = config.LANGCHAIN_VERBOSE
 
 
-config = Dynaconf(
+class Settings(Dynaconf):
+    """Custom Dynaconf settings class"""
+
+    def reload(self, env=None, silent=True):
+        """reload setings and run validators"""
+        self._wrapped.reload(env=env, silent=silent)
+        self.validators.validate(
+            only=self._validate_only,
+            exclude=self._validate_exclude,
+            only_current_env=self._validate_only_current_env,
+        )
+
+    def setenv(self, env=None, clean=True, silent=True, filename=None):
+        """set new environment and run validators"""
+        self._wrapped.setenv(
+            env=env, clean=clean, silent=silent, filename=filename
+        )
+        self.validators.validate(
+            only=self._validate_only,
+            exclude=self._validate_exclude,
+            only_current_env=self._validate_only_current_env,
+        )
+
+    def init_app(self, app):
+        """initialize the app"""
+        self.validators.validate()
+
+
+config = Settings(
     ENVVAR_PREFIX="FLASK",
     ENV_SWITCHER="FLASK_ENV",
     LOAD_DOTENV=False,
     ENVIRONMENTS=True,
     SETTINGS_FILES=["settings.toml", ".secrets.toml"],
-    post_hooks=[
-        secret_key_hook,
-        timedeltas_hook,
-        db_uri_hook,
-        export_to_env_hook,
-        langchain_verbosity_hook,
-    ],
+    post_hooks=[export_to_env, set_langchain_verbosity],
 )
 
+config.validators.register(TIMEDELTAS)
+config.validators.register(APP_ESSENTIALS)
 
-def init_app(app):
-    pass
+
+init_app = config.init_app

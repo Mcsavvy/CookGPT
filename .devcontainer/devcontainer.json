@@ -1,0 +1,62 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "Python 3",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/python:1-3.10-bookworm",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {
+			"ppa": true,
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/github-cli:1": {
+			"installDirectlyFromGitHubRelease": true,
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/node:1": {
+			"nodeGypDependencies": true,
+			"version": "18"
+		},
+		"ghcr.io/devcontainers-contrib/features/pipenv:2": {
+			"version": "latest"
+		},
+		"ghcr.io/guiyomh/features/vim:0": {},
+		"ghcr.io/jungaretti/features/make:1": {},
+		"ghcr.io/devcontainers/features/sshd:1": {
+			"version": "latest"
+		}
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "pipenv install --dev --python python3",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.isort",
+				"ms-python.vscode-pylance",
+				"ms-python.black-formatter",
+				"Github.copilot",
+				"GitHub.copilot-chat",
+				"github.vscode-pull-request-github",
+				"tamasfe.even-better-toml",
+				"ryanluker.vscode-coverage-gutters",
+				"qwtel.sqlite-viewer",
+				"eamodio.gitlens",
+				"charliermarsh.ruff",
+				"ms-python.mypy-type-checker",
+				"GitHub.vscode-github-actions"
+			]
+		}
+	}
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

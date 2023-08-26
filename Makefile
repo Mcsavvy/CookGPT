@@ -1,6 +1,5 @@
 .ONESHELL:
 ENV_PREFIX=$(shell if [ -z "$$PIPENV_ACTIVE" ]; then pipenv --venv; else echo "$$ENV_PREFIX"; fi)/bin
-DEV_MODE=$(shell grep "FLASK_ENV=development" .env && echo "true")
 FILES="."
 PYTEST_ARGS=--cov-config .coveragerc --cov-report xml:cov.xml --cov=cookgpt --cov-append --cov-report term-missing --cov-fail-under=90 --no-cov-on-fail
 
@@ -18,14 +17,6 @@ show:             ## Show the current environment.
 	@echo "Running using $(ENV_PREFIX)"
 	@$(ENV_PREFIX)/python -V
 	@$(ENV_PREFIX)/python -m site
-
-.PHONY: virtualenv
-virtualenv:       ## Create a virtual environment.
-	@if [ "$(shell pipenv --venv > /dev/null)" ]; then echo "Virtual environment already exists"; else pipenv --python 3.10; fi
-
-.PHONY: install
-install:          ## Install the project in dev mode.
-	@if [ "$(DEV_MODE)" ]; then pipenv install --dev; else pipenv install; fi
 
 .PHONY: requirements
 requirements:     ## Generate requirements.txt.
@@ -54,25 +45,18 @@ test:             ## Run tests and generate coverage report.
 	$(ENV_PREFIX)/coverage erase
 	$(ENV_PREFIX)/pytest $(PYTEST_ARGS) tests/ || exit $$?
 
-.PHONY: watch
-watch:            ## Run tests on every change.
-	ls **/**.py | entr $(ENV_PREFIX)pytest -s -vvv -l --tb=long --maxfail=1 tests/
-
 .PHONY: clean
 clean:            ## Clean unused files.
 	@find ./ -name '*.pyc' -exec rm -f {} \;
 	@find . -name __pycache__ -exec rm -rf {} +
-	@find ./ -name 'Thumbs.db' -exec rm -f {} \;
 	@find ./ -name '*~' -exec rm -f {} \;
 	@rm -rf .cache
 	@rm -rf .pytest_cache
 	@rm -rf .mypy_cache
-	@rm -rf build
-	@rm -rf dist
+	@rm -rf .coverage
+	@rm -rf .ruff_cache
 	@rm -rf *.egg-info
 	@rm -rf htmlcov
-	@rm -rf .tox/
-	@rm -rf docs/_build
 
 
 .PHONY: release
@@ -80,6 +64,7 @@ release:          ## Create a new tag for release.
 	@echo "WARNING: This operation will create a version tag and push to github"
 	@PREV_BRANCH=$$(git rev-parse --abbrev-ref HEAD)
 	@git checkout dev || exit $$?
+	echo "Current version is $$(cat cookgpt/VERSION)"
 	@read -p "Version? (provide the next x.y.z semver) : " TAG
 	@echo "creating git tag : $${TAG}"
 	@git tag $${TAG} || exit $$?

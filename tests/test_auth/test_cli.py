@@ -1,7 +1,7 @@
 import pytest
 from marshmallow import ValidationError
 
-from cookgpt.auth.cli import create_admin, create_medic, create_patient
+from cookgpt.auth.cli import create_admin, create_cook
 from cookgpt.auth.data.enums import UserType
 from cookgpt.auth.models.user import User
 
@@ -226,11 +226,11 @@ class TestCreateAdmin:
 
 
 @pytest.mark.usefixtures("app")
-class TestCreateMedic:
-    """test `auth create-medic`"""
+class TestCreateCook:
+    """test `auth create-cook`"""
 
     def test_create_success(self, faker):
-        """test creating a medic"""
+        """test creating a cook"""
 
         uname = faker.unique.user_name()
         pword = faker.password()
@@ -239,7 +239,7 @@ class TestCreateMedic:
         email = faker.unique.email()
 
         with pytest.raises(SystemExit) as excinfo:
-            create_medic.main(
+            create_cook.main(
                 [
                     "-f",
                     fname,
@@ -261,46 +261,7 @@ class TestCreateMedic:
         assert user.email == email
         assert user.password != pword  # hashed
         assert user.username == uname
-        assert user.user_type == UserType.MEDIC
-
-
-@pytest.mark.usefixtures("app")
-class TestCreatePatient:
-    """test `auth create-patient`"""
-
-    def test_create_success(self, faker):
-        """test creating a patient"""
-
-        uname = faker.unique.user_name()
-        pword = faker.password()
-        fname = faker.first_name()
-        lname = faker.last_name()
-        email = faker.unique.email()
-
-        with pytest.raises(SystemExit) as excinfo:
-            create_patient.main(
-                [
-                    "-f",
-                    fname,
-                    "-l",
-                    lname,
-                    "-e",
-                    email,
-                    "-p",
-                    pword,
-                    "-u",
-                    uname,
-                ]
-            )
-        assert excinfo.value.code == 0
-        user = User.query.filter(User.email == email).first()
-        assert user is not None
-        assert user.first_name == fname
-        assert user.last_name == lname
-        assert user.email == email
-        assert user.password != pword  # hashed
-        assert user.username == uname
-        assert user.user_type == UserType.PATIENT
+        assert user.user_type == UserType.COOK
 
 
 class TestGetAccessToken:
