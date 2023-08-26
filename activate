@@ -2,6 +2,26 @@
 # activate the virtualenv
 # if it's not already activated
 
+
+export ENV_PREFIX
+
+if [ "$1" = 'production' ]; then
+	DOTENV_FILE=".env.production"
+elif [ "$1" = 'development' ] || [ -z "$1" ]; then
+	DOTENV_FILE=".env.development"
+elif [ "$1" = 'testing' ]; then
+	DOTENV_FILE=".env.testing"
+fi
+
+
+# if the virtualenv is already activated
+# then reactivate it
+if ! [ -z "$VIRTUAL_ENV" ]; then
+	deactivate
+	unalias deactivate 2>/dev/null
+fi
+
+
 if [ -f ".venv" ]; then
 	ENV_PREFIX="$(cat .venv)"
 else
@@ -9,16 +29,6 @@ else
 	echo "$ENV_PREFIX" > .venv
 fi
 
-
-export ENV_PREFIX
-
-
-# if the virtualenv is already activated
-# then reactivate it
-if ! [ -z "$VIRTUAL_ENV" ]; then
-	deactivate
-	unalias deactivate
-fi
 
 echo "Activating virtualenv $(basename $ENV_PREFIX)"
 
@@ -33,4 +43,5 @@ source $ENV_PREFIX/bin/activate
 alias deactivate="unset PIPENV_ACTIVE ENV_PREFIX; unalias deactivate; deactivate"
 
 # load env vars
-export $(cat .env | xargs)
+export $(cat $DOTENV_FILE | xargs)
+unset DOTENV_FILE
