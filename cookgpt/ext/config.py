@@ -6,13 +6,13 @@ from dynaconf import Dynaconf, Validator
 def to_timedelta(value: Any):
     from datetime import timedelta
 
-    if isinstance(value, timedelta):
-        return value
-    if isinstance(value, (float, int)):
-        return timedelta(seconds=value)
-    if isinstance(value, dict):
-        return timedelta(**value)
-    raise ValueError(f"Invalid timedelta value: {value}")
+    if isinstance(value, (float, int)):  # pragma: no cover
+        value = timedelta(seconds=value)
+    elif isinstance(value, dict):  # pragma: no cover
+        value = timedelta(**value)
+    if not isinstance(value, timedelta):  # pragma: no cover
+        raise ValueError(f"Invalid timedelta value: {value}")
+    return value
 
 
 TIMEDELTAS = Validator(
