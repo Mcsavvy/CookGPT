@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 # activate the virtualenv
 # if it's not already activated
-
-
-export ENV_PREFIX
-
 if [ "$1" = 'production' ]; then
 	DOTENV_FILE=".env.production"
 elif [ "$1" = 'development' ] || [ -z "$1" ]; then
@@ -29,6 +25,7 @@ else
 	echo "$ENV_PREFIX" > .venv
 fi
 
+export ENV_PREFIX
 
 echo "Activating virtualenv $(basename $ENV_PREFIX)"
 
