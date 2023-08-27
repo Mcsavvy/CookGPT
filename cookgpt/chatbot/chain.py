@@ -102,7 +102,7 @@ class LLM(ChatOpenAI):
     # callbacks: Callbacks = Field(default_factory=get_llm_callbacks)
 
 
-class Chain(ConversationChain):
+class ThreadChain(ConversationChain):
     """custom chain for the language model"""
 
     input_key: str = Field(default_factory=get_chain_input_key)
