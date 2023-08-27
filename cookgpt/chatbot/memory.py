@@ -113,10 +113,14 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
 
 
 class BaseMemory(ConversationBufferMemory):
-    """ "A mock conversation memory"""
+    """
+    A conversation memory that is user aware
+    """
 
     memory_key: str = Field(default_factory=get_memory_key)
     input_key: str = Field(default_factory=get_memory_input_key)
+    human_prefix: str = Field(default_factory=get_human_prefix)
+    ai_prefix: str = Field(default_factory=get_ai_prefix)
 
     @property
     def user(self) -> str:
@@ -129,16 +133,14 @@ class BaseMemory(ConversationBufferMemory):
         history_ctx.set(values["chat_memory"])
         return values
 
-    def get_history(self):  # pragma: no cover
-        """return all chats in the thread"""
-        if self.return_messages:
-            return self.chat_memory.messages
-        else:
-            return get_buffer_string(
-                self.chat_memory.messages,
-                human_prefix=self.user,
-                ai_prefix=self.ai_prefix,
-            )
+    @property
+    def buffer_as_str(self) -> str:  # pragma: no cover
+        """return buffer as string"""
+        return get_buffer_string(
+            self.chat_memory.messages,
+            human_prefix=self.human_prefix,
+            ai_prefix=self.ai_prefix,
+        )
 
     @property
     def memory_variables(self) -> "list[str]":
