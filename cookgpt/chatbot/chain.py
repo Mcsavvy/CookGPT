@@ -163,20 +163,9 @@ class ThreadChain(ConversationChain):
     """custom chain for the language model"""
 
     input_key: str = Field(default_factory=get_chain_input_key)
-    llm: BaseChatModel = Field(default_factory=get_llm)
-    prompt: BasePromptTemplate = PROMPT
-    memory: BaseMemory = Field(default_factory=ThreadMemory)
-    # callbacks: Callbacks = Field(default_factory=get_chain_callbacks)
-
-    # def __setattr__(self, name, value):
-    #     if name == "memory":  # pragma: no cover
-    #         callbacks = (cast(Callbacks, self.llm.callbacks) or []) + (
-    #             self.callbacks or []
-    #         )
-    #         for cb in callbacks:  # type: ignore
-    #             if hasattr(cb, "_memory"):
-    #                 setattr(cb, "_memory", value)
-    #     return super().__setattr__(name, value)
+    llm: "BaseChatModel" = Field(default_factory=get_llm)
+    prompt: "BasePromptTemplate" = PROMPT
+    memory: "BaseMemory" = Field(default_factory=ThreadMemory)
 
     @root_validator
     def set_context(cls, values):
@@ -204,3 +193,7 @@ class ThreadChain(ConversationChain):
         callbacks = (callbacks or []) + (callbacks_ctx.get() or [])
         print("callbacks:", callbacks)
         return super().predict(callbacks, **kwargs)
+
+    @property
+    def _chain_type(self) -> str:
+        return "thread_chain"
