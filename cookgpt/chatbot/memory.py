@@ -163,5 +163,12 @@ class ThreadMemory(BaseMemory, BaseModel):
     def save_context(
         self, inputs: Dict[str, Any], outputs: Dict[str, str]
     ) -> None:
+        """Save context from this conversation to database."""
+        input = inputs[self.input_key]
+        if isinstance(input, list):
+            input = input[0]
+        if isinstance(input, BaseMessage):
+            input = input.content
+        inputs[self.input_key] = input
         super().save_context(inputs, outputs)
         self.chat_memory._unset_query_cost()
