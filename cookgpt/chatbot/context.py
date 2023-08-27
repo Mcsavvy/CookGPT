@@ -1,5 +1,10 @@
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
+
+from langchain.callbacks.base import BaseCallbackHandler
+
+Callbacks = Union[list[BaseCallbackHandler], None]
+
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -22,4 +27,7 @@ query_time_ctx: ContextVar["Optional[datetime]"] = ContextVar(
 )
 response_time_ctx: ContextVar["Optional[datetime]"] = ContextVar(
     "response_time_ctx", default=None
+)
+callbacks_ctx: ContextVar["Callbacks"] = ContextVar(
+    "callbacks_ctx", default=None
 )
