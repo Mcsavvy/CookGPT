@@ -147,7 +147,7 @@ class BaseMemory(ConversationBufferMemory):
 
     def load_memory_variables(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """return chat thread and user's name"""
-        return {"user": self.user, self.memory_key: self.get_history()}
+        return {"user": self.user, self.memory_key: self.buffer_as_messages}
 
 
 class ThreadMemory(BaseMemory, BaseModel):

@@ -20,7 +20,7 @@ from cookgpt.chatbot.context import (
     response_time_ctx,
 )
 from cookgpt.chatbot.data.fake_data import responses
-from cookgpt.chatbot.data.prompts import PROMPT
+from cookgpt.chatbot.data.prompts import prompt as PROMPT
 from cookgpt.chatbot.memory import BaseMemory, ThreadMemory
 from cookgpt.ext.config import config
 
@@ -131,3 +131,19 @@ class ThreadChain(ConversationChain):
         """reload variables"""
         self.input_key = get_chain_input_key()
         self.llm = get_llm()
+
+    def predict(self, callbacks: Callbacks = None, **kwargs: Any) -> str:
+        """predict the next response"""
+        from langchain.schema import HumanMessage
+
+        # ensure that the input key is provided
+        assert config.CHATBOT_CHAIN_INPUT_KEY in kwargs, (
+            "Please provide a value for the input key "
+            f"({config.CHATBOT_CHAIN_INPUT_KEY})."
+        )
+
+        input: str = kwargs[config.CHATBOT_CHAIN_INPUT_KEY]
+        kwargs[config.CHATBOT_CHAIN_INPUT_KEY] = [HumanMessage(content=input)]
+        callbacks = (callbacks or []) + (callbacks_ctx.get() or [])
+        print("callbacks:", callbacks)
+        return super().predict(callbacks, **kwargs)
