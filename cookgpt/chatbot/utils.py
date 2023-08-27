@@ -11,7 +11,7 @@ def num_tokens_from_messages(
     """Returns the number of tokens used by a list of messages."""
     try:
         encoding = tiktoken.encoding_for_model(model)
-    except KeyError:
+    except KeyError:  # pragma: no cover
         encoding = tiktoken.get_encoding("cl100k_base")
     if (
         model == "gpt-3.5-turbo-0613"
@@ -22,7 +22,8 @@ def num_tokens_from_messages(
             num_tokens += 4
             for key, value in message.items():
                 num_tokens += len(encoding.encode(value))
-                if key == "name":  # if there's a name, the role is omitted
+                # if there's a name, the role is omitted
+                if key == "name":  # pragma: no cover
                     num_tokens += (
                         -1
                     )  # role is always required and always 1 token

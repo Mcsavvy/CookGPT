@@ -125,7 +125,7 @@ class ChatCallbackHandler(OpenAICallbackHandler):
                 token_usage.get("completion_tokens", 0),
             )
         )
-        self.successful_requests += 1
+        self.successful_requests += 1  # pragma: no cover
 
     def on_chat_model_start(
         self,
@@ -195,5 +195,5 @@ class ThreadChain(ConversationChain):
         return super().predict(callbacks, **kwargs)
 
     @property
-    def _chain_type(self) -> str:
+    def _chain_type(self) -> str:  # pragma: no cover
         return "thread_chain"
