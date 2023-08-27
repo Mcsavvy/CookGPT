@@ -17,7 +17,7 @@ jobs:
       - name: Deploy API documentation
         uses: bump-sh/github-action@v1
         with:
-          doc: ${{env.BUMP_DOC_ID}}
+          doc: "6c3583c2-1448-4ff3-9c8c-eda314881628"
           token: ${{ secrets.BUMP_TOKEN }}
           file: openapi.json
   api-diff:
