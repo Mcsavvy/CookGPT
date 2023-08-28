@@ -2,6 +2,26 @@ Changelog
 =========
 
 
+0.2.2 (2023-08-28)
+------------------
+
+New
+~~~
+- LLM Response Streaming. [mcsavvy]
+
+Changes
+~~~~~~~
+- Chore(coverage): configured coverage. [mcsavvy]
+
+Fix
+~~~
+- API Definition. [mcsavvy]
+
+Other
+~~~~~
+- Merged changes. [mcsavvy]
+
+
 0.2.0 (2023-08-26)
 ------------------
 

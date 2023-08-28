@@ -187,11 +187,9 @@ class ChatView(MethodView):
 
 
 app.add_url_rule(
-    "/chat/<uuid:chat_id>",
+    "/<uuid:chat_id>",
     view_func=ChatView.as_view("chat"),
     methods=["GET", "DELETE"],
 )
 app.add_url_rule("/thread", view_func=ThreadView.as_view("thread"))
-app.add_url_rule(
-    "/chat", view_func=ChatView.as_view("query"), methods=["POST"]
-)
+app.add_url_rule("/", view_func=ChatView.as_view("query"), methods=["POST"])

@@ -1,5 +1,7 @@
 # Flask Project Template
 
+[![codecov](https://codecov.io/gh/Mcsavvy/CookGPT/graph/badge.svg?token=bo6TQaURy2)](https://codecov.io/gh/Mcsavvy/CookGPT)
+
 A full feature Flask project template.
 
 See also 

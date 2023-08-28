@@ -2,7 +2,7 @@
   "info": {
     "description": "Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered cooking assistance.\n\nThe API allows you to perform various actions such as user authentication, managing user information, and interacting with the AI chat functionality.\n\nThe API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.",
     "title": "Cookgpt",
-    "version": "0.1.13"
+    "version": "0.2.1"
   },
   "tags": [
     {
@@ -16,13 +16,13 @@
   ],
   "servers": [
     {
-      "name": "local",
-      "url": "http://localhost:8000",
+      "name": "live",
+      "url": "https://my-kitchen-power-c2f3e0fe1a71.herokuapp.com",
       "_bypass_evaluation": false
     }
   ],
   "paths": {
-    "/chat/chat": {
+    "/chat/": {
       "post": {
         "parameters": [],
         "responses": {
@@ -160,7 +160,7 @@
           "auth"
         ],
         "summary": "Log a user into the system.",
-        "description": "Use this endpoint to authenticate a user and get authentication info. This endpoint returns an access token and a refresh token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires via the `/auth/refresh` endpoint.\n\nThe expiry time of  both tokens are also returned. If the refresh token expires, the user will have to login again. Use the expiry to check and refresh the access token before it expires.\n\nThe access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.",
+        "description": "Use this endpoint to authenticate a user and get authentication info. This endpoint returns an access token and a refresh token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires via the `/auth/refresh` endpoint.\n\nThe expiry time of  both tokens are also returned. If the refresh token expires, the user will have to login again. Use the expiry to check and refresh the access token before it expires.\n\nThe access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.\n\nThe `user_type` field is used to determine the type of user that is logged in. This can be used to determine the permissions of the user.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -383,7 +383,7 @@
         ]
       }
     },
-    "/chat/chat/{chat_id}": {
+    "/chat/{chat_id}": {
       "get": {
         "parameters": [
           {
