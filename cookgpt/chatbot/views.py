@@ -9,7 +9,7 @@ from flask_jwt_extended import get_current_user, jwt_required
 
 from cookgpt import docs
 from cookgpt.chatbot import app
-from cookgpt.chatbot.chain import Chain, ChatCallbackHandler
+from cookgpt.chatbot.chain import ChatCallbackHandler, ThreadChain
 from cookgpt.chatbot.context import chain_ctx, thread_ctx, user_ctx
 from cookgpt.chatbot.data import examples as ex
 from cookgpt.chatbot.data import schemas as sc
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from cookgpt.auth.models import User
 
 
-chain = Chain()
+chain = ThreadChain()
 chain_ctx.set(chain)
 
 
