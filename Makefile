@@ -1,7 +1,7 @@
 .ONESHELL:
 ENV_PREFIX=$(shell if [ -z "$$PIPENV_ACTIVE" ]; then pipenv --venv; else echo "$$ENV_PREFIX"; fi)/bin
 FILES="."
-PYTEST_ARGS=--cov-config .coveragerc --cov-report xml:cov.xml --cov=cookgpt --cov-append --cov-report term-missing --cov-fail-under=90 --no-cov-on-fail
+PYTEST_ARGS=--cov-config .coveragerc --cov-report xml --cov=cookgpt --cov-append --cov-report term-missing --cov-fail-under=95 --no-cov-on-fail
 
 
 .PHONY: help
