@@ -23,7 +23,9 @@ VALIDATION_ERROR_DESCRIPTION = "could not validate input data"
 AUTH_ERROR_STATUS_CODE = 403
 AUTH_ERROR_DESCRIPTION = "insufficient permissions"
 AUTO_SERVERS = true
-SERVERS = [{name = "local", url = "http://localhost:8000"}]
+SERVERS = [
+    {name = "live", url = "https://my-kitchen-power-c2f3e0fe1a71.herokuapp.com"}
+]
 
 # AI
 MAX_CHAT_COST = 2500
@@ -61,6 +63,10 @@ JWT_REFRESH_TOKEN_LEEWAY = {minutes = 15}
 EXTENSIONS = [
     "dynaconf_merge",
     # "quick_tests:init_app"
+]
+SERVERS = [
+    "dynaconf_merge",
+    {name = "local", url = "http://localhost:8000"}
 ]
 
 
