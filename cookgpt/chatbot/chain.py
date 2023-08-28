@@ -1,6 +1,6 @@
 from datetime import datetime as dt
 from datetime import timezone as tz
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Dict, List, cast
 from uuid import UUID
 
 from langchain.adapters.openai import convert_message_to_dict
@@ -8,7 +8,7 @@ from langchain.callbacks import (
     OpenAICallbackHandler,
     StreamingStdOutCallbackHandler,
 )
-from langchain.callbacks.base import BaseCallbackHandler
+from langchain.callbacks.base import BaseCallbackManager, Callbacks
 from langchain.callbacks.openai_info import get_openai_token_cost_for_model
 from langchain.chains import ConversationChain
 from langchain.chat_models import ChatOpenAI, FakeListChatModel
@@ -30,8 +30,6 @@ from cookgpt.chatbot.memory import BaseMemory, ThreadMemory
 from cookgpt.chatbot.utils import convert_messages_to_dict  # noqa
 from cookgpt.chatbot.utils import num_tokens_from_messages
 from cookgpt.ext.config import config
-
-Callbacks = Union[list[BaseCallbackHandler], None]
 
 
 def get_llm_callbacks() -> "Callbacks":  # pragma: no cover
@@ -118,6 +116,10 @@ class ChatCallbackHandler(OpenAICallbackHandler):
             self.compute_completion_tokens(response, "gpt-3.5-turbo-0613")
             self.successful_requests += 1
             return
+        assert llm_output and "token_usage" in llm_output, (
+            "The LLM response did not contain a token_usage "
+            "field, but the LLM was not streaming."
+        )
         token_usage = llm_output["token_usage"]  # pragma: no cover
         chat_cost_ctx.set(  # pragma: no cover
             (
@@ -190,8 +192,13 @@ class ThreadChain(ConversationChain):
 
         input: str = kwargs[config.CHATBOT_CHAIN_INPUT_KEY]
         kwargs[config.CHATBOT_CHAIN_INPUT_KEY] = [HumanMessage(content=input)]
-        callbacks = (callbacks or []) + (callbacks_ctx.get() or [])
-        print("callbacks:", callbacks)
+        if isinstance(callbacks, BaseCallbackManager):  # pragma: no cover
+            for cb in callbacks_ctx.get() or []:
+                callbacks.add_handler(cb, inherit=True)
+        elif callbacks is None:
+            callbacks = callbacks_ctx.get() or []
+        else:
+            callbacks.extend(callbacks_ctx.get() or [])
         return super().predict(callbacks, **kwargs)
 
     @property
