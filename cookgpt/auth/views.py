@@ -7,6 +7,7 @@ from flask_jwt_extended import get_current_user, get_jwt
 from cookgpt import docs
 from cookgpt.auth import app
 from cookgpt.auth.data import examples as ex
+from cookgpt.auth.data.enums import UserType
 
 # from cookgpt.auth.data.schemas import User as UserSchema
 from cookgpt.auth.data.schemas import (  # UserDelete,; UserUpdate,
