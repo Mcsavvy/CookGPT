@@ -50,10 +50,9 @@ def login(json_data: dict) -> Any:
     password: str = json_data["password"]
     user: Optional[User]
 
-    if "@" in login:
-        user = User.query.filter_by(email=login).first()
-    else:
-        user = User.query.filter_by(username=login).first()
+    user = User.query.filter(
+        (User.username == login) | (User.email == login)
+    ).first()
     if user is None:
         abort(404, "User does not exist")
     elif not user.validate_password(password):
@@ -65,7 +64,7 @@ def login(json_data: dict) -> Any:
         "atoken_expiry": token.atoken_expiry,
         "rtoken": token.refresh_token,
         "rtoken_expiry": token.rtoken_expiry,
-        "user_type": user.user_type.value,
+        "user_type": user.get_type(),
         "auth_type": "Bearer",
     }
 
@@ -111,7 +110,7 @@ def signup(json_data: dict) -> Any:
     from cookgpt.auth.models import User
 
     try:
-        User.create(**json_data)
+        User.create(**json_data, user_type=UserType.COOK)
     except User.CreateError as err:
         return {"message": err.args[0]}, 422
     return {"message": "Successfully signed up"}, 201
@@ -137,7 +136,7 @@ def refresh() -> Any:
         "atoken_expiry": token.atoken_expiry,
         "rtoken": token.refresh_token,
         "rtoken_expiry": token.rtoken_expiry,
-        "user_type": token.user.user_type.value,
+        "user_type": token.user.get_type(),
         "auth_type": "Bearer",
     }
 
