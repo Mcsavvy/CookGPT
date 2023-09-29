@@ -2,6 +2,31 @@ Changelog
 =========
 
 
+0.2.4 (2023-09-29)
+------------------
+
+Changes
+~~~~~~~
+- Chore(spec): regenerated openapi schema. [mcsavvy]
+- Refactor(workflow): change heroku app. [mcsavvy]
+
+Fix
+~~~
+- Missing import. [mcsavvy]
+- Fix(ci): Updated bump doc id. [mcsavvy]
+
+Other
+~~~~~
+- Merge 8912804e2de31ea4492f4151614a656c9ff30e12 into
+  877ea26be07928294028d781b15149791135c120. [mcsavvy]
+- Merge pull request #19 from Mcsavvy/dev. [mcsavvy]
+
+  Bump version to 0.2.3
+- Bump version to 0.2.2. [github-actions[bot]]
+- Bump version to 0.2.1. [github-actions[bot]]
+- Bump version to 0.2.0. [github-actions[bot]]
+
+
 0.2.3 (2023-09-29)
 ------------------
 
