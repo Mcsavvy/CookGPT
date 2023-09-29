@@ -55,10 +55,10 @@ class User(
     def __repr__(self):
         "Admin[45g56](name=Dave, email=dave@ex.com, threads=9, token=5)"
         (self.username or self.first_name).title()
-        self.user_type.value.title()
+        self.get_type().title()
         self.id.hex[:6]
         return "{}[{}](name={}, email={}, threads={}, tokens={})".format(
-            self.user_type.value.title(),
+            self.get_type().title(),
             self.id.hex[:6],
             self.name,
             self.email,
@@ -117,3 +117,15 @@ class User(
         ):
             raise self.UpdateError("email is taken")
         return super().update(commit, **kwargs)
+
+    def get_type(self) -> str:
+        """
+        get the user's type
+
+        NOTE: this is a workaound for a bug where user_type was returned as
+              a string instead of an enum
+        """
+        try:
+            return self.user_type.value
+        except AttributeError:
+            return self.user_type or "cook"
