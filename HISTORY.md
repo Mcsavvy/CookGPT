@@ -2,6 +2,18 @@ Changelog
 =========
 
 
+0.2.3 (2023-09-29)
+------------------
+
+Changes
+~~~~~~~
+- Chore: change gunicorn bind & server url. [mcsavvy]
+
+Fix
+~~~
+- Create a workaround for user_type bug. [mcsavvy]
+
+
 0.2.2 (2023-08-28)
 ------------------
 
