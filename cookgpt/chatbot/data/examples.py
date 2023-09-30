@@ -1,15 +1,16 @@
 """chatbot schema data examples."""
 
 
-Response = "You should take some aspirin"
-Query = "I have a headache"
+Response = "Okay, tell me what type of rice so I can suggest recipes"
+Query = "Hi, I need a recipe for rice"
 DateTime = "2021-01-01 00:00:00"
 Uuid = "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+StreamUrl = f"https://example.com/chat/stream/{Uuid}"
 
 
 class Chat:
     In = {
-        "content": Query,
+        "query": Query,
         # "thread_id": Uuid,
     }
     Out = {
@@ -22,6 +23,10 @@ class Chat:
         "sent_time": DateTime,
         "thread_id": Uuid,
     }
+
+
+class Stream(Chat):
+    Out = dict(Chat.Out, stream_url=StreamUrl, streaming=True)
 
 
 class GetChat:

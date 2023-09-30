@@ -18,7 +18,7 @@ def ChatType(**k):
             "description": "chat type",
             "example": MessageType.QUERY.value,
         },
-        **k
+        **k,
     )
 
 
@@ -52,7 +52,7 @@ def SentTime(**k):
             "description": "time message was sent",
             "example": ex.DateTime,
         },
-        **k
+        **k,
     )
 
 
@@ -65,7 +65,7 @@ def ThreadId(**k):
 def ErrorMessage(**k):
     return fields.String(
         metadata={"description": "error message", "example": "chat not found"},
-        **k
+        **k,
     )
 
 
@@ -77,11 +77,27 @@ class Chat:
         # TODO: allow users to select thread
         # thread_id = ThreadId(required=False)
 
+        class Params(Schema):
+            stream = fields.Boolean(
+                load_default=False,
+                metadata={
+                    "description": "whether to stream the response",
+                    "example": True,
+                },
+            )
+
     class Out(Schema):
         id = ChatId()
         content = Content()
         chat_type = ChatType()
         cost = Cost()
+        streaming = fields.Boolean(
+            dump_default=True,
+            metadata={
+                "description": "indicates if the chatbot is streaming",
+                "example": True,
+            },
+        )
         previous_chat_id = PrevChatId(allow_none=True)
         next_chat_id = NextChatId(allow_none=True)
         sent_time = SentTime()
@@ -90,7 +106,7 @@ class Chat:
     class Get(Out):
         pass
 
-    class Delete(Out):
+    class Delete(Schema):
         message = fields.String(
             metadata={
                 "description": "message",
