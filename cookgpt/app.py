@@ -4,6 +4,7 @@ from socket import gethostname
 
 from apiflask import APIFlask
 from dynaconf import Dynaconf, FlaskDynaconf
+from redis import Redis  # type: ignore
 
 from cookgpt import docs
 from cookgpt.ext.config import config
@@ -26,10 +27,12 @@ class App(APIFlask):
     """App class that extends APIFlask and FlaskDynaconf"""
 
     config: "Dynaconf"
+    redis: "Redis"
 
     def __init__(self, *args, **kwargs):
-        kwargs.update(title="Cookgpt", version=VERSION)
+        kwargs.update(title="Cookgpt", version=VERSION, docs_ui="elements")
         super().__init__(*args, **kwargs)
+
         self.schema_name_resolver = schema_name_resolver
         self.description = docs.APP
         FlaskDynaconf(self, dynaconf_instance=config)
