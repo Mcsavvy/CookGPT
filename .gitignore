@@ -138,3 +138,5 @@ cov.xml
 
 # Ignore secrets file
 .secrets.toml
+requirements.txt
+requirements-dev.txt
