@@ -5,12 +5,10 @@ from typing import Optional as O
 from uuid import UUID, uuid4
 
 from apiflask.views import MethodView
-from flask_jwt_extended import get_current_user, jwt_required
+from flask_jwt_extended import get_current_user
 
-from cookgpt import docs
+from cookgpt import docs, logging
 from cookgpt.chatbot import app
-from cookgpt.chatbot.chain import ChatCallbackHandler, ThreadChain
-from cookgpt.chatbot.context import chain_ctx, thread_ctx, user_ctx
 from cookgpt.chatbot.data import examples as ex
 from cookgpt.chatbot.data import schemas as sc
 from cookgpt.chatbot.data.enums import MessageType
@@ -23,10 +21,6 @@ from cookgpt.utils import abort, api_output
 
 if TYPE_CHECKING:
     from cookgpt.auth.models import User
-
-
-chain = ThreadChain()
-chain_ctx.set(chain)
 
 
 def make_dummy_chat(
@@ -58,7 +52,7 @@ def make_dummy_chat(
 class ThreadView(MethodView):
     """thread endpoints"""
 
-    decorators = [jwt_required()]
+    decorators = [auth_required()]
 
     @app.output(
         sc.Chats.Get,
@@ -70,12 +64,14 @@ class ThreadView(MethodView):
     def get(self):
         """Get all messages in a thread."""
         # TODO: allow user to select thread
+        logging.info("GET all chats from thread")
         user = get_current_user()
         thread = user.default_thread
+        logging.info("Using default thread %s", thread.id)
         return {"chats": thread.chats}
 
     @app.output(
-        sc.Chat.Delete,
+        sc.Chats.Delete,
         200,
         example=ex.DeleteChat.Out,
         description="Success message",
@@ -83,9 +79,11 @@ class ThreadView(MethodView):
     @app.doc(description=docs.CHAT_DELETE_CHATS)
     def delete(self):
         """Delete all messages in a thread."""
+        logging.info("DELETE all chats from thread")
         # TODO: allow user to select thread
         user = get_current_user()
         thread = user.default_thread
+        logging.info("Using default thread %s", thread.id)
         thread.clear()
         return {"message": "All chats deleted"}
 
@@ -93,7 +91,7 @@ class ThreadView(MethodView):
 class ChatView(MethodView):
     """Chat endpoints"""
 
-    decorators = [jwt_required()]
+    decorators = [auth_required()]
 
     @app.output(
         sc.Chat.Out,
@@ -105,8 +103,10 @@ class ChatView(MethodView):
     def get(self, chat_id):
         """Get a single chat from a thread."""
         # TODO: allow user to select thread
+        logging.info("GET chat %s from thread", chat_id)
         user = get_current_user()
         thread = user.default_thread
+        logging.info("Using default thread %s", thread.id)
         # chat = (
         #     Chat.query.join(Thread)
         #     .filter(Chat.id == chat_id, Thread.user_id == user.id)
@@ -134,11 +134,13 @@ class ChatView(MethodView):
         #     .filter(Chat.id == chat_id, Thread.user_id == user.id)
         #     .first()
         # )
+        logging.info("DELETE chat %s from thread", chat_id)
         chat = Chat.query.filter(
             Chat.id == chat_id, Chat.thread_id == user.default_thread.id
         ).first()
         if not chat:
             return {"message": "Chat not found"}, 404
+        logging.info("Using default thread %s", chat.thread.id)
         chat.delete()
         return {"message": "Chat deleted"}
 
@@ -168,20 +170,20 @@ class ChatView(MethodView):
         from cookgpt.chatbot.utils import get_stream_name
         from redisflow import celeryapp
 
-        chain.reload()
         input_key = get_memory_input_key()
         query: str = json_data["query"]
         user: "User" = get_current_user()
 
         stream_response = query_data["stream"]
 
+        if stream_response:
+            logging.info("POST chat to thread (streamed)")
+        else:
+            logging.info("POST chat to thread")
+
         # TODO: allow user to select thread
         thread = user.default_thread
-        thread_ctx.set(thread)
-
-        handler = ChatCallbackHandler()
-        handler.register()
-
+        logging.info("Using default thread %s", thread.id)
         if thread.cost >= user.max_chat_cost:
             return (
                 make_dummy_chat(
@@ -199,6 +201,7 @@ class ChatView(MethodView):
         stream = get_stream_name(user, r)
         if stream_response:
             # Run the task in the background
+            logging.info("Sending query to AI in background")
             task = celeryapp.send_task(
                 "chatbot.send_query",
                 args=(q.id, r.id, thread.id, {input_key: query}),
@@ -206,6 +209,7 @@ class ChatView(MethodView):
             app.redis.set(f"{stream}:task", task.id)
         else:
             # Run the task in the foreground
+            logging.info("Sending query to AI in foreground")
             send_query(q.id, r.id, thread.id, {input_key: query})
             app.redis.set(f"{stream}:task", "")
         db.session.refresh(r)
@@ -225,17 +229,20 @@ def read_stream(chat_id: UUID):
     from cookgpt.ext import db
     from redisflow import celeryapp
 
+    logging.info("GET stream for chat %s", chat_id)
     OutputT = list[tuple[bytes, list[tuple[bytes, dict[bytes, bytes]]]]]
 
     chat = db.session.get(Chat, chat_id)
     if not chat:
         abort(404, "Chat does not exist.")
+    logging.debug("Using default thread %s", chat.thread.id)
     user: "User" = chat.thread.user
     stream = get_stream_name(user, chat)
 
     if chat.content != "" or not (
         app.redis.exists(stream) and app.redis.exists(f"{stream}:task")
     ):  # chat has been streamed
+        logging.debug("Chat has already been streamed")
         entries: list[str] = []
         for word in chat.content.split(" "):
             entries.extend((word, " "))
@@ -246,6 +253,7 @@ def read_stream(chat_id: UUID):
         return Response(iter(entries), status=200)
 
     def get_stream(entry_id: bytes):
+        logging.debug("Streaming %r from %s", stream, entry_id)
 
         task_id = app.redis.get(f"{stream}:task")
 
@@ -254,19 +262,23 @@ def read_stream(chat_id: UUID):
             entries: OutputT = app.redis.xread({stream: entry_id})
             if entries:
                 # there are new entries in the stream
+                logging.debug("New entries in stream")
                 _, data = entries[0]
                 for entry_id, entry in data:
                     yield entry[b"token"]
             elif task_id:
                 # there are no new entries in the stream, check if task is
                 # complete
+                logging.debug("No new entries in stream")
                 task = celeryapp.AsyncResult(task_id)
                 if task.ready():
                     # task is complete, stop streaming
+                    logging.debug("Task is complete")
                     break
             else:  # pragma: no cover
                 # there are no new entries in the stream and no task
                 # running, stop streaming
+                logging.debug("No task running")
                 break
             sleep(0.1)
 

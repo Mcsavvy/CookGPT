@@ -4,7 +4,7 @@ from uuid import UUID
 # from apiflask.views import MethodView
 from flask_jwt_extended import get_current_user, get_jwt
 
-from cookgpt import docs
+from cookgpt import docs, logging
 from cookgpt.auth import app
 from cookgpt.auth.data import examples as ex
 from cookgpt.auth.data.enums import UserType
@@ -51,12 +51,15 @@ def login(json_data: dict) -> Any:
     password: str = json_data["password"]
     user: Optional[User]
 
+    logging.info("Attempting to log in user: %s", login)
     user = User.query.filter(
         (User.username == login) | (User.email == login)
     ).first()
     if user is None:
+        logging.debug("User does not exist: %s", login)
         abort(404, "User does not exist")
     elif not user.validate_password(password):
+        logging.debug("Incorrect password for user: %s", login)
         abort(401, "Cannot authenticate")
     token: "Token" = user.request_token()
     return {
@@ -83,10 +86,12 @@ def logout() -> Any:
     """Log a user out of the system."""
     from cookgpt.auth.models import User
 
+    logging.info("Logging out user...")
     jwt = get_jwt()
     user: "User" = get_current_user()
     token = db.session.get(Token, UUID(jwt["jti"]))
     assert token is not None
+    logging.debug("Deactivating token: %s", token)
     user.deactivate_token(token)
     return {"message": "Logged out user"}
 
@@ -110,9 +115,11 @@ def signup(json_data: dict) -> Any:
     """Signup a new user."""
     from cookgpt.auth.models import User
 
+    logging.info("Signing up user...")
     try:
         User.create(**json_data, user_type=UserType.COOK)
     except User.CreateError as err:
+        logging.debug("Error while creating user: %s", err.args[0])
         return {"message": err.args[0]}, 422
     return {"message": "Successfully signed up"}, 201
 
@@ -128,6 +135,7 @@ def signup(json_data: dict) -> Any:
 @app.doc(description=docs.AUTH_REFRESH)
 def refresh() -> Any:
     """Refresh the access token."""
+    logging.info("Refreshing access token...")
     jti = UUID(get_jwt()["jti"])
     token = cast(Token, db.session.get(Token, jti))
     token.refresh()

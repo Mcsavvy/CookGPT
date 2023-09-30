@@ -9,18 +9,10 @@ from langchain.schema.output import ChatGenerationChunk, ChatResult
 from langchain.schema.prompt_template import BasePromptTemplate
 from pydantic import Field, root_validator
 
-from cookgpt.chatbot.context import (
-    callbacks_ctx,
-    chat_cost_ctx,
-    memory_ctx,
-    query_time_ctx,
-    response_time_ctx,
-)
+from cookgpt import logging
 from cookgpt.chatbot.data.fake_data import responses
 from cookgpt.chatbot.data.prompts import prompt as PROMPT
 from cookgpt.chatbot.memory import BaseMemory, ThreadMemory
-from cookgpt.chatbot.utils import convert_messages_to_dict  # noqa
-from cookgpt.chatbot.utils import num_tokens_from_messages
 from cookgpt.ext.config import config
 from cookgpt.globals import setvar
 
@@ -67,7 +59,7 @@ class FakeLLM(FakeListChatModel):
         **kwargs: Any,
     ) -> ChatResult:
         if self.streaming:
-        if config.OPENAI_STREAMING:
+            logging.debug("Streaming FakeLLM...")
             generation: Optional[ChatGenerationChunk] = None
             for chunk in self._stream(messages, stop, run_manager, **kwargs):
                 if generation is None:
@@ -77,7 +69,7 @@ class FakeLLM(FakeListChatModel):
             assert generation is not None
             return ChatResult(generations=[generation])
         else:  # pragma: no cover
-        """unregister the callback handler"""
+            logging.debug("Generating FakeLLM...")
             return super()._generate(messages, stop, run_manager, **kwargs)
 
 

@@ -3,6 +3,7 @@ from typing import Literal
 import click
 from marshmallow.utils import INCLUDE
 
+from cookgpt import logging
 from cookgpt.auth import app
 from cookgpt.auth.data.enums import UserType
 from cookgpt.auth.data.schemas import UserCreate
@@ -85,6 +86,7 @@ def create_user(
     cleaned: dict = UserCreate.In().load(  # type: ignore
         payload, unknown=INCLUDE
     )
+    logging.debug("Creating user with payload: %r", cleaned)
     new_user = User.create(**cleaned)
     print(f"Created {user_type.lower()} '{fname}' with id {new_user.id!s}")
 

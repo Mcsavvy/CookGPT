@@ -118,7 +118,7 @@ class User(
             raise self.UpdateError("email is taken")
         return super().update(commit, **kwargs)
 
-    def get_type(self) -> str:
+    def get_type(self) -> str:  # pragma: no cover
         """
         get the user's type
 

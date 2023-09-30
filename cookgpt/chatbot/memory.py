@@ -21,15 +21,7 @@ from langchain.schema import (
 )
 from pydantic import BaseModel, Field, root_validator
 
-from cookgpt.chatbot.context import (
-    chat_cost_ctx,
-    history_ctx,
-    query_time_ctx,
-    response_time_ctx,
-    thread_ctx,
-    user_ctx,
-)
-from cookgpt.chatbot.models import Chat, MessageType, Thread
+from cookgpt import logging
 from cookgpt.chatbot.models import Chat, MessageType
 from cookgpt.ext.config import config
 from cookgpt.globals import (
@@ -98,6 +90,7 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
 
     def add_user_message(self, message: str) -> None:
         """add the user's query to the database"""
+        logging.debug("Adding user message to database...")
         extra: dict[str, Any] = {"cost": self.query_cost}
         if q_time := getvar("query_time", datetime.datetime):
             extra["sent_time"] = q_time
@@ -111,6 +104,7 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
 
     def add_ai_message(self, message: str) -> None:
         """add the ai's response to the database"""
+        logging.debug("Adding ai message to database...")
         extra: dict[str, Any] = {"cost": self.response_cost}
         if r_time := getvar("response_time", datetime.datetime):
             extra["sent_time"] = r_time
@@ -165,6 +159,7 @@ class BaseMemory(ConversationBufferMemory):
 
     def load_memory_variables(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         """return chat thread and user's name"""
+        logging.debug("Loading memory variables...")
         return {"user": self.user, self.memory_key: self.buffer_as_messages}
 
 
