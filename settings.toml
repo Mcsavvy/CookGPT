@@ -35,7 +35,8 @@ AUTH_ERROR_STATUS_CODE = 403
 AUTH_ERROR_DESCRIPTION = "insufficient permissions"
 AUTO_SERVERS = true
 SERVERS = [
-    {name = "live", url = "https://mkpbackend-fe1c9f5599b1.herokuapp.com"}
+    {name = "live", url = "https://mkpbackend-fe1c9f5599b1.herokuapp.com"},
+    {name = "local", url = "http://localhost:8000"}
 ]
 
 # AI

@@ -2,7 +2,7 @@
   "info": {
     "description": "Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered cooking assistance.\n\nThe API allows you to perform various actions such as user authentication, managing user information, and interacting with the AI chat functionality.\n\nThe API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.",
     "title": "Cookgpt",
-    "version": "0.2.3"
+    "version": "0.2.4"
   },
   "tags": [
     {
@@ -29,7 +29,19 @@
   "paths": {
     "/chat/": {
       "post": {
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "stream",
+            "description": "whether to stream the response",
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "example": true
+            },
+            "required": false
+          }
+        ],
         "responses": {
           "201": {
             "content": {
@@ -39,7 +51,7 @@
                 },
                 "example": {
                   "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "content": "I have a headache",
+                  "content": "Hi, I need a recipe for rice",
                   "chat_type": "query",
                   "cost": 0,
                   "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
@@ -61,6 +73,16 @@
             },
             "description": "could not validate input data"
           },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          },
           "200": {
             "content": {
               "application/json": {
@@ -69,7 +91,7 @@
                 },
                 "example": {
                   "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "content": "I have a headache",
+                  "content": "Hi, I need a recipe for rice",
                   "chat_type": "query",
                   "cost": 0,
                   "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
@@ -94,11 +116,16 @@
                 "$ref": "#/components/schemas/Chat:Send"
               },
               "example": {
-                "content": "I have a headache"
+                "query": "Hi, I need a recipe for rice"
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       }
     },
     "/auth/login": {
@@ -298,7 +325,7 @@
                 "example": {
                   "chat": {
                     "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "content": "I have a headache",
+                    "content": "Hi, I need a recipe for rice",
                     "chat_type": "query",
                     "cost": 0,
                     "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
@@ -310,13 +337,28 @@
               }
             },
             "description": "All messages in the thread"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
           }
         },
         "tags": [
           "chat"
         ],
         "summary": "Get all messages in a thread.",
-        "description": "Use this endpoint to get a list of all chats that the user has participated in. The chats are sorted in descending order of the last message sent in the chat."
+        "description": "Use this endpoint to get a list of all chats that the user has participated in. The chats are sorted in descending order of the last message sent in the chat.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       },
       "delete": {
         "parameters": [],
@@ -325,7 +367,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat:Delete"
+                  "$ref": "#/components/schemas/Chats:Delete"
                 },
                 "example": {
                   "message": "all messages deleted"
@@ -333,13 +375,28 @@
               }
             },
             "description": "Success message"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
           }
         },
         "tags": [
           "chat"
         ],
         "summary": "Delete all messages in a thread.",
-        "description": "Use this endpoint to delete all chats in the thread. **This action cannot be undone**."
+        "description": "Use this endpoint to delete all chats in the thread. **This action cannot be undone**.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       }
     },
     "/auth/refresh": {
@@ -410,7 +467,7 @@
                 "example": {
                   "chat": {
                     "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "content": "I have a headache",
+                    "content": "Hi, I need a recipe for rice",
                     "chat_type": "query",
                     "cost": 0,
                     "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
@@ -422,6 +479,16 @@
               }
             },
             "description": "A single chat"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
           },
           "404": {
             "content": {
@@ -438,7 +505,12 @@
           "chat"
         ],
         "summary": "Get a single chat from a thread.",
-        "description": "Use this endpoint to get a specific chat in the thread. You need to specify the chat ID in the URL."
+        "description": "Use this endpoint to get a specific chat in the thread. You need to specify the chat ID in the URL.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       },
       "delete": {
         "parameters": [
@@ -465,6 +537,16 @@
             },
             "description": "Success message"
           },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          },
           "404": {
             "content": {
               "application/json": {
@@ -480,7 +562,50 @@
           "chat"
         ],
         "summary": "Delete a single chat from a thread.",
-        "description": "Use this endpoint to delete a specific chat in the thread. **This action cannot be undone**. You need to specify the chat ID in the URL."
+        "description": "Use this endpoint to delete a specific chat in the thread. **This action cannot be undone**. You need to specify the chat ID in the URL.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/chat/stream/{chat_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "chat_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful response"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Not found"
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "summary": "read a streamed response"
       }
     }
   },
@@ -528,7 +653,7 @@
           "query": {
             "type": "string",
             "description": "chat content",
-            "example": "I have a headache"
+            "example": "Hi, I need a recipe for rice"
           }
         },
         "required": [
@@ -547,7 +672,7 @@
           "content": {
             "type": "string",
             "description": "chat content",
-            "example": "I have a headache"
+            "example": "Hi, I need a recipe for rice"
           },
           "chat_type": {
             "description": "chat type",
@@ -562,6 +687,11 @@
             "type": "integer",
             "description": "chat cost",
             "example": 100
+          },
+          "streaming": {
+            "type": "boolean",
+            "description": "indicates if the chatbot is streaming",
+            "example": true
           },
           "previous_chat_id": {
             "type": "string",
@@ -734,7 +864,7 @@
             "example": [
               {
                 "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "content": "I have a headache",
+                "content": "Hi, I need a recipe for rice",
                 "chat_type": "query",
                 "cost": 0,
                 "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
@@ -744,7 +874,7 @@
               },
               {
                 "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "content": "I have a headache",
+                "content": "Hi, I need a recipe for rice",
                 "chat_type": "query",
                 "cost": 0,
                 "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
@@ -759,64 +889,13 @@
           }
         }
       },
-      "Chat:Delete": {
+      "Chats:Delete": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "chat id",
-            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-          },
-          "content": {
-            "type": "string",
-            "description": "chat content",
-            "example": "I have a headache"
-          },
-          "chat_type": {
-            "description": "chat type",
-            "example": "query",
-            "type": "string",
-            "enum": [
-              "QUERY",
-              "RESPONSE"
-            ]
-          },
-          "cost": {
-            "type": "integer",
-            "description": "chat cost",
-            "example": 100
-          },
-          "previous_chat_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true,
-            "description": "previous chat id",
-            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-          },
-          "next_chat_id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true,
-            "description": "next chat id",
-            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-          },
-          "sent_time": {
-            "type": "string",
-            "format": "date-time",
-            "description": "time message was sent",
-            "example": "2021-01-01 00:00:00"
-          },
-          "thread_id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "chat's thread id",
-            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-          },
           "message": {
             "type": "string",
-            "description": "message",
-            "example": "chat deleted"
+            "description": "success message",
+            "example": "all chats deleted"
           }
         }
       },
@@ -855,6 +934,16 @@
           },
           "auth_type": {
             "type": "string"
+          }
+        }
+      },
+      "Chat:Delete": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "message",
+            "example": "chat deleted"
           }
         }
       }
