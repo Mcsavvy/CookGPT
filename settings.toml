@@ -5,6 +5,11 @@ EXTENSIONS = [
     "cookgpt.ext.database:init_app",
     "cookgpt.ext.auth:init_app",
     # "cookgpt.ext.admin:init_app",
+    "cookgpt.ext.redisflow:init_app"
+]
+
+CELERY_TASKS = [
+    "cookgpt.chatbot.tasks"
 ]
 
 BLUEPRINTS = [
@@ -69,6 +74,8 @@ SERVERS = [
     {name = "local", url = "http://localhost:8000"}
 ]
 
+# RedisFlow
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = true
 
 [testing]
 TESTING = true
