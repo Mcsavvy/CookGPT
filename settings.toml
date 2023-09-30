@@ -49,6 +49,7 @@ CHATBOT_CHAIN_INPUT_KEY = "query"
 USE_OPENAI = true
 LANGCHAIN_VERBOSE = false
 OPENAI_STREAMING = true
+OPENAI_CALLBACK_RAISE_ERROR = true
 
 # Flask
 FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"
@@ -75,10 +76,6 @@ JWT_REFRESH_TOKEN_LEEWAY = {minutes = 15}
 EXTENSIONS = [
     "dynaconf_merge",
     # "quick_tests:init_app"
-]
-SERVERS = [
-    "dynaconf_merge",
-    {name = "local", url = "http://localhost:8000"}
 ]
 
 # RedisFlow
