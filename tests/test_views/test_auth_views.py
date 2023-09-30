@@ -5,9 +5,9 @@ import pytest
 from flask import url_for
 from flask.testing import FlaskClient as Client
 
-from tests.utils import Random, mock_config
 from cookgpt.auth.models import Token, User
 from cookgpt.ext.database import db
+from tests.utils import Random, mock_config
 
 
 class TestLoginView:

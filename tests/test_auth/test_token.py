@@ -5,9 +5,9 @@ from uuid import UUID
 import pytest
 from flask_jwt_extended import decode_token
 
-from tests.utils import mock_config
 from cookgpt.auth.models import Token, User
 from cookgpt.ext.database import db
+from tests.utils import mock_config
 
 
 class TestTokenModel:

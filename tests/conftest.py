@@ -3,15 +3,18 @@ from typing import TYPE_CHECKING, Generator
 
 import pytest
 
-from tests.utils import Random
 from cookgpt import create_app
 from cookgpt.auth.models import User
 from cookgpt.chatbot.models import Chat, MessageType, Thread
 from cookgpt.ext import config
 from cookgpt.ext.database import db
+from tests.utils import Random
 
 if TYPE_CHECKING:  # pragma: no cover
     from cookgpt.app import App
+
+
+pytest_plugins = ("celery.contrib.pytest",)
 
 
 @pytest.fixture(scope="session")
@@ -125,3 +128,30 @@ def random_chat(thread: Thread):
     chat = Random.chat(thread_id=thread.id)
     yield chat
     chat.delete()
+
+
+@pytest.fixture(scope="session")
+def celery_worker_parameters():
+    return {
+        "perform_ping_check": False,
+        "loglevel": "INFO",
+    }
+
+
+@pytest.fixture(scope="session")
+def celery_app(app: "App"):
+    """An instance of the Celery application"""
+    from redisflow import celeryapp
+
+    celeryapp.init_app(app)
+    return celeryapp
+
+
+@pytest.fixture(scope="session")
+def celery_worker_pool():
+    """You can override this fixture to set the worker pool.
+
+    The "solo" pool is used by default, but you can set this to
+    return e.g. "prefork".
+    """
+    return "prefork"
