@@ -6,6 +6,7 @@ SqlConversationMemory:
     this memory stores each input from the user and the output from
     the assistant in an SQL database augmented with Flask-SqlAlchemy
 """
+import datetime
 from typing import Any, Dict, Iterable, cast
 
 from langchain.memory import ConversationBufferMemory
@@ -29,7 +30,18 @@ from cookgpt.chatbot.context import (
     user_ctx,
 )
 from cookgpt.chatbot.models import Chat, MessageType, Thread
+from cookgpt.chatbot.models import Chat, MessageType
 from cookgpt.ext.config import config
+from cookgpt.globals import (
+    chat_cost,
+    getvar,
+    query,
+    resetvar,
+    response,
+    setvar,
+    thread,
+    user,
+)
 
 
 def get_memory_key() -> str:
@@ -56,23 +68,14 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
     """An SqlAlchemy models backed chat history"""
 
     @property
-    def thread(self) -> "Thread":
-        """return current thread"""
-        return thread_ctx.get()
-
-    @property
     def query_cost(self) -> int:
         """return query cost"""
-        return chat_cost_ctx.get()[0]
+        return chat_cost[0]
 
     @property
     def response_cost(self) -> int:
         """return response cost"""
-        return chat_cost_ctx.get()[1]
-
-    def _unset_query_cost(self) -> None:
-        """delete query cost"""
-        chat_cost_ctx.set((0, 0))
+        return chat_cost[1]
 
     def __getattribute__(self, __name: str) -> Any:
         if __name == "messages":
@@ -82,7 +85,11 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
     def get_messages(self) -> "list[BaseMessage]":  # pragma: no cover
         """get all messages in thread"""
         chats: "list[BaseMessage]" = []
-        for chat in cast(Iterable[Chat], self.thread.chats):
+        # non-empty chats
+        chats_query = Chat.query.filter(
+            Chat.thread_id == thread.id, Chat.content != ""
+        )
+        for chat in cast(Iterable[Chat], chats_query):
             if chat.chat_type == MessageType.QUERY:
                 chats.append(HumanMessage(content=chat.content))
             else:
@@ -92,24 +99,33 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
     def add_user_message(self, message: str) -> None:
         """add the user's query to the database"""
         extra: dict[str, Any] = {"cost": self.query_cost}
-        if q_time := query_time_ctx.get():
+        if q_time := getvar("query_time", datetime.datetime):
             extra["sent_time"] = q_time
-            query_time_ctx.set(None)
-        self.thread.add_query(content=message, **extra)
+            resetvar("query_time")
+        assert query.thread_id == thread.id, (
+            "The query being added to the thread does not "
+            "belong to the thread."
+        )
+        query.update(content=message, **extra)
         return None
 
     def add_ai_message(self, message: str) -> None:
         """add the ai's response to the database"""
         extra: dict[str, Any] = {"cost": self.response_cost}
-        if r_time := response_time_ctx.get():
+        if r_time := getvar("response_time", datetime.datetime):
             extra["sent_time"] = r_time
-            response_time_ctx.set(None)
-        self.thread.add_response(content=message, **extra)
+            resetvar("response_time")
+        assert response, "No response found in context."
+        assert response.thread_id == thread.id, (
+            "The response being added to the thread does not "
+            "belong to the thread."
+        )
+        response.update(content=message, **extra)
         return None
 
     def clear(self) -> None:  # pragma: no cover
         """Clear all messages in the thread"""
-        return self.thread.clear()
+        return thread.clear()
 
 
 class BaseMemory(ConversationBufferMemory):
@@ -125,12 +141,12 @@ class BaseMemory(ConversationBufferMemory):
     @property
     def user(self) -> str:
         """return current user's name"""
-        return user_ctx.get().first_name
+        return user.first_name
 
     @root_validator
     def set_context(cls, values):
         """set context"""
-        history_ctx.set(values["chat_memory"])
+        setvar("history", values["chat_memory"])
         return values
 
     @property
@@ -171,4 +187,4 @@ class ThreadMemory(BaseMemory, BaseModel):
             input = input.content
         inputs[self.input_key] = input
         super().save_context(inputs, outputs)
-        self.chat_memory._unset_query_cost()
+        resetvar("chat_cost")

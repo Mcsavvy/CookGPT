@@ -1,19 +1,11 @@
-from datetime import datetime as dt
-from datetime import timezone as tz
-from typing import Any, Dict, List, cast
-from uuid import UUID
+from typing import Any, Dict, Iterator, List, Optional, Type, Union
 
-from langchain.adapters.openai import convert_message_to_dict
-from langchain.callbacks import (
-    OpenAICallbackHandler,
-    StreamingStdOutCallbackHandler,
-)
-from langchain.callbacks.base import BaseCallbackManager, Callbacks
-from langchain.callbacks.openai_info import get_openai_token_cost_for_model
+from langchain.callbacks.base import Callbacks
+from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.chains import ConversationChain
 from langchain.chat_models import ChatOpenAI, FakeListChatModel
-from langchain.chat_models.base import BaseChatModel
-from langchain.schema import BaseMessage, ChatGeneration, LLMResult
+from langchain.chat_models.base import BaseChatModel, BaseMessage
+from langchain.schema.output import ChatGenerationChunk, ChatResult
 from langchain.schema.prompt_template import BasePromptTemplate
 from pydantic import Field, root_validator
 
@@ -30,28 +22,17 @@ from cookgpt.chatbot.memory import BaseMemory, ThreadMemory
 from cookgpt.chatbot.utils import convert_messages_to_dict  # noqa
 from cookgpt.chatbot.utils import num_tokens_from_messages
 from cookgpt.ext.config import config
-
-
-def get_llm_callbacks() -> "Callbacks":  # pragma: no cover
-    """returns the callbacks for the chain"""
-    if config.LANGCHAIN_VERBOSE:
-        return [StreamingStdOutCallbackHandler()]
-    return []
-
-
-def get_chain_callbacks() -> "Callbacks":  # pragma: no cover
-    """returns the callbacks for the chain"""
-    return []
+from cookgpt.globals import setvar
 
 
 def get_llm() -> BaseChatModel:  # pragma: no cover
     """returns the language model"""
+    llm_cls: Type[LLM | FakeLLM]
     if config.USE_OPENAI:
-        return LLM(
-            streaming=config.OPENAI_STREAMING,
-            callbacks=get_llm_callbacks(),
-        )
-    return FakeListChatModel(responses=responses)
+        llm_cls = LLM
+    else:
+        llm_cls = FakeLLM
+    return llm_cls(streaming=config.OPENAI_STREAMING)
 
 
 def get_chain_input_key() -> str:
@@ -59,106 +40,51 @@ def get_chain_input_key() -> str:
     return config.CHATBOT_CHAIN_INPUT_KEY
 
 
-class ChatCallbackHandler(OpenAICallbackHandler):
-    """tracks the cost and time of the conversation"""
+class FakeLLM(FakeListChatModel):
+    """fake language model for testing purposes"""
 
-    def compute_completion_tokens(self, result: LLMResult, model_name: str):
-        """Compute the cost of the result."""
-        ai_message = cast(ChatGeneration, result.generations[0][0]).message
-        ai_message_raw = convert_message_to_dict(ai_message)
-        num_tokens = num_tokens_from_messages([ai_message_raw], model_name)
-        completion_cost = get_openai_token_cost_for_model(
-            model_name, num_tokens, is_completion=True
-        )
-        self.total_tokens += num_tokens
-        self.completion_tokens += num_tokens
-        self.total_cost += completion_cost
+    streaming: bool
+    responses: List = responses
+    i: int = 0
 
-        cost = chat_cost_ctx.get()
-        chat_cost_ctx.set((cost[0], num_tokens))
-
-    def compute_prompt_tokens(
-        self, messages: List[BaseMessage], model_name: str
-    ):
-        """Compute the cost of the prompt."""
-        messages_raw = convert_messages_to_dict(messages)
-        num_tokens = num_tokens_from_messages(messages_raw, model_name)
-        prompt_cost = get_openai_token_cost_for_model(model_name, num_tokens)
-        self.total_tokens += num_tokens
-        self.prompt_tokens += num_tokens
-        self.total_cost += prompt_cost
-
-        cost = chat_cost_ctx.get()
-        chat_cost_ctx.set((num_tokens, cost[1]))
-
-    def on_chain_start(
+    def _stream(
         self,
-        serialized: Dict[str, Any],
-        inputs: Dict[str, Any],
-        *,
-        run_id: UUID,
-        parent_run_id: UUID | None = None,
-        tags: List[str] | None = None,
-        metadata: Dict[str, Any] | None = None,
+        messages: List[BaseMessage],
+        stop: Union[List[str], None] = None,
+        run_manager: Union[CallbackManagerForLLMRun, None] = None,
         **kwargs: Any,
-    ) -> Any:
-        """tracks the time the query was sent"""
-        query_time_ctx.set(dt.now(tz.utc))
+    ) -> Iterator[ChatGenerationChunk]:
+        for c in super()._stream(messages, stop, run_manager, **kwargs):
+            yield c
+            if run_manager:
+                run_manager.on_llm_new_token(c.message.content)
 
-    def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
-        """tracks the cost of the conversation"""
-        response_time_ctx.set(dt.now(tz.utc))
-        super().on_llm_end(response, **kwargs)
-        llm_output = response.llm_output
-        if (
-            not llm_output or "token_usage" not in llm_output
-        ) and config.OPENAI_STREAMING:
-            self.compute_completion_tokens(response, "gpt-3.5-turbo-0613")
-            self.successful_requests += 1
-            return
-        assert llm_output and "token_usage" in llm_output, (
-            "The LLM response did not contain a token_usage "
-            "field, but the LLM was not streaming."
-        )
-        token_usage = llm_output["token_usage"]  # pragma: no cover
-        chat_cost_ctx.set(  # pragma: no cover
-            (
-                token_usage.get("prompt_tokens", 0),
-                token_usage.get("completion_tokens", 0),
-            )
-        )
-        self.successful_requests += 1  # pragma: no cover
-
-    def on_chat_model_start(
+    def _generate(
         self,
-        serialized: Dict[str, Any],
-        messages: List[List[BaseMessage]],
-        *,
-        run_id: UUID,
-        parent_run_id: UUID | None = None,
-        tags: List[str] | None = None,
-        metadata: Dict[str, Any] | None = None,
+        messages: List[BaseMessage],
+        stop: List[str] | None = None,
+        run_manager: CallbackManagerForLLMRun | None = None,
         **kwargs: Any,
-    ) -> Any:
-        """tracks the cost of the prompt"""
+    ) -> ChatResult:
+        if self.streaming:
         if config.OPENAI_STREAMING:
-            return self.compute_prompt_tokens(
-                messages[0], "gpt-3.5-turbo-0613"
-            )
-
-    def register(self) -> None:  # pragma: no cover
-        """register the callback handler"""
-        callbacks_ctx.set([self])
-
-    def unregister(self) -> None:  # pragma: no cover
+            generation: Optional[ChatGenerationChunk] = None
+            for chunk in self._stream(messages, stop, run_manager, **kwargs):
+                if generation is None:
+                    generation = chunk
+                else:
+                    generation += chunk
+            assert generation is not None
+            return ChatResult(generations=[generation])
+        else:  # pragma: no cover
         """unregister the callback handler"""
-        callbacks_ctx.set(None)
+            return super()._generate(messages, stop, run_manager, **kwargs)
 
 
 class LLM(ChatOpenAI):
     """language model for the chatbot"""
 
-    # callbacks: Callbacks = Field(default_factory=get_llm_callbacks)
+    ...
 
 
 class ThreadChain(ConversationChain):
@@ -172,34 +98,43 @@ class ThreadChain(ConversationChain):
     @root_validator
     def set_context(cls, values):
         """set context"""
-        memory_ctx.set(values["memory"])
+        setvar("memory", values["memory"])
         return values
 
-    def reload(self):
+    def reload(self):  # pragma: no cover
         """reload variables"""
         self.input_key = get_chain_input_key()
         self.llm = get_llm()
 
-    def predict(self, callbacks: Callbacks = None, **kwargs: Any) -> str:
-        """predict the next response"""
+    def __call__(
+        self,
+        inputs: Dict[str, Any] | Any,
+        return_only_outputs: bool = False,
+        callbacks: Callbacks = None,
+        *,
+        tags: List[str] | None = None,
+        metadata: Dict[str, Any] | None = None,
+        include_run_info: bool = False,
+    ) -> Dict[str, Any]:
         from langchain.schema import HumanMessage
 
         # ensure that the input key is provided
-        assert config.CHATBOT_CHAIN_INPUT_KEY in kwargs, (
+        assert config.CHATBOT_CHAIN_INPUT_KEY in inputs, (
             "Please provide a value for the input key "
             f"({config.CHATBOT_CHAIN_INPUT_KEY})."
         )
 
-        input: str = kwargs[config.CHATBOT_CHAIN_INPUT_KEY]
-        kwargs[config.CHATBOT_CHAIN_INPUT_KEY] = [HumanMessage(content=input)]
-        if isinstance(callbacks, BaseCallbackManager):  # pragma: no cover
-            for cb in callbacks_ctx.get() or []:
-                callbacks.add_handler(cb, inherit=True)
-        elif callbacks is None:
-            callbacks = callbacks_ctx.get() or []
-        else:
-            callbacks.extend(callbacks_ctx.get() or [])
-        return super().predict(callbacks, **kwargs)
+        input: str = inputs[config.CHATBOT_CHAIN_INPUT_KEY]
+        inputs[config.CHATBOT_CHAIN_INPUT_KEY] = [HumanMessage(content=input)]
+
+        return super().__call__(
+            inputs,
+            return_only_outputs,
+            callbacks,
+            tags=tags,
+            metadata=metadata,
+            include_run_info=include_run_info,
+        )
 
     @property
     def _chain_type(self) -> str:  # pragma: no cover
