@@ -59,6 +59,7 @@ FLASK_ADMIN_SWATCH = 'cerulean'
 # JWT-Extended
 JWT_TOKEN_LOCATION = ['headers']
 JWT_HEADER_NAME = 'Authorization'
+JWT_ERROR_MESSAGE_KEY = 'message'
 
 # Cross Origin Resource Sharing
 FLASK_CORS_ALLOW_HEADERS = '*'
