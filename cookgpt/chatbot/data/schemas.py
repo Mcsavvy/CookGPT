@@ -25,7 +25,7 @@ class ChatSchema(Schema):
 
     id = ChatId()
     content = Content()
-    chat_type = ChatType()
+    chat_type = ChatType()  # type: ignore
     cost = Cost()
     previous_chat_id = PrevChatId(allow_none=True)
     next_chat_id = NextChatId(allow_none=True)

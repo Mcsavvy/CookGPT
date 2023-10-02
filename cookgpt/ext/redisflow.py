@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from redis import Redis  # type: ignore
 
@@ -18,7 +18,7 @@ def init_app(app: "App"):
         return
 
     logging.debug("Initializing redis")
-    redis = Redis.from_url(app.config.REDIS_URL)
+    redis = cast(Redis, Redis.from_url(app.config.REDIS_URL))
     app.redis = redis
     celeryapp.init_app(app)
     setvar("redis", redis)

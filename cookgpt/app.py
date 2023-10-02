@@ -1,4 +1,3 @@
-from cookgpt import logging # noqa: F401
 from importlib.metadata import EntryPoint
 from pathlib import Path
 from socket import gethostname
@@ -7,6 +6,7 @@ from apiflask import APIFlask
 from dynaconf import Dynaconf, FlaskDynaconf
 from redis import Redis  # type: ignore
 
+from cookgpt import logging  # noqa: F401
 from cookgpt import docs
 from cookgpt.ext.config import config
 

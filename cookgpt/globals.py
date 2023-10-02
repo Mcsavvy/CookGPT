@@ -1,7 +1,8 @@
 from contextvars import ContextVar, Token
-from typing import TYPE_CHECKING, Optional, Type, TypeVar, overload
+from typing import TYPE_CHECKING, Optional, Type, TypeVar, cast, overload
 
 from flask.globals import _no_app_msg
+from flask.globals import current_app as _current_app
 from werkzeug.local import LocalProxy
 
 from cookgpt import logging
@@ -11,6 +12,7 @@ if TYPE_CHECKING:
 
     from redis import Redis  # type: ignore
 
+    from cookgpt.app import App
     from cookgpt.auth.models import User
     from cookgpt.chatbot.chain import ThreadChain
     from cookgpt.chatbot.memory import BaseMemory, SingleThreadHistory
@@ -42,7 +44,7 @@ _query_var: ContextVar["Chat"] = ContextVar("query")
 _response_var: ContextVar["Chat"] = ContextVar("response")
 _redis_var: "ContextVar[Redis]" = ContextVar("redis")
 
-
+current_app = cast("App", _current_app)
 chain: "ThreadChain" = LocalProxy(_chain_var)  # type: ignore[assignment]
 redis: "Redis" = LocalProxy(  # type: ignore[assignment]
     _redis_var, unbound_message=_no_app_msg
@@ -130,6 +132,7 @@ __all__ = [
     "setvar",
     "resetvar",
     "getvar",
+    "current_app",
     "chain",
     "redis",
     "thread",

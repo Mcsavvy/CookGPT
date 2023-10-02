@@ -94,7 +94,7 @@ def refresh_expiring_jwts(response):
     from flask_jwt_extended import set_access_cookies
     from cookgpt.auth.models import Token
     from uuid import UUID
-    from flask import current_app as app
+    from cookgpt.globals import current_app as app
 
     jwt = get_jwt()
     if jwt["type"] == "refresh":

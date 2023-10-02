@@ -102,9 +102,8 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         Run on new LLM token.
         Only available when streaming is enabled.
         """
-        from flask import current_app as app
-
         from cookgpt.chatbot.utils import get_stream_name
+        from cookgpt.globals import current_app as app
 
         if self.verbose:  # pragma: no cover
             print(token, end="", flush=True)

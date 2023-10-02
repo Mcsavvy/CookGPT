@@ -171,10 +171,9 @@ class ChatView(MethodView):
     @app.doc(description=docs.CHAT_POST_CHAT)
     def post(self, json_data: dict, query_data: dict) -> Any:
         """Send a message to the chatbot."""
-        from flask import current_app as app
-
         from cookgpt.chatbot.tasks import send_query
         from cookgpt.chatbot.utils import get_stream_name
+        from cookgpt.globals import current_app as app
         from redisflow import celeryapp
 
         input_key = get_memory_input_key()
@@ -241,9 +240,9 @@ def read_stream(chat_id: UUID):
     from time import sleep
 
     from flask import Response
-    from flask import current_app as app
 
     from cookgpt.ext import db
+    from cookgpt.globals import current_app as app
     from redisflow import celeryapp
 
     logging.info("GET stream for chat %s", chat_id)
@@ -269,7 +268,6 @@ def read_stream(chat_id: UUID):
 
         return Response(iter(entries), status=200)
 
-    @stream_with_context
     def get_stream(entry_id: bytes):
         logging.debug("Streaming %r from %s", stream, entry_id)
 
@@ -277,7 +275,9 @@ def read_stream(chat_id: UUID):
 
         while True:
             # check if there are any new entries in the stream
-            entries: OutputT = app.redis.xread({stream: entry_id})
+            entries: OutputT = app.redis.xread(  # type: ignore
+                {stream: entry_id}
+            )
             if entries:
                 # there are new entries in the stream
                 logging.debug("New entries in stream")
@@ -300,7 +300,7 @@ def read_stream(chat_id: UUID):
                 break
             sleep(0.1)
 
-    return Response(get_stream(b"0-0"), status=200)
+    return Response(stream_with_context(get_stream(b"0-0")), status=200)
 
 
 app.add_url_rule(

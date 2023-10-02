@@ -47,8 +47,8 @@ class TestThreadView:
         response = client.delete(url_for("chatbot.thread"), headers=headers)
 
         assert response.status_code == 200
-        assert "message" in response.json
-        assert "deleted" in response.json["message"].lower()
+        assert "message" in response.json  # type: ignore
+        assert "deleted" in response.json["message"].lower()  # type: ignore
         assert len(cast(list[Chat], thread.chats)) == 0
 
 
@@ -316,7 +316,7 @@ class TestChatView:
         assert response.status_code == 200
 
         for token in response.response:
-            content_bytes += token
+            content_bytes += cast(bytes, token)
         content = content_bytes.decode()
         assert content == query.content
 
@@ -376,7 +376,7 @@ class TestChatView:
         content_bytes = b""
 
         for token in response.response:
-            content_bytes += token
+            content_bytes += cast(bytes, token)
         content = content_bytes.decode()
         assert content
 

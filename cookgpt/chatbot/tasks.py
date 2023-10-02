@@ -13,14 +13,13 @@ def send_query(
 ):
     """send query to ai and process response"""
 
-    from flask import current_app as app
-
     from cookgpt import logging
     from cookgpt.chatbot.callback import ChatCallbackHandler
     from cookgpt.chatbot.chain import ThreadChain
     from cookgpt.chatbot.models import Chat, Thread
     from cookgpt.chatbot.utils import get_stream_name, use_chat_callback
     from cookgpt.ext.database import db
+    from cookgpt.globals import current_app as app
     from cookgpt.globals import resetvar, setvar
 
     logging.info("Sending query to AI using celery")
