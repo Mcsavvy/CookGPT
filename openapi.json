@@ -614,7 +614,7 @@
           },
           "200": {
             "content": {
-              "text/plain": {
+              "text/html": {
                 "schema": {}
               }
             },

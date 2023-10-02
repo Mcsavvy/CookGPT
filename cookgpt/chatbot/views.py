@@ -229,7 +229,7 @@ class ChatView(MethodView):
 @app.get("stream/<uuid:chat_id>")
 @api_output(
     {},
-    content_type="text/plain",
+    content_type="text/html",
     status_code=200,
     description="A streamed response",
 )
