@@ -115,7 +115,6 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
             "belong to the thread."
         )
         response.update(content=message, **extra)
-        return None
 
     def clear(self) -> None:  # pragma: no cover
         """Clear all messages in the thread"""
