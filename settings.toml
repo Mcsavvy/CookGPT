@@ -8,6 +8,9 @@ EXTENSIONS = [
     "cookgpt.ext.redisflow:init_app"
 ]
 
+
+# RedisFlow
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = true
 CELERY_TASKS = [
     "cookgpt.chatbot.tasks"
 ]
@@ -81,8 +84,6 @@ EXTENSIONS = [
     # "quick_tests:init_app"
 ]
 
-# RedisFlow
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = true
 
 [testing]
 TESTING = true
