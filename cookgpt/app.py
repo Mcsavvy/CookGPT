@@ -4,7 +4,9 @@ from socket import gethostname
 
 from apiflask import APIFlask
 from dynaconf import Dynaconf, FlaskDynaconf
+from redis import Redis  # type: ignore
 
+from cookgpt import logging  # noqa: F401
 from cookgpt import docs
 from cookgpt.ext.config import config
 
@@ -26,10 +28,12 @@ class App(APIFlask):
     """App class that extends APIFlask and FlaskDynaconf"""
 
     config: "Dynaconf"
+    redis: "Redis"
 
     def __init__(self, *args, **kwargs):
-        kwargs.update(title="Cookgpt", version=VERSION)
+        kwargs.update(title="Cookgpt", version=VERSION, docs_ui="elements")
         super().__init__(*args, **kwargs)
+
         self.schema_name_resolver = schema_name_resolver
         self.description = docs.APP
         FlaskDynaconf(self, dynaconf_instance=config)
@@ -42,6 +46,7 @@ class App(APIFlask):
         blueprints = self.config.get(key, [])
         for object_reference in blueprints:
             # parse the entry point specification
+            logging.debug(f"Loading blueprint: {object_reference}")
             entry_point = EntryPoint(
                 name=None, group=None, value=object_reference  # type: ignore
             )
@@ -53,6 +58,7 @@ class App(APIFlask):
 
 def add_application_info(response):
     """Add application info to response headers"""
+    logging.debug("Adding application info to response headers...")
     response.headers["X-HostName"] = gethostname()
     response.headers["X-Application"] = "Cookgpt"
     response.headers["X-Version"] = VERSION
@@ -63,11 +69,15 @@ def create_app(**config):
     import os
 
     os.environ.setdefault("FLASK_ENV", "PRODUCTION")
-
+    logging.debug(f"FLASK_ENV: {os.environ.get('FLASK_ENV')}")
+    logging.info("Creating app cookgpt...")
     app = App(__name__)
     app.config.update(config)  # Override with passed config
+    logging.info("Loading extensions...")
     app.config.load_extensions()  # Load extensions
+    logging.info("Loading blueprints...")
     app.load_blueprints()  # Load blueprints
+    logging.info("Reloading configurations...")
     app.config._settings.reload()
     app.after_request(add_application_info)
     return app

@@ -29,6 +29,7 @@ exclude = [
     "\\.mypy_cache",
     "__pycache__",
     "migrations/.*",
+    "test_streaming.py"
 ]
 
 [tool.pytest.ini_options]
@@ -46,10 +47,12 @@ exclude_also = [
     "if 0:",
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
+    "@overload",
 ]
 omit = [
     "migrations/*",
     "cookgpt/ext/cors.py",
     "cookgpt/ext/admin.py",
     "cookgpt/ext/database.py",
+    "cookgpt/logging.py",
 ]

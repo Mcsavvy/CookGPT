@@ -2,7 +2,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Iterable, cast
 from uuid import UUID, uuid4
 
-from flask import current_app as app
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -12,6 +11,7 @@ from sqlalchemy.orm.dynamic import AppenderQuery
 
 from cookgpt.base import BaseModelMixin
 from cookgpt.ext.database import db
+from cookgpt.globals import current_app as app
 from cookgpt.utils import utcnow, utcnow_from__ts
 
 
@@ -40,7 +40,6 @@ class Token(db.Model, BaseModelMixin):  # type: ignore
             self.user_id.hex, additional_claims={"jti": self.id.hex}
         )
         self.update(access_token=access_token)
-        db.session.flush()
 
     def atoken_has_expired(self):
         """Checks if access token has expired"""

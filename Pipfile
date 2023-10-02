@@ -20,12 +20,15 @@ python-dateutil = "2.8.2"
 langchain = "0.0.262"
 mysqlclient = "2.2.0"
 tiktoken = "*"
+celery = "*"
+redis = {version = "*", extras = ["hiredis"]}
+rich = "*"
 
 [dev-packages]
 ipython = "8.14.0"
 black = "23.7.0"
 mypy = "1.4.1"
-pytest = "7.4.0"
+pytest = {extras = ["toml"], version = "7.4.0"}
 isort = "5.12.0"
 coverage = "7.2.7"
 faker = "19.3.0"

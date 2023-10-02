@@ -1,132 +1,105 @@
 """Chatbot data validation schemas."""
 from apiflask import Schema, fields
 
+from cookgpt.utils import make_field
+
 from . import examples as ex
 from .enums import MessageType
 
-
-def Content(**k):
-    return fields.String(
-        metadata={"description": "chat content", "example": ex.Query}, **k
-    )
-
-
-def ChatType(**k):
-    return fields.Enum(
-        MessageType,
-        metadata={
-            "description": "chat type",
-            "example": MessageType.QUERY.value,
-        },
-        **k
-    )
+ChatType = make_field(
+    fields.Enum, "chat type", MessageType.QUERY.value, enum=MessageType
+)
+Content = make_field(fields.String, "chat content", ex.Query)
+Cost = make_field(fields.Integer, "chat cost", 100)
+PrevChatId = make_field(fields.UUID, "previous chat id", ex.Uuid)
+ChatId = make_field(fields.UUID, "chat id", ex.Uuid)
+NextChatId = make_field(fields.UUID, "next chat id", ex.Uuid)
+SentTime = make_field(fields.DateTime, "time message was sent", ex.DateTime)
+ThreadId = make_field(fields.UUID, "chat's thread id", ex.Uuid)
+ErrorMessage = make_field(fields.String, "error message", "...")
+SuccessMessage = make_field(fields.String, "success message", "...")
 
 
-def Cost(**k):
-    return fields.Integer(
-        metadata={"description": "chat cost", "example": 100}, **k
-    )
+class ChatSchema(Schema):
+    """Chat schema."""
 
-
-def PrevChatId(**k):
-    return fields.UUID(
-        metadata={"description": "previous chat id", "example": ex.Uuid}, **k
-    )
-
-
-def ChatId(**k):
-    return fields.UUID(
-        metadata={"description": "chat id", "example": ex.Uuid}, **k
-    )
-
-
-def NextChatId(**k):
-    return fields.UUID(
-        metadata={"description": "next chat id", "example": ex.Uuid}, **k
-    )
-
-
-def SentTime(**k):
-    return fields.DateTime(
-        metadata={
-            "description": "time message was sent",
-            "example": ex.DateTime,
-        },
-        **k
-    )
-
-
-def ThreadId(**k):
-    return fields.UUID(
-        metadata={"description": "chat's thread id", "example": ex.Uuid}, **k
-    )
-
-
-def ErrorMessage(**k):
-    return fields.String(
-        metadata={"description": "error message", "example": "chat not found"},
-        **k
-    )
+    id = ChatId()
+    content = Content()
+    chat_type = ChatType()  # type: ignore
+    cost = Cost()
+    previous_chat_id = PrevChatId(allow_none=True)
+    next_chat_id = NextChatId(allow_none=True)
+    sent_time = SentTime()
+    thread_id = ThreadId()
 
 
 class Chat:
     """Chat schema."""
 
-    class Send(Schema):
-        query = Content(required=True)
-        # TODO: allow users to select thread
-        # thread_id = ThreadId(required=False)
+    class Post:
+        class Body(Schema):
+            query = Content(required=True)
+            # TODO: allow users to select thread
+            # thread_id = ThreadId(required=False)
 
-    class Out(Schema):
-        id = ChatId()
-        content = Content()
-        chat_type = ChatType()
-        cost = Cost()
-        previous_chat_id = PrevChatId(allow_none=True)
-        next_chat_id = NextChatId(allow_none=True)
-        sent_time = SentTime()
-        thread_id = ThreadId()
+        class QueryParams(Schema):
+            stream = fields.Boolean(
+                load_default=False,
+                metadata={
+                    "description": "whether to stream the response",
+                    "example": True,
+                },
+            )
 
-    class Get(Out):
-        pass
+        class Response(Schema):
+            chat = fields.Nested(ChatSchema)
+            streaming = fields.Boolean(
+                dump_default=True,
+                metadata={
+                    "description": "indicates if the chatbot is streaming",
+                    "example": True,
+                },
+            )
 
-    class Delete(Out):
-        message = fields.String(
-            metadata={
-                "description": "message",
-                "example": "chat deleted",
-            },
-        )
+    class Get:
+        class Response(ChatSchema):
+            ...
+
+    class Delete(Schema):
+        class Response(Schema):
+            message = SuccessMessage(
+                metadata={
+                    "example": "chat deleted",
+                },
+            )
 
     class NotFound(Schema):
-        message = ErrorMessage()
+        """Chat not found error."""
+
+        message = ErrorMessage(
+            metadata={
+                "example": "chat not found",
+            }
+        )
 
 
 class Chats:
     """Chats schema."""
 
-    class Out(Schema):
-        chats = fields.List(
-            fields.Nested(Chat.Out),
-            metadata={
-                "description": "list of chats",
-                "example": [ex.Chat.Out, ex.Chat.Out],
-            },
-        )
+    class Get:
+        class Response(Schema):
+            chats = fields.List(
+                fields.Nested(ChatSchema),
+                metadata={
+                    "description": "list of chats",
+                    "example": [ex.ChatExample, ex.ChatExample],
+                },
+            )
 
-    class Get(Schema):
-        chats = fields.List(
-            fields.Nested(Chat.Out),
-            metadata={
-                "description": "list of chats",
-                "example": [ex.Chat.Out, ex.Chat.Out],
-            },
-        )
-
-    class Delete(Schema):
-        message = fields.String(
-            metadata={
-                "description": "success message",
-                "example": "all chats deleted",
-            },
-        )
+    class Delete:
+        class Response(Schema):
+            message = SuccessMessage(
+                metadata={
+                    "example": "all chats deleted",
+                },
+            )

@@ -3,6 +3,7 @@ from uuid import uuid4
 
 from sqlalchemy_serializer import SerializerMixin
 
+from cookgpt import logging
 from cookgpt.ext.database import db
 
 
@@ -32,6 +33,7 @@ class BaseModelMixin(SerializerMixin):
     @classmethod
     def create(cls, commit=True, **kwargs):
         """Creates model"""
+        logging.debug("Creating %s with attributes: %s", cls.__name__, kwargs)
         instance = cls(**kwargs)
         if commit:
             instance.save()  # pragma: no cover
@@ -39,6 +41,7 @@ class BaseModelMixin(SerializerMixin):
 
     def update(self, commit=True, **kwargs):
         """Updates model"""
+        logging.debug("Updating %s with attributes: %s", self, kwargs)
         for attr, value in kwargs.items():
             setattr(self, attr, value)
         if commit:
@@ -47,11 +50,13 @@ class BaseModelMixin(SerializerMixin):
 
     def save(self):
         """Saves model"""
+        logging.debug(f"Saving {self.__class__}...")
         db.session.add(self)
         db.session.commit()
 
     def delete(self, commit=True):
         """Deletes model"""
+        logging.debug(f"Deleting {self}...")
         db.session.delete(self)
         if commit:
             db.session.commit()  # pragma: no cover

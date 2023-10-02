@@ -41,6 +41,42 @@ def auth_required(
     return decorator
 
 
+@jwt.token_verification_loader
+def token_verification_callback(header: dict, payload: dict):
+    """Token verification callback"""
+    from uuid import UUID
+
+    from cookgpt.auth.models import Token
+
+    token = db.session.get(Token, UUID(payload["jti"]))
+    if token is None:
+        return False
+    return token.active
+
+
+@jwt.token_in_blocklist_loader
+def token_in_blocklist_callback(header: dict, payload: dict):
+    """Token in blacklist callback"""
+    from uuid import UUID
+
+    from cookgpt.auth.models import Token
+
+    token = db.session.get(Token, UUID(payload["jti"]))
+    if token is None:
+        return False
+    return token.revoked
+
+
+@jwt.token_verification_failed_loader
+def token_verification_failed_callback(header: dict, payload: dict):
+    """Token verification failed callback"""
+    from flask_jwt_extended.config import config
+
+    from cookgpt.utils import jsonify
+
+    return jsonify({config.error_msg_key: "Token verification failed"}, 422)
+
+
 @jwt.user_lookup_loader
 def user_loader_callback(header, payload):
     """User loader callback"""
@@ -58,7 +94,7 @@ def refresh_expiring_jwts(response):
     from flask_jwt_extended import set_access_cookies
     from cookgpt.auth.models import Token
     from uuid import UUID
-    from flask import current_app as app
+    from cookgpt.globals import current_app as app
 
     jwt = get_jwt()
     if jwt["type"] == "refresh":

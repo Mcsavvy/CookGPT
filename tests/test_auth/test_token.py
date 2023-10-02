@@ -1,13 +1,13 @@
 from datetime import timedelta
 from time import sleep
+from typing import Callable
 from uuid import UUID
 
-import pytest
 from flask_jwt_extended import decode_token
 
-from tests.utils import mock_config
 from cookgpt.auth.models import Token, User
 from cookgpt.ext.database import db
+from tests.utils import mock_config
 
 
 class TestTokenModel:
@@ -85,16 +85,17 @@ class TestTokenModel:
         sleep(0.1)
         assert token2.rtoken_has_expired() is False
 
-    @pytest.mark.skip  # TODO: fix sqlalchemy UPDATE issue
-    def test_refresh(self, user: "User", config):
+    def test_refresh(self, user: "User", add_jwt_salt: Callable[[], None]):
         """test that a token properly refreshes"""
 
         token = user.create_token()
-        db.session.flush()
         atoken = token.access_token
-
+        rtoken = token.refresh_token
+        add_jwt_salt()  # add salt so the test passes
         token.refresh()
-        assert atoken != token.access_token
+        db.session.refresh(token)
+        assert atoken != token.access_token, "access token not changed"
+        assert rtoken == token.refresh_token, "refresh token changed"
 
 
 class TestTokenMixin:

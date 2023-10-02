@@ -13,7 +13,7 @@ from cookgpt.ext.database import db
 
 def get_max_chat_cost() -> int:
     """get the max chat cost from the app config"""
-    from flask import current_app as app
+    from cookgpt.globals import current_app as app
 
     return cast(int, app.config["MAX_CHAT_COST"])
 
@@ -118,7 +118,7 @@ class User(
             raise self.UpdateError("email is taken")
         return super().update(commit, **kwargs)
 
-    def get_type(self) -> str:
+    def get_type(self) -> str:  # pragma: no cover
         """
         get the user's type
 

@@ -3,15 +3,18 @@ from typing import TYPE_CHECKING, Generator
 
 import pytest
 
-from tests.utils import Random
 from cookgpt import create_app
 from cookgpt.auth.models import User
 from cookgpt.chatbot.models import Chat, MessageType, Thread
 from cookgpt.ext import config
 from cookgpt.ext.database import db
+from tests.utils import Random
 
 if TYPE_CHECKING:  # pragma: no cover
     from cookgpt.app import App
+
+
+pytest_plugins = ("celery.contrib.pytest",)
 
 
 @pytest.fixture(scope="session")
@@ -125,3 +128,60 @@ def random_chat(thread: Thread):
     chat = Random.chat(thread_id=thread.id)
     yield chat
     chat.delete()
+
+
+@pytest.fixture(scope="session")
+def celery_worker_parameters():
+    return {
+        "perform_ping_check": False,
+        "loglevel": "INFO",
+    }
+
+
+@pytest.fixture(scope="session")
+def celery_app(app: "App"):
+    """An instance of the Celery application"""
+    from redisflow import celeryapp
+
+    celeryapp.init_app(app)
+    return celeryapp
+
+
+@pytest.fixture(scope="session")
+def celery_worker_pool():
+    """You can override this fixture to set the worker pool.
+
+    The "solo" pool is used by default, but you can set this to
+    return e.g. "prefork".
+    """
+    return "prefork"
+
+
+@pytest.fixture(scope="function")
+def add_jwt_salt():
+    """
+    Add salt to jwt claims
+    """
+    from random import choices
+    from string import ascii_letters, digits
+
+    from cookgpt.ext.auth import jwt
+
+    old_claims_callback = jwt._user_claims_callback
+    charset = ascii_letters + digits
+
+    def salt_adder():
+        """Helper function that adds salt to jwt claims"""
+
+        salt = "".join(choices(charset, k=5))
+
+        def add_salt_to_claims(user_data):
+            claims = {"salt": salt}
+            claims.update(old_claims_callback(user_data))
+            return claims
+
+        jwt._user_claims_callback = add_salt_to_claims
+
+    yield salt_adder
+
+    jwt._user_claims_callback = old_claims_callback

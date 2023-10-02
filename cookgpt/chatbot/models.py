@@ -2,6 +2,7 @@
 from typing import Optional, Sequence, cast
 from uuid import UUID, uuid4
 
+from cookgpt import logging
 from cookgpt.base import BaseModelMixin
 from cookgpt.ext.database import db
 from cookgpt.utils import utcnow
@@ -109,7 +110,12 @@ class Thread(BaseModelMixin, db.Model):  # type: ignore
         **attrs,
     ) -> "Chat":
         """Add a chat to the thread"""
-
+        logging.debug(
+            "adding %s to thread %s: %s",
+            chat_type.value.lower(),
+            self.id.hex[:6],
+            content[:20],
+        )
         previous_chat = previous_chat or self.last_chat
         # TODO: if `previous_chat` already has a `next_chat` then
         #       perform doubly-linked list insertion
@@ -160,10 +166,16 @@ class Thread(BaseModelMixin, db.Model):  # type: ignore
 
     def close(self):
         """Close the thread"""
+        logging.debug("closing thread %s", self.id.hex[:6])
         self.update(closed=True)
 
     def clear(self):
         """Clear all messages in the thread"""
+        logging.debug(
+            "clearing %d chats from thread %s",
+            len(self.chats),
+            self.id.hex[:6],
+        )
         for chat in Chat.query.filter(
             Chat.thread_id == self.id,
             Chat.previous_chat_id == None,  # noqa: E711
@@ -191,6 +203,12 @@ class ThreadMixin:
         self, title: str, default=False, closed=False, commit=True
     ):
         """Create a new thread"""
+        logging.debug(
+            "creating thread: %r for %s %s",
+            title,
+            self.get_type().lower(),  # type: ignore
+            self.name,  # type: ignore
+        )
         return Thread.create(
             title=title,
             user=self,
@@ -272,5 +290,11 @@ class ThreadMixin:
 
     def clear_chats(self, threads: Sequence[Thread]):
         """Clear all messages in specified threads"""
+        logging.debug(
+            "clearing %d threads for %s %r",
+            len(threads),
+            self.get_type().lower(),  # type: ignore
+            self.name,  # type: ignore
+        )
         for thread in threads:
             thread.clear()

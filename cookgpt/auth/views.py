@@ -4,18 +4,11 @@ from uuid import UUID
 # from apiflask.views import MethodView
 from flask_jwt_extended import get_current_user, get_jwt
 
-from cookgpt import docs
+from cookgpt import docs, logging
 from cookgpt.auth import app
 from cookgpt.auth.data import examples as ex
+from cookgpt.auth.data import schemas as sc
 from cookgpt.auth.data.enums import UserType
-
-# from cookgpt.auth.data.schemas import User as UserSchema
-from cookgpt.auth.data.schemas import (  # UserDelete,; UserUpdate,
-    TokenRefresh,
-    UserCreate,
-    UserLogin,
-    UserLogout,
-)
 from cookgpt.auth.models import Token
 from cookgpt.ext.auth import auth_required
 from cookgpt.ext.database import db
@@ -23,23 +16,23 @@ from cookgpt.utils import abort, api_output
 
 
 @app.post("/login")
-@app.input(UserLogin.In, example=ex.UserLogin.In)
+@app.input(sc.Auth.Login.Body, example=ex.Auth.Login.Body)
 @app.output(
-    UserLogin.Out,
+    sc.Auth.Login.Response,
     200,
-    example=ex.UserLogin.Out,
+    example=ex.Auth.Login.Response,
     description="Authentication info",
 )
 @api_output(
-    UserLogin.NotFound,
+    sc.Auth.Login.NotFound,
     404,
-    example=ex.UserLogin.Unauthorized,
+    example=ex.Auth.Login.NotFound,
     description="Error message if user does not exist",
 )
 @api_output(
-    UserLogin.Unauthorized,
+    sc.Auth.Login.Unauthorized,
     401,
-    example=ex.UserLogin.Unauthorized,
+    example=ex.Auth.Login.Unauthorized,
     description="Error message if password is incorrect",
 )
 @app.doc(description=docs.AUTH_LOGIN)
@@ -51,31 +44,36 @@ def login(json_data: dict) -> Any:
     password: str = json_data["password"]
     user: Optional[User]
 
+    logging.info("Attempting to log in user: %s", login)
     user = User.query.filter(
         (User.username == login) | (User.email == login)
     ).first()
     if user is None:
+        logging.debug("User does not exist: %s", login)
         abort(404, "User does not exist")
     elif not user.validate_password(password):
+        logging.debug("Incorrect password for user: %s", login)
         abort(401, "Cannot authenticate")
     token: "Token" = user.request_token()
     return {
         "message": "Successfully logged in",
-        "atoken": token.access_token,
-        "atoken_expiry": token.atoken_expiry,
-        "rtoken": token.refresh_token,
-        "rtoken_expiry": token.rtoken_expiry,
-        "user_type": user.get_type(),
-        "auth_type": "Bearer",
+        "auth_info": {
+            "atoken": token.access_token,
+            "atoken_expiry": token.atoken_expiry,
+            "rtoken": token.refresh_token,
+            "rtoken_expiry": token.rtoken_expiry,
+            "user_type": user.get_type(),
+            "auth_type": "Bearer",
+        },
     }
 
 
 @app.post("/logout")
 @auth_required()
 @app.output(
-    UserLogout.Out,
+    sc.Auth.Logout.Response,
     200,
-    example=ex.UserLogout.Out,
+    example=ex.Auth.Logout.Response,
     description="Success message",
 )
 @app.doc(description=docs.AUTH_LOGOUT)
@@ -83,26 +81,28 @@ def logout() -> Any:
     """Log a user out of the system."""
     from cookgpt.auth.models import User
 
+    logging.info("Logging out user...")
     jwt = get_jwt()
     user: "User" = get_current_user()
     token = db.session.get(Token, UUID(jwt["jti"]))
     assert token is not None
+    logging.debug("Deactivating token: %s", token)
     user.deactivate_token(token)
     return {"message": "Logged out user"}
 
 
 @app.post("/signup")
-@app.input(UserCreate.In, example=ex.UserCreate.In)
+@app.input(sc.Auth.Signup.Body, example=ex.Auth.Signup.Body)
 @app.output(
-    UserCreate.Out,
+    sc.Auth.Signup.Response,
     201,
-    example=ex.UserCreate.Out,
+    example=ex.Auth.Signup.Response,
     description="Success message",
 )
 @api_output(
-    UserCreate.Error,
+    sc.Auth.Signup.Error,
     422,
-    example=ex.UserCreate.Error,
+    example=ex.Auth.Signup.Error,
     description="Error message while creating user",
 )
 @app.doc(description=docs.AUTH_SIGNUP)
@@ -110,9 +110,11 @@ def signup(json_data: dict) -> Any:
     """Signup a new user."""
     from cookgpt.auth.models import User
 
+    logging.info("Signing up user...")
     try:
         User.create(**json_data, user_type=UserType.COOK)
     except User.CreateError as err:
+        logging.debug("Error while creating user: %s", err.args[0])
         return {"message": err.args[0]}, 422
     return {"message": "Successfully signed up"}, 201
 
@@ -120,25 +122,28 @@ def signup(json_data: dict) -> Any:
 @app.post("/refresh")
 @auth_required(refresh=True)
 @app.output(
-    TokenRefresh.Out,
+    sc.Auth.Refresh.Response,
     200,
-    example=ex.TokenRefresh.Out,
+    example=ex.Auth.Refresh.Response,
     description="Authentication info",
 )
 @app.doc(description=docs.AUTH_REFRESH)
 def refresh() -> Any:
     """Refresh the access token."""
+    logging.info("Refreshing access token...")
     jti = UUID(get_jwt()["jti"])
     token = cast(Token, db.session.get(Token, jti))
     token.refresh()
     return {
         "message": "Refreshed access token",
-        "atoken": token.access_token,
-        "atoken_expiry": token.atoken_expiry,
-        "rtoken": token.refresh_token,
-        "rtoken_expiry": token.rtoken_expiry,
-        "user_type": token.user.get_type(),
-        "auth_type": "Bearer",
+        "auth_info": {
+            "atoken": token.access_token,
+            "atoken_expiry": token.atoken_expiry,
+            "rtoken": token.refresh_token,
+            "rtoken_expiry": token.rtoken_expiry,
+            "user_type": token.user.get_type(),
+            "auth_type": "Bearer",
+        },
     }
 
 

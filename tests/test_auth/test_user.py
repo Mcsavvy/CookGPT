@@ -1,7 +1,7 @@
 import pytest
 
-from tests.utils import Random
 from cookgpt.auth.models import User
+from tests.utils import Random
 
 
 class TestUserModel:
