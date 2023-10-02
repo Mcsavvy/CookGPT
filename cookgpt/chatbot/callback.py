@@ -36,7 +36,8 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         self.total_tokens += num_tokens
         self.completion_tokens += num_tokens
         self.total_cost += completion_cost
-        self._query_cost = num_tokens
+        setvar("chat_cost", (self._query_cost, num_tokens))
+        self._query_cost = 0
 
     def compute_prompt_tokens(
         self, messages: List[BaseMessage], model_name: str
@@ -51,8 +52,7 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         self.total_tokens += num_tokens
         self.prompt_tokens += num_tokens
         self.total_cost += prompt_cost
-        setvar("chat_cost", (num_tokens, self._query_cost))
-        self._query_cost = 0
+        self._query_cost = num_tokens
 
     def on_chain_start(
         self,
