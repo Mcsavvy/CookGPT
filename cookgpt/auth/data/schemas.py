@@ -66,87 +66,135 @@ Datetime = make_field(
 )
 
 
-class User:
+class UserSchema(Schema):
+    """user schema"""
+
+    id = Id()
+    first_name = FirstName()
+    last_name = LastName()
+    username = Username()
+    email = Email()
+    max_chat_cost = fields.Integer(
+        metadata={
+            "description": "the maximum allowed cost of a user's chat",
+            "example": ex.MaxChatCost,
+        }
+    )
+    total_chat_cost = fields.Integer(
+        metadata={
+            "description": "the total cost of a user's chat",
+            "example": ex.TotalChatCost,
+        }
+    )
+
+
+class AuthInfoSchema(Schema):
+    """user auth info schema"""
+
+    atoken = AuthToken(
+        metadata={
+            "description": "a JWT to authenticate a user",
+        }
+    )
+    atoken_expiry = Datetime(
+        metadata={
+            "description": "the time the access token expires",
+        }
+    )
+    rtoken = AuthToken(
+        metadata={
+            "description": "a JWT to refresh a user's access token",
+        }
+    )
+    rtoken_expiry = Datetime(
+        metadata={
+            "description": "the time the refresh token expires",
+        }
+    )
+    user_type = UserType()
+    auth_type = fields.String(
+        metadata={
+            "description": "the type of authentication",
+            "example": ex.AuthType,
+        }
+    )
+
+
+class Auth:
     """user data"""
 
-    class In(EmptySchema):
-        pass
+    class Signup:
+        class Body(Schema):
+            first_name = FirstName(required=True)
+            last_name = LastName(required=True)
+            email = Email(required=True)
+            password = Password(required=True)
+            username = Username(allow_none=True)
 
-    class Out(Schema):
-        id = fields.UUID(
-            metadata={"description": "user's id", "example": ex.Uuid}
-        )
-        user_type = UserType()
-        first_name = FirstName()
-        last_name = LastName()
-        username = Username()
-        email = Email()
-        max_chat_cost = fields.Integer(
-            metadata={
-                "description": "the maximum cost of a user's chat",
-                "example": ex.MaxChatCost,
-            }
-        )
-        total_chat_cost = fields.Integer(
-            metadata={
-                "description": "the total cost of a user's chat",
-                "example": ex.TotalChatCost,
-            }
-        )
+        class Response(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "success message",
+                    "example": ex.Auth.Signup.Response["message"],
+                }
+            )
 
+        class Error(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "error message",
+                    "example": ex.Auth.Signup.Error["message"],
+                }
+            )
 
-class UserCreate:
-    """User signup data"""
+    class Login:
+        class Body(Schema):
+            login = Login(required=True)
+            password = Password(required=True)
 
-    class In(Schema):
-        first_name = FirstName(required=True)
-        last_name = LastName(required=True)
-        email = Email(required=True)
-        password = Password(required=True)
-        username = Username(allow_none=True)
+        class Response(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "success message",
+                    "example": ex.Auth.Login.Response["message"],
+                }
+            )
+            auth_info = fields.Nested(AuthInfoSchema)
 
-    class Out(Schema):
-        message = fields.String()
+        class NotFound(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "error message",
+                    "example": ex.Auth.Login.NotFound["message"],
+                }
+            )
 
-    class Error(Schema):
-        message = fields.String()
+        class Unauthorized(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "error message",
+                    "example": ex.Auth.Login.Unauthorized["message"],
+                }
+            )
 
+    class Logout:
+        class Response(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "success message",
+                    "example": ex.Auth.Logout.Response["message"],
+                }
+            )
 
-class UserLogin:
-    """User login data"""
-
-    class In(Schema):
-        login = Login(required=True)
-        password = Password(required=True)
-
-    class Out(Schema):
-        message = fields.String()
-        atoken = AuthToken()
-        atoken_expiry = Datetime()
-        rtoken = AuthToken()
-        rtoken_expiry = Datetime()
-        user_type = UserType()
-        auth_type = fields.String()
-
-        rtoken.metadata[
-            "description"
-        ] = "a JWT to refresh a user's access token"
-
-    class NotFound(Schema):
-        message = fields.String()
-
-    class Unauthorized(Schema):
-        message = fields.String()
-
-
-class UserLogout:
-    """User logout data"""
-
-    class In(EmptySchema):
-        pass
-
-    class Out(Schema):
-        message = fields.String()
+    class Refresh:
+        class Response(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "success message",
+                    "example": ex.Auth.Refresh.Response["message"],
+                }
+            )
+            auth_info = fields.Nested(AuthInfoSchema)
 
 
 class UserUpdate:
@@ -161,7 +209,7 @@ class UserUpdate:
 
     class Out(Schema):
         message = fields.String()
-        user = fields.Nested(User.Out)
+        user = fields.Nested(UserSchema)
 
     class Error(Schema):
         message = fields.String()
@@ -170,18 +218,8 @@ class UserUpdate:
 class UserDelete:
     """Delete user data"""
 
-    class In(EmptySchema):
+    class In(Schema):
         pass
 
     class Out(Schema):
         message = fields.String()
-
-
-class TokenRefresh:
-    """Refresh a json web token"""
-
-    class In(EmptySchema):
-        pass
-
-    class Out(UserLogin.Out):
-        pass

@@ -47,17 +47,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat:Out"
+                  "$ref": "#/components/schemas/Chat:Post:Response"
                 },
                 "example": {
-                  "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "content": "Hi, I need a recipe for rice",
-                  "chat_type": "query",
-                  "cost": 0,
-                  "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "sent_time": "2021-01-01 00:00:00",
-                  "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                  "chat": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "content": "Okay, tell me what type of rice so I can suggest recipes",
+                    "chat_type": "RESPONSE",
+                    "cost": 0,
+                    "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "sent_time": "2021-01-01 00:00:00",
+                    "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                  },
+                  "streaming": true
                 }
               }
             },
@@ -87,17 +90,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat:Out"
+                  "$ref": "#/components/schemas/Chat:Post:Response"
                 },
                 "example": {
-                  "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "content": "Hi, I need a recipe for rice",
-                  "chat_type": "query",
-                  "cost": 0,
-                  "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "sent_time": "2021-01-01 00:00:00",
-                  "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                  "chat": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "content": "Okay, tell me what type of rice so I can suggest recipes",
+                    "chat_type": "RESPONSE",
+                    "cost": 0,
+                    "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "sent_time": "2021-01-01 00:00:00",
+                    "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                  },
+                  "streaming": true
                 }
               }
             },
@@ -108,12 +114,12 @@
           "chat"
         ],
         "summary": "Send a message to the chatbot.",
-        "description": "Use this endpoint to send a message to the AI assistant. The message will be sent to the AI assistant and the response will be returned in the response body. The response will also be saved in the database.\n\nIf the user does not have enough tokens to send the message, a dummy response will be returned in the response body. Neither the query nor the dummy response will not be saved in the database.\n\n> INFO: To identify a dummy response, check if the `cost` field is `0`.",
+        "description": "Use this endpoint to send a message to the AI assistant. The message will be sent to the AI assistant and the response will be returned in the response body. The response will also be saved in the database.\n\nThe `stream` query parameter can be used to force the AI assistant to respond with a stream of messages. The `stream` query parameter can be set to `true` or `false`. If the `stream` query parameter is set to `true`, the AI assistant would respond send it's response bit by bit. If the `stream` query parameter is set to `false`, the AI assistant would send it's response all at once. If the `stream` query parameter is not specified, the AI assistant would not stream it's response.\n\nThe `streaming` field in the response body is used to determine if the AI assistant is streaming it's response. If the `streaming` field is `true`, the AI assistant is streaming it's response. If the `streaming` field is `false`, the AI assistant is not streaming it's response.\n\n> INFO: When the AI is streaming, you can read the response bit by bit as it is sent from the `/chat/stream` endpoint.\n\nIf the user does not have enough tokens to send the message, a dummy response will be returned in the response body. Neither the query nor the dummy response will not be saved in the database.\n\n> INFO: To identify a dummy response, check if the `chat.cost` field is `0`.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Chat:Send"
+                "$ref": "#/components/schemas/Chat:Post:Body"
               },
               "example": {
                 "query": "Hi, I need a recipe for rice"
@@ -136,16 +142,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserLogin:Out"
+                  "$ref": "#/components/schemas/Auth:Login:Response"
                 },
                 "example": {
                   "message": "Successfully logged in",
-                  "atoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-                  "atoken_expiry": "2021-01-01 00:00:00",
-                  "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-                  "rtoken_expiry": "2021-01-01 00:00:00",
-                  "user_type": "cook",
-                  "auth_type": "Bearer"
+                  "auth_info": {
+                    "atoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                    "atoken_expiry": "2021-01-01 00:00:00",
+                    "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                    "rtoken_expiry": "2021-01-01 00:00:00",
+                    "user_type": "cook",
+                    "auth_type": "Bearer"
+                  }
                 }
               }
             },
@@ -165,7 +173,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserLogin:Unauthorized"
+                  "$ref": "#/components/schemas/Auth:Login:Unauthorized"
                 },
                 "example": {
                   "message": "Cannot authenticate"
@@ -178,10 +186,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserLogin:NotFound"
+                  "$ref": "#/components/schemas/Auth:Login:NotFound"
                 },
                 "example": {
-                  "message": "Cannot authenticate"
+                  "message": "User does not exist"
                 }
               }
             },
@@ -192,12 +200,12 @@
           "auth"
         ],
         "summary": "Log a user into the system.",
-        "description": "Use this endpoint to authenticate a user and get authentication info. This endpoint returns an access token and a refresh token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires via the `/auth/refresh` endpoint.\n\nThe expiry time of  both tokens are also returned. If the refresh token expires, the user will have to login again. Use the expiry to check and refresh the access token before it expires.\n\nThe access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.\n\nThe `user_type` field is used to determine the type of user that is logged in. This can be used to determine the permissions of the user.",
+        "description": "Use this endpoint to authenticate a user and get authentication info. This endpoint returns an access token and a refresh token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires via the `/auth/refresh` endpoint.\n\nThe expiry time of  both tokens are also returned. If the refresh token expires, the user will have to login again. Use the expiry to check and refresh the access token before it expires.\n\nThe access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.\n\nThe `auth_info.user_type` field is used to determine the type of user that is logged in. This can be used to determine the permissions of the user.",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserLogin:In"
+                "$ref": "#/components/schemas/Auth:Login:Body"
               },
               "example": {
                 "login": "johndoe",
@@ -216,7 +224,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserLogout:Out"
+                  "$ref": "#/components/schemas/Auth:Logout:Response"
                 },
                 "example": {
                   "message": "Logged out user"
@@ -256,10 +264,19 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserCreate:Out"
+                  "$ref": "#/components/schemas/Auth:Signup:Response"
                 },
                 "example": {
-                  "message": "Successfully signed up"
+                  "message": "Successfully signed up",
+                  "user": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "user_type": "cook",
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "username": "johndoe",
+                    "max_chat_cost": 4000,
+                    "total_chat_cost": 1000
+                  }
                 }
               }
             },
@@ -279,7 +296,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserCreate:Error"
+                  "$ref": "#/components/schemas/Auth:Signup:Error"
                 },
                 "example": {
                   "message": "email is taken"
@@ -298,7 +315,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserCreate:In"
+                "$ref": "#/components/schemas/Auth:Signup:Body"
               },
               "example": {
                 "first_name": "John",
@@ -320,19 +337,21 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chats:Get"
+                  "$ref": "#/components/schemas/Chats:Get:Response"
                 },
                 "example": {
-                  "chat": {
-                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "content": "Hi, I need a recipe for rice",
-                    "chat_type": "query",
-                    "cost": 0,
-                    "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "sent_time": "2021-01-01 00:00:00",
-                    "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-                  }
+                  "chats": [
+                    {
+                      "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                      "content": "Okay, tell me what type of rice so I can suggest recipes",
+                      "chat_type": "RESPONSE",
+                      "cost": 0,
+                      "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                      "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                      "sent_time": "2021-01-01 00:00:00",
+                      "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                    }
+                  ]
                 }
               }
             },
@@ -367,10 +386,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chats:Delete"
+                  "$ref": "#/components/schemas/Chats:Delete:Response"
                 },
                 "example": {
-                  "message": "all messages deleted"
+                  "message": "chat deleted"
                 }
               }
             },
@@ -407,16 +426,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenRefresh:Out"
+                  "$ref": "#/components/schemas/Auth:Refresh:Response"
                 },
                 "example": {
                   "message": "Refreshed access token",
-                  "atoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-                  "atoken_expiry": "2021-01-01 00:00:00",
-                  "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-                  "rtoken_expiry": "2021-01-01 00:00:00",
-                  "user_type": "cook",
-                  "auth_type": "Bearer"
+                  "auth_info": {
+                    "atoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                    "atoken_expiry": "2021-01-01 00:00:00",
+                    "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                    "rtoken_expiry": "2021-01-01 00:00:00",
+                    "user_type": "cook",
+                    "auth_type": "Bearer"
+                  }
                 }
               }
             },
@@ -462,19 +483,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat:Out"
+                  "$ref": "#/components/schemas/Chat:Get:Response"
                 },
                 "example": {
-                  "chat": {
-                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "content": "Hi, I need a recipe for rice",
-                    "chat_type": "query",
-                    "cost": 0,
-                    "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "sent_time": "2021-01-01 00:00:00",
-                    "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-                  }
+                  "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "content": "Okay, tell me what type of rice so I can suggest recipes",
+                  "chat_type": "RESPONSE",
+                  "cost": 0,
+                  "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "sent_time": "2021-01-01 00:00:00",
+                  "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
                 }
               }
             },
@@ -528,10 +547,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chat:Delete"
+                  "$ref": "#/components/schemas/Chat:Delete:Response"
                 },
                 "example": {
-                  "message": "all messages deleted"
+                  "message": "chat deleted"
                 }
               }
             },
@@ -583,14 +602,6 @@
           }
         ],
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful response"
-          },
           "404": {
             "content": {
               "application/json": {
@@ -600,12 +611,21 @@
               }
             },
             "description": "Not found"
+          },
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {}
+              }
+            },
+            "description": "A streamed response"
           }
         },
         "tags": [
           "chat"
         ],
-        "summary": "read a streamed response"
+        "summary": "Read a streamed response bit by bit.",
+        "description": "Use this endpoint to read the AI assistant's response bit by bit. This endpoint is used when the AI assistant is streaming it's response. The `chat_id` url parameter is used to specify the chat that you want to read from. The `id` field in the response body from the `/chat` endpoint contains the `chat_id`."
       }
     }
   },
@@ -647,7 +667,7 @@
         },
         "type": "object"
       },
-      "Chat:Send": {
+      "Chat:Post:Body": {
         "type": "object",
         "properties": {
           "query": {
@@ -660,7 +680,7 @@
           "query"
         ]
       },
-      "Chat:Out": {
+      "Chat": {
         "type": "object",
         "properties": {
           "id": {
@@ -687,11 +707,6 @@
             "type": "integer",
             "description": "chat cost",
             "example": 100
-          },
-          "streaming": {
-            "type": "boolean",
-            "description": "indicates if the chatbot is streaming",
-            "example": true
           },
           "previous_chat_id": {
             "type": "string",
@@ -721,7 +736,20 @@
           }
         }
       },
-      "UserLogin:In": {
+      "Chat:Post:Response": {
+        "type": "object",
+        "properties": {
+          "chat": {
+            "$ref": "#/components/schemas/Chat"
+          },
+          "streaming": {
+            "type": "boolean",
+            "description": "indicates if the chatbot is streaming",
+            "example": true
+          }
+        }
+      },
+      "Auth:Login:Body": {
         "type": "object",
         "properties": {
           "login": {
@@ -740,21 +768,18 @@
           "password"
         ]
       },
-      "UserLogin:Out": {
+      "AuthInfo": {
         "type": "object",
         "properties": {
-          "message": {
-            "type": "string"
-          },
           "atoken": {
             "type": "string",
-            "description": "a JWT to authenticate as a user to the backend",
+            "description": "a JWT to authenticate a user",
             "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
           },
           "atoken_expiry": {
             "type": "string",
             "format": "date-time",
-            "description": "a datetime",
+            "description": "the time the access token expires",
             "example": "2021-01-01 00:00:00"
           },
           "rtoken": {
@@ -765,7 +790,7 @@
           "rtoken_expiry": {
             "type": "string",
             "format": "date-time",
-            "description": "a datetime",
+            "description": "the time the refresh token expires",
             "example": "2021-01-01 00:00:00"
           },
           "user_type": {
@@ -774,35 +799,56 @@
             "example": "cook"
           },
           "auth_type": {
-            "type": "string"
+            "type": "string",
+            "description": "the type of authentication",
+            "example": "Bearer"
           }
         }
       },
-      "UserLogin:Unauthorized": {
+      "Auth:Login:Response": {
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "success message",
+            "example": "Successfully logged in"
+          },
+          "auth_info": {
+            "$ref": "#/components/schemas/AuthInfo"
           }
         }
       },
-      "UserLogin:NotFound": {
+      "Auth:Login:Unauthorized": {
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "error message",
+            "example": "Cannot authenticate"
           }
         }
       },
-      "UserLogout:Out": {
+      "Auth:Login:NotFound": {
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "error message",
+            "example": "User does not exist"
           }
         }
       },
-      "UserCreate:In": {
+      "Auth:Logout:Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "success message",
+            "example": "Logged out user"
+          }
+        }
+      },
+      "Auth:Signup:Body": {
         "type": "object",
         "properties": {
           "first_name": {
@@ -839,23 +885,27 @@
           "password"
         ]
       },
-      "UserCreate:Out": {
+      "Auth:Signup:Response": {
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "success message",
+            "example": "Successfully signed up"
           }
         }
       },
-      "UserCreate:Error": {
+      "Auth:Signup:Error": {
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
+            "type": "string",
+            "description": "error message",
+            "example": "email is taken"
           }
         }
       },
-      "Chats:Get": {
+      "Chats:Get:Response": {
         "type": "object",
         "properties": {
           "chats": {
@@ -864,8 +914,8 @@
             "example": [
               {
                 "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "content": "Hi, I need a recipe for rice",
-                "chat_type": "query",
+                "content": "Okay, tell me what type of rice so I can suggest recipes",
+                "chat_type": "RESPONSE",
                 "cost": 0,
                 "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
                 "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
@@ -874,8 +924,8 @@
               },
               {
                 "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "content": "Hi, I need a recipe for rice",
-                "chat_type": "query",
+                "content": "Okay, tell me what type of rice so I can suggest recipes",
+                "chat_type": "RESPONSE",
                 "cost": 0,
                 "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
                 "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
@@ -884,12 +934,12 @@
               }
             ],
             "items": {
-              "$ref": "#/components/schemas/Chat:Out"
+              "$ref": "#/components/schemas/Chat"
             }
           }
         }
       },
-      "Chats:Delete": {
+      "Chats:Delete:Response": {
         "type": "object",
         "properties": {
           "message": {
@@ -899,50 +949,81 @@
           }
         }
       },
-      "TokenRefresh:Out": {
+      "Auth:Refresh:Response": {
         "type": "object",
         "properties": {
           "message": {
-            "type": "string"
-          },
-          "atoken": {
             "type": "string",
-            "description": "a JWT to authenticate as a user to the backend",
-            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
+            "description": "success message",
+            "example": "Refreshed access token"
           },
-          "atoken_expiry": {
-            "type": "string",
-            "format": "date-time",
-            "description": "a datetime",
-            "example": "2021-01-01 00:00:00"
-          },
-          "rtoken": {
-            "type": "string",
-            "description": "a JWT to refresh a user's access token",
-            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
-          },
-          "rtoken_expiry": {
-            "type": "string",
-            "format": "date-time",
-            "description": "a datetime",
-            "example": "2021-01-01 00:00:00"
-          },
-          "user_type": {
-            "type": "string",
-            "description": "the type of user",
-            "example": "cook"
-          },
-          "auth_type": {
-            "type": "string"
+          "auth_info": {
+            "$ref": "#/components/schemas/AuthInfo"
           }
         }
       },
-      "Chat:Delete": {
+      "Chat:Get:Response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "content": {
+            "type": "string",
+            "description": "chat content",
+            "example": "Hi, I need a recipe for rice"
+          },
+          "chat_type": {
+            "description": "chat type",
+            "example": "query",
+            "type": "string",
+            "enum": [
+              "QUERY",
+              "RESPONSE"
+            ]
+          },
+          "cost": {
+            "type": "integer",
+            "description": "chat cost",
+            "example": 100
+          },
+          "previous_chat_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "previous chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "next_chat_id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "next chat id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "sent_time": {
+            "type": "string",
+            "format": "date-time",
+            "description": "time message was sent",
+            "example": "2021-01-01 00:00:00"
+          },
+          "thread_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "chat's thread id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          }
+        }
+      },
+      "Chat:Delete:Response": {
         "type": "object",
         "properties": {
           "message": {
             "type": "string",
-            "description": "message",
+            "description": "success message",
             "example": "chat deleted"
           }
         }

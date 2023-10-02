@@ -37,14 +37,16 @@ def make_dummy_chat(
     """make fake response"""
 
     return {
-        "id": id or uuid4(),
-        "content": response,
-        "chat_type": chat_type,
-        "cost": cost,
-        "previous_chat_id": previous_chat_id,
-        "next_chat_id": next_chat_id,
-        "sent_time": sent_time or datetime.now(tz=timezone.utc),
-        "thread_id": thread_id or uuid4(),
+        "chat": {
+            "id": id or uuid4(),
+            "content": response,
+            "chat_type": chat_type,
+            "cost": cost,
+            "previous_chat_id": previous_chat_id,
+            "next_chat_id": next_chat_id,
+            "sent_time": sent_time or datetime.now(tz=timezone.utc),
+            "thread_id": thread_id or uuid4(),
+        },
         "streaming": streaming,
     }
 
@@ -55,9 +57,9 @@ class ThreadView(MethodView):
     decorators = [auth_required()]
 
     @app.output(
-        sc.Chats.Get,
+        sc.Chats.Get.Response,
         200,
-        example=ex.GetChat.Out,
+        example=ex.Chats.Get.Response,
         description="All messages in the thread",
     )
     @app.doc(description=docs.CHAT_GET_CHATS)
@@ -71,9 +73,9 @@ class ThreadView(MethodView):
         return {"chats": thread.chats}
 
     @app.output(
-        sc.Chats.Delete,
+        sc.Chats.Delete.Response,
         200,
-        example=ex.DeleteChat.Out,
+        example=ex.Chat.Delete.Response,
         description="Success message",
     )
     @app.doc(description=docs.CHAT_DELETE_CHATS)
@@ -94,9 +96,9 @@ class ChatView(MethodView):
     decorators = [auth_required()]
 
     @app.output(
-        sc.Chat.Out,
+        sc.Chat.Get.Response,
         200,
-        example=ex.GetChat.Out,
+        example=ex.Chat.Get.Response,
         description="A single chat",
     )
     @app.doc(description=docs.CHAT_GET_CHAT)
@@ -120,9 +122,9 @@ class ChatView(MethodView):
         return chat
 
     @app.output(
-        sc.Chat.Delete,
+        sc.Chat.Delete.Response,
         200,
-        example=ex.DeleteChat.Out,
+        example=ex.Chat.Delete.Response,
         description="Success message",
     )
     @app.doc(description=docs.CHAT_DELETE_CHAT)
@@ -145,20 +147,24 @@ class ChatView(MethodView):
         return {"message": "Chat deleted"}
 
     @app.input(
-        sc.Chat.Send,
-        example=ex.Chat.In,
+        sc.Chat.Post.Body,
+        example=ex.Chat.Post.Body,
     )
-    @app.input(sc.Chat.Send.Params, location="query")
+    @app.input(
+        sc.Chat.Post.QueryParams,
+        location="query",
+        example=ex.Chat.Post.QueryParams,
+    )
     @app.output(
-        sc.Chat.Out,
+        sc.Chat.Post.Response,
         201,
-        example=ex.Chat.Out,
+        example=ex.Chat.Post.Response,
         description="The chatbot's response",
     )
     @api_output(
-        sc.Chat.Out,
+        sc.Chat.Post.Response,
         200,
-        example=ex.Chat.Out,
+        example=ex.Chat.Post.Response,
         description="A dummy response",
     )
     @app.doc(description=docs.CHAT_POST_CHAT)
@@ -214,13 +220,23 @@ class ChatView(MethodView):
             app.redis.set(f"{stream}:task", "")
         db.session.refresh(r)
         db.session.refresh(q)
-        setattr(r, "streaming", stream_response)
-        return r, 201
+        return {
+            "chat": r,
+            "streaming": stream_response,
+        }, 201
 
 
 @app.get("stream/<uuid:chat_id>")
+@api_output(
+    {},
+    content_type="text/plain",
+    status_code=200,
+    description="A streamed response",
+)
+@app.doc(description=docs.CHAT_READ_STREAM)
+# @auth_required()
 def read_stream(chat_id: UUID):
-    """read a streamed response"""
+    """Read a streamed response bit by bit."""
     from time import sleep
 
     from flask import Response

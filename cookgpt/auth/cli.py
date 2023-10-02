@@ -6,7 +6,7 @@ from marshmallow.utils import INCLUDE
 from cookgpt import logging
 from cookgpt.auth import app
 from cookgpt.auth.data.enums import UserType
-from cookgpt.auth.data.schemas import UserCreate
+from cookgpt.auth.data.schemas import Auth
 from cookgpt.auth.models import User
 
 
@@ -83,12 +83,11 @@ def create_user(
     }
     if username is None:  # pragma: no cover
         del payload["username"]
-    cleaned: dict = UserCreate.In().load(  # type: ignore
+    cleaned: dict = Auth.Signup.Body().load(  # type: ignore
         payload, unknown=INCLUDE
     )
     logging.debug("Creating user with payload: %r", cleaned)
-    new_user = User.create(**cleaned)
-    print(f"Created {user_type.lower()} '{fname}' with id {new_user.id!s}")
+    User.create(**cleaned)
 
 
 @app.cli.command("create-admin")

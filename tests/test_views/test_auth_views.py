@@ -1,12 +1,11 @@
 from typing import Callable, cast
 
-import pytest
 from flask import url_for
 from flask.testing import FlaskClient as Client
 
 from cookgpt.auth.models import Token, User
 from cookgpt.ext.database import db
-from tests.utils import Random, mock_config
+from tests.utils import Random
 
 
 class TestLoginView:
@@ -27,7 +26,7 @@ class TestLoginView:
             "auth_type",
         ]
         for key in expected_keys:
-            assert key in json, f"{key} not in response body"
+            assert key in json["auth_info"], f"{key} not in response body"
 
     def test_login_valid_username(self, client, user: "User"):
         """Test login with valid username"""
@@ -46,15 +45,15 @@ class TestLoginView:
             "auth_type",
         ]
         for key in expected_keys:
-            assert key in json, f"{key} not in response body"
+            assert key in json["auth_info"], f"{key} not in response body"
 
     def test_tokens_valid(self, client: "Client", user: "User"):
         """Test that the access token returned is valid"""
         data = {"login": user.email, "password": "JohnDoe1234"}
         response = client.post(url_for("auth.login"), json=data)
         json = cast(dict, response.json)
-        access_token = json["atoken"]
-        refresh_token = json["rtoken"]
+        access_token = json["auth_info"]["atoken"]
+        refresh_token = json["auth_info"]["rtoken"]
         token = Token.query.filter_by(access_token=access_token).first()
         token2 = Token.query.filter_by(refresh_token=refresh_token).first()
         assert token is not None, "Token not found"
@@ -133,7 +132,6 @@ class TestSignupView:
 class TestRefreshView:
     """Test token refresh view"""
 
-    @pytest.mark.skip  # TODO: fix sqlalchemy UPDATE issue
     def test_refresh_access_token(
         self, user: "User", client: "Client", add_jwt_salt: Callable[[], None]
     ):
@@ -159,6 +157,7 @@ class TestRefreshView:
             "auth_type",
         ]
         for key in expected_keys:
-            assert key in json, f"{key} not in response body"
+            assert key in json["auth_info"], f"{key} not in response body"
 
-        assert old_atoken != token.access_token
+        assert atoken != token.access_token, "access token did not change"
+        assert rtoken == token.refresh_token, "refresh token changed"

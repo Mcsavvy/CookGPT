@@ -20,15 +20,29 @@ ErrorMessage = make_field(fields.String, "error message", "...")
 SuccessMessage = make_field(fields.String, "success message", "...")
 
 
+class ChatSchema(Schema):
+    """Chat schema."""
+
+    id = ChatId()
+    content = Content()
+    chat_type = ChatType()
+    cost = Cost()
+    previous_chat_id = PrevChatId(allow_none=True)
+    next_chat_id = NextChatId(allow_none=True)
+    sent_time = SentTime()
+    thread_id = ThreadId()
+
+
 class Chat:
     """Chat schema."""
 
-    class Send(Schema):
-        query = Content(required=True)
-        # TODO: allow users to select thread
-        # thread_id = ThreadId(required=False)
+    class Post:
+        class Body(Schema):
+            query = Content(required=True)
+            # TODO: allow users to select thread
+            # thread_id = ThreadId(required=False)
 
-        class Params(Schema):
+        class QueryParams(Schema):
             stream = fields.Boolean(
                 load_default=False,
                 metadata={
@@ -37,63 +51,55 @@ class Chat:
                 },
             )
 
-    class Out(Schema):
-        id = ChatId()
-        content = Content()
-        chat_type = ChatType()
-        cost = Cost()
-        streaming = fields.Boolean(
-            dump_default=True,
-            metadata={
-                "description": "indicates if the chatbot is streaming",
-                "example": True,
-            },
-        )
-        previous_chat_id = PrevChatId(allow_none=True)
-        next_chat_id = NextChatId(allow_none=True)
-        sent_time = SentTime()
-        thread_id = ThreadId()
+        class Response(Schema):
+            chat = fields.Nested(ChatSchema)
+            streaming = fields.Boolean(
+                dump_default=True,
+                metadata={
+                    "description": "indicates if the chatbot is streaming",
+                    "example": True,
+                },
+            )
 
-    class Get(Out):
-        pass
+    class Get:
+        class Response(ChatSchema):
+            ...
 
     class Delete(Schema):
-        message = fields.String(
-            metadata={
-                "description": "message",
-                "example": "chat deleted",
-            },
-        )
+        class Response(Schema):
+            message = SuccessMessage(
+                metadata={
+                    "example": "chat deleted",
+                },
+            )
 
     class NotFound(Schema):
-        message = ErrorMessage()
+        """Chat not found error."""
+
+        message = ErrorMessage(
+            metadata={
+                "example": "chat not found",
+            }
+        )
 
 
 class Chats:
     """Chats schema."""
 
-    class Out(Schema):
-        chats = fields.List(
-            fields.Nested(Chat.Out),
-            metadata={
-                "description": "list of chats",
-                "example": [ex.Chat.Out, ex.Chat.Out],
-            },
-        )
+    class Get:
+        class Response(Schema):
+            chats = fields.List(
+                fields.Nested(ChatSchema),
+                metadata={
+                    "description": "list of chats",
+                    "example": [ex.ChatExample, ex.ChatExample],
+                },
+            )
 
-    class Get(Schema):
-        chats = fields.List(
-            fields.Nested(Chat.Out),
-            metadata={
-                "description": "list of chats",
-                "example": [ex.Chat.Out, ex.Chat.Out],
-            },
-        )
-
-    class Delete(Schema):
-        message = fields.String(
-            metadata={
-                "description": "success message",
-                "example": "all chats deleted",
-            },
-        )
+    class Delete:
+        class Response(Schema):
+            message = SuccessMessage(
+                metadata={
+                    "example": "all chats deleted",
+                },
+            )

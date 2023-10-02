@@ -135,22 +135,24 @@ class TestChatView:
         assert response.status_code == 201
         assert response.json is not None
 
+        chat = response.json["chat"]
+        streaming = response.json["streaming"]
+
         for key in [
             "id",
             "content",
             "chat_type",
             "cost",
-            "streaming",
             "previous_chat_id",
             "next_chat_id",
             "sent_time",
             "thread_id",
         ]:
-            assert key in response.json, f"{key} not in response"
+            assert key in chat, f"{key} not in response"
 
-        assert response.json["content"]
-        assert response.json["chat_type"] == "RESPONSE"
-        assert response.json["streaming"] is False
+        assert chat["content"]
+        assert chat["chat_type"] == "RESPONSE"
+        assert streaming is False
 
         chats = cast(list[Chat], thread.chats)
 
@@ -183,22 +185,24 @@ class TestChatView:
         assert response.status_code == 201
         assert response.json is not None
 
+        chat = response.json["chat"]
+        streaming = response.json["streaming"]
+
         for key in [
             "id",
             "content",
             "chat_type",
             "cost",
-            "streaming",
             "previous_chat_id",
             "next_chat_id",
             "sent_time",
             "thread_id",
         ]:
-            assert key in response.json, f"{key} not in response"
+            assert key in chat, f"{key} not in response"
 
-        assert response.json["content"] == ""
-        assert response.json["chat_type"] == "RESPONSE"
-        assert response.json["streaming"] is True
+        assert chat["content"] == ""
+        assert chat["chat_type"] == "RESPONSE"
+        assert streaming is True
 
         chats = cast(list[Chat], thread.chats)
 
@@ -231,26 +235,29 @@ class TestChatView:
         assert response.status_code == 200
         assert response.json is not None
 
+        chat = response.json["chat"]
+        streaming = response.json["streaming"]
+
         for key in [
             "id",
             "content",
             "chat_type",
             "cost",
-            "streaming",
             "previous_chat_id",
             "next_chat_id",
             "sent_time",
             "thread_id",
         ]:
-            assert key in response.json, f"{key} not in response"
+            assert key in chat, f"{key} not in response"
 
+        assert chat["content"]
         assert len(cast(list[Chat], thread.chats)) == 0
-        assert response.json["chat_type"] == "RESPONSE"
-        assert response.json["cost"] == 0
-        assert response.json["thread_id"] == str(thread.id)
-        assert response.json["previous_chat_id"] is None
-        assert response.json["next_chat_id"] is None
-        assert response.json["streaming"] is False
+        assert chat["chat_type"] == "RESPONSE"
+        assert chat["cost"] == 0
+        assert chat["thread_id"] == str(thread.id)
+        assert chat["previous_chat_id"] is None
+        assert chat["next_chat_id"] is None
+        assert streaming is False
 
     def test_send_query_exceeded_max_chat_cost__streaming(
         self, client: "FlaskClient", access_token: str, thread: "Thread"
@@ -265,30 +272,31 @@ class TestChatView:
         response = client.post(
             url_for("chatbot.query"), headers=headers, json=data
         )
-        response.stream
         assert response.status_code == 200
         assert response.json is not None
+
+        chat = response.json["chat"]
+        streaming = response.json["streaming"]
 
         for key in [
             "id",
             "content",
             "chat_type",
             "cost",
-            "streaming",
             "previous_chat_id",
             "next_chat_id",
             "sent_time",
             "thread_id",
         ]:
-            assert key in response.json, f"{key} not in response"
+            assert key in chat, f"{key} not in response"
 
-        assert response.json["chat_type"] == "RESPONSE"
+        assert chat["chat_type"] == "RESPONSE"
         assert len(cast(list[Chat], thread.chats)) == 0
-        assert response.json["cost"] == 0
-        assert response.json["thread_id"] == str(thread.id)
-        assert response.json["previous_chat_id"] is None
-        assert response.json["next_chat_id"] is None
-        assert response.json["streaming"] is False
+        assert chat["cost"] == 0
+        assert chat["thread_id"] == str(thread.id)
+        assert chat["previous_chat_id"] is None
+        assert chat["next_chat_id"] is None
+        assert streaming is False
 
     def test_read_stream(
         self, access_token: str, thread: "Thread", client: "FlaskClient"

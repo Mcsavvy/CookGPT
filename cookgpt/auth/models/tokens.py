@@ -40,7 +40,6 @@ class Token(db.Model, BaseModelMixin):  # type: ignore
             self.user_id.hex, additional_claims={"jti": self.id.hex}
         )
         self.update(access_token=access_token)
-        db.session.flush()
 
     def atoken_has_expired(self):
         """Checks if access token has expired"""
