@@ -1,72 +1,23 @@
 """Chatbot data validation schemas."""
 from apiflask import Schema, fields
 
+from cookgpt.utils import make_field
+
 from . import examples as ex
 from .enums import MessageType
 
-
-def Content(**k):
-    return fields.String(
-        metadata={"description": "chat content", "example": ex.Query}, **k
-    )
-
-
-def ChatType(**k):
-    return fields.Enum(
-        MessageType,
-        metadata={
-            "description": "chat type",
-            "example": MessageType.QUERY.value,
-        },
-        **k,
-    )
-
-
-def Cost(**k):
-    return fields.Integer(
-        metadata={"description": "chat cost", "example": 100}, **k
-    )
-
-
-def PrevChatId(**k):
-    return fields.UUID(
-        metadata={"description": "previous chat id", "example": ex.Uuid}, **k
-    )
-
-
-def ChatId(**k):
-    return fields.UUID(
-        metadata={"description": "chat id", "example": ex.Uuid}, **k
-    )
-
-
-def NextChatId(**k):
-    return fields.UUID(
-        metadata={"description": "next chat id", "example": ex.Uuid}, **k
-    )
-
-
-def SentTime(**k):
-    return fields.DateTime(
-        metadata={
-            "description": "time message was sent",
-            "example": ex.DateTime,
-        },
-        **k,
-    )
-
-
-def ThreadId(**k):
-    return fields.UUID(
-        metadata={"description": "chat's thread id", "example": ex.Uuid}, **k
-    )
-
-
-def ErrorMessage(**k):
-    return fields.String(
-        metadata={"description": "error message", "example": "chat not found"},
-        **k,
-    )
+ChatType = make_field(
+    fields.Enum, "chat type", MessageType.QUERY.value, enum=MessageType
+)
+Content = make_field(fields.String, "chat content", ex.Query)
+Cost = make_field(fields.Integer, "chat cost", 100)
+PrevChatId = make_field(fields.UUID, "previous chat id", ex.Uuid)
+ChatId = make_field(fields.UUID, "chat id", ex.Uuid)
+NextChatId = make_field(fields.UUID, "next chat id", ex.Uuid)
+SentTime = make_field(fields.DateTime, "time message was sent", ex.DateTime)
+ThreadId = make_field(fields.UUID, "chat's thread id", ex.Uuid)
+ErrorMessage = make_field(fields.String, "error message", "...")
+SuccessMessage = make_field(fields.String, "success message", "...")
 
 
 class Chat:

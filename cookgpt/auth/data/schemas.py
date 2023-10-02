@@ -1,83 +1,69 @@
 """data validation & serialization schemas"""
 from apiflask import Schema, fields
-from apiflask.schemas import EmptySchema
+
+from cookgpt.utils import make_field
 
 from . import examples as ex
 from . import validators as v
 
+Id = make_field(fields.UUID, "user's id", ex.Uuid)
+FirstName = make_field(
+    fields.String,
+    "user's first name",
+    ex.FirstName,
+    validate=v.FirstName(),
+)
 
-def FirstName(**attrs):
-    return fields.String(
-        validate=v.FirstName(),
-        metadata={"description": "user's first name", "example": ex.FirstName},
-        **attrs
-    )
+LastName = make_field(
+    fields.String,
+    "user's last name",
+    ex.LastName,
+    validate=v.LastName(),
+)
 
+Username = make_field(
+    fields.String,
+    "user's username",
+    ex.Username,
+    validate=v.Username(),
+)
 
-def LastName(**attrs):
-    return fields.String(
-        validate=v.LastName(),
-        metadata={"description": "user's last name", "example": ex.LastName},
-        **attrs
-    )
+Email = make_field(
+    fields.String,
+    "user's email address",
+    ex.Email,
+    validate=v.Email(),
+)
 
+Login = make_field(
+    fields.String,
+    "user's username or email",
+    ex.Email,
+    validate=v.Login(),
+)
 
-def Username(**attrs):
-    return fields.String(
-        validate=v.Username(),
-        metadata={"description": "user's username", "example": ex.Username},
-        **attrs
-    )
+Password = make_field(
+    fields.String,
+    "user's password",
+    ex.Password,
+    validate=v.Password(),
+)
 
+AuthToken = make_field(
+    fields.String,
+    example=ex.AuthToken,
+)
 
-def Email(**attrs):
-    return fields.String(
-        validate=v.Email(),
-        metadata={"description": "user's email address", "example": ex.Email},
-        **attrs
-    )
+UserType = make_field(
+    fields.String,
+    "the type of user",
+    ex.UserType,
+)
 
-
-def Login(**attrs):
-    return fields.String(
-        validate=v.Login(),
-        metadata={
-            "description": "user's username or email",
-            "example": ex.Email,
-        },
-        **attrs
-    )
-
-
-def Password(**attrs):
-    return fields.String(
-        validate=v.Password(),
-        metadata={"description": "user's password", "example": ex.Password},
-        **attrs
-    )
-
-
-def AuthToken(**attrs):
-    return fields.String(
-        metadata={
-            "description": "a JWT to authenticate as a user to the backend",
-            "example": ex.AuthToken,
-        },
-        **attrs
-    )
-
-
-def UserType(**attrs):
-    return fields.String(
-        metadata={"description": "the type of user", "example": ex.UserType},
-        **attrs
-    )
-
-
-def Datetime(**attrs):
-    return fields.DateTime(
-        metadata={"description": "a datetime", "example": ex.DateTime}, **attrs
-    )
+Datetime = make_field(
+    fields.DateTime,
+    example=ex.DateTime,
+)
 
 
 class User:
