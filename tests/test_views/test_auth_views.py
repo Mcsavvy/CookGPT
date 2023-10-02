@@ -1,5 +1,4 @@
-from datetime import timedelta
-from typing import cast
+from typing import Callable, cast
 
 import pytest
 from flask import url_for
@@ -136,17 +135,15 @@ class TestRefreshView:
 
     @pytest.mark.skip  # TODO: fix sqlalchemy UPDATE issue
     def test_refresh_access_token(
-        self, user: "User", client: "Client", config
+        self, user: "User", client: "Client", add_jwt_salt: Callable[[], None]
     ):
         """test refresh access token"""
-        with mock_config(
-            config, JWT_ACCESS_TOKEN_EXPIRES=timedelta(seconds=10)
-        ):
-            # BUG: 2 jwt's created at the same time would be identical,
-            # so I need to make sure the expiration time varies
-            token = user.create_token()
-        old_atoken = token.access_token
+
+        token = user.create_token()
+        atoken = token.access_token
+        rtoken = token.refresh_token
         headers = {"Authorization": f"Bearer {token.refresh_token}"}
+        add_jwt_salt()  # add salt to jwt salt
         response = client.post(url_for("auth.refresh"), headers=headers)
         json = cast(dict, response.json)
         assert response.status_code == 200

@@ -18,6 +18,8 @@ LOG_SHOW_TIME = false
 LOG_HANDLER_CLASS = "rich.logging.RichHandler"
 
 
+SQLALCHEMY_ENGINE_OPTIONS = {"isolation_level" = "READ UNCOMMITTED"}
+
 BLUEPRINTS = [
     "cookgpt.auth:app",
     "cookgpt.chatbot:app",
