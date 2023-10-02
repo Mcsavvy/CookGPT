@@ -1,6 +1,6 @@
 """Utilities"""
 from datetime import datetime, timezone
-from typing import Any, NoReturn, Optional
+from typing import Any, Callable, NoReturn, Optional, ParamSpec, TypeVar
 
 from apiflask import HTTPError
 from apiflask.types import SchemaType
@@ -68,3 +68,31 @@ def api_output(
         return func
 
     return decorator
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+def make_field(
+    field: Callable[P, R],
+    description: Optional[str] = None,
+    example: Optional[Any] = None,
+    *args,
+    **kwargs,
+) -> Callable[P, R]:
+    """Make a field with default metadata."""
+    metadata = {"description": description, "example": example}
+    if example is not None:
+        metadata["example"] = example
+    if description is not None:
+        metadata["description"] = description
+
+    def helper(*a: P.args, **k: P.kwargs) -> R:
+        metadata.update(k.pop("metadata", {}))  # type: ignore
+        k["metadata"] = metadata
+        k.update(kwargs)
+        a += args  # type: ignore
+        return field(*a, **k)
+
+    return helper

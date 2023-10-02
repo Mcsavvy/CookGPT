@@ -3,9 +3,9 @@ from uuid import uuid4
 
 import pytest
 
-from tests.utils import Random
 from cookgpt.auth.models import User
 from cookgpt.chatbot.models import Chat, MessageType, Thread
+from tests.utils import Random
 
 
 class TestThreadModel:

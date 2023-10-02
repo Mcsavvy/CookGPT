@@ -27,7 +27,7 @@ The expiry time of  both tokens are also returned. If the refresh token expires,
 
 The access token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.
 
-The `user_type` field is used to determine the type of user that is logged in. This can be used to determine the permissions of the user."""
+The `auth_info.user_type` field is used to determine the type of user that is logged in. This can be used to determine the permissions of the user."""
 
 
 AUTH_REFRESH = """Use this endpoint to refresh an access token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires. 
@@ -75,6 +75,14 @@ CHAT_DELETE_CHAT = """Use this endpoint to delete a specific chat in the thread.
 
 CHAT_POST_CHAT = """Use this endpoint to send a message to the AI assistant. The message will be sent to the AI assistant and the response will be returned in the response body. The response will also be saved in the database.
 
+The `stream` query parameter can be used to force the AI assistant to respond with a stream of messages. The `stream` query parameter can be set to `true` or `false`. If the `stream` query parameter is set to `true`, the AI assistant would respond send it's response bit by bit. If the `stream` query parameter is set to `false`, the AI assistant would send it's response all at once. If the `stream` query parameter is not specified, the AI assistant would not stream it's response.
+
+The `streaming` field in the response body is used to determine if the AI assistant is streaming it's response. If the `streaming` field is `true`, the AI assistant is streaming it's response. If the `streaming` field is `false`, the AI assistant is not streaming it's response.
+
+> INFO: When the AI is streaming, you can read the response bit by bit as it is sent from the `/chat/stream` endpoint.
+
 If the user does not have enough tokens to send the message, a dummy response will be returned in the response body. Neither the query nor the dummy response will not be saved in the database.
 
-> INFO: To identify a dummy response, check if the `cost` field is `0`."""
+> INFO: To identify a dummy response, check if the `chat.cost` field is `0`."""
+
+CHAT_READ_STREAM = """Use this endpoint to read the AI assistant's response bit by bit. This endpoint is used when the AI assistant is streaming it's response. The `chat_id` url parameter is used to specify the chat that you want to read from. The `id` field in the response body from the `/chat` endpoint contains the `chat_id`."""

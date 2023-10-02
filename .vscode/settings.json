@@ -8,7 +8,7 @@
     "terminal.integrated.enablePersistentSessions": false,
     "[python]": {
         "diffEditor.ignoreTrimWhitespace": false,
-        "editor.formatOnType": false,
+        "editor.formatOnType": true,
         "editor.wordBasedSuggestions": false,
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
@@ -19,7 +19,7 @@
     },
     "ruff.importStrategy": "fromEnvironment",
     "ruff.organizeImports": false,
-    "ruff.run": "onSave",
+    "ruff.run": "onType",
     "python.analysis.inlayHints.callArgumentNames": false,
     "python.analysis.inlayHints.functionReturnTypes": false,
     "python.analysis.useLibraryCodeForTypes": false,

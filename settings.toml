@@ -5,7 +5,23 @@ EXTENSIONS = [
     "cookgpt.ext.database:init_app",
     "cookgpt.ext.auth:init_app",
     # "cookgpt.ext.admin:init_app",
+    "cookgpt.ext.redisflow:init_app"
 ]
+
+
+# RedisFlow
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = true
+CELERY_TASKS = [
+    "cookgpt.chatbot.tasks"
+]
+
+# Logging
+LOG_LEVEL = "INFO"
+LOG_SHOW_TIME = false
+LOG_HANDLER_CLASS = "rich.logging.RichHandler"
+
+
+SQLALCHEMY_ENGINE_OPTIONS = {"isolation_level" = "READ UNCOMMITTED"}
 
 BLUEPRINTS = [
     "cookgpt.auth:app",
@@ -24,7 +40,8 @@ AUTH_ERROR_STATUS_CODE = 403
 AUTH_ERROR_DESCRIPTION = "insufficient permissions"
 AUTO_SERVERS = true
 SERVERS = [
-    {name = "live", url = "https://mkpbackend-fe1c9f5599b1.herokuapp.com"}
+    {name = "live", url = "https://mkpbackend-fe1c9f5599b1.herokuapp.com"},
+    {name = "local", url = "http://localhost:8000"}
 ]
 
 # AI
@@ -37,6 +54,7 @@ CHATBOT_CHAIN_INPUT_KEY = "query"
 USE_OPENAI = true
 LANGCHAIN_VERBOSE = false
 OPENAI_STREAMING = true
+OPENAI_CALLBACK_RAISE_ERROR = true
 
 # Flask
 FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"
@@ -46,6 +64,7 @@ FLASK_ADMIN_SWATCH = 'cerulean'
 # JWT-Extended
 JWT_TOKEN_LOCATION = ['headers']
 JWT_HEADER_NAME = 'Authorization'
+JWT_ERROR_MESSAGE_KEY = 'message'
 
 # Cross Origin Resource Sharing
 FLASK_CORS_ALLOW_HEADERS = '*'
@@ -64,15 +83,12 @@ EXTENSIONS = [
     "dynaconf_merge",
     # "quick_tests:init_app"
 ]
-SERVERS = [
-    "dynaconf_merge",
-    {name = "local", url = "http://localhost:8000"}
-]
 
 
 [testing]
 TESTING = true
 DEBUG = true
+LOG_LEVEL = "WARNING"
 JWT_ACCESS_TOKEN_EXPIRES = {minutes = 2}
 JWT_ACCESS_TOKEN_LEEWAY = {minutes = 1}
 JWT_REFRESH_TOKEN_EXPIRES = {minutes = 30}
@@ -80,6 +96,7 @@ JWT_REFRESH_TOKEN_LEEWAY = {minutes = 5}
 USE_OPENAI = false
 
 [production]
+LOG_LEVEL = "INFO"
 JWT_ACCESS_TOKEN_EXPIRES = {days = 7}
 JWT_ACCESS_TOKEN_LEEWAY = {days = 5}
 JWT_REFRESH_TOKEN_EXPIRES = {days = 30}

@@ -1,8 +1,12 @@
-from typing import Sequence
+from contextlib import contextmanager
+from typing import TYPE_CHECKING, Optional, Sequence
 
 import tiktoken
-from langchain.adapters.openai import convert_message_to_dict
-from langchain.schema import BaseMessage
+
+if TYPE_CHECKING:
+    from cookgpt.auth.models import User
+    from cookgpt.chatbot.callback import ChatCallbackHandler
+    from cookgpt.chatbot.models import Chat
 
 
 def num_tokens_from_messages(
@@ -38,6 +42,25 @@ def num_tokens_from_messages(
         )
 
 
-def convert_messages_to_dict(messages: Sequence[BaseMessage]):
-    """Converts a list of messages to a list of dicts."""
-    return [convert_message_to_dict(message) for message in messages]
+def get_stream_name(user: "User", chat: "Chat") -> str:
+    """Returns the stream name for a given user and chat."""
+    return f"stream:{chat.id.hex}"
+
+
+def get_chat_callback():  # pragma: no cover
+    """returns the callbacks for the chain"""
+    from cookgpt.chatbot.callback import ChatCallbackHandler
+
+    return ChatCallbackHandler()
+
+
+@contextmanager
+def use_chat_callback(cb: "Optional[ChatCallbackHandler]" = None):
+    """use chat callback"""
+
+    cb = cb or get_chat_callback()
+    try:
+        cb.register()
+        yield cb
+    finally:
+        cb.unregister()
