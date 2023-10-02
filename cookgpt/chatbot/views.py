@@ -5,6 +5,7 @@ from typing import Optional as O
 from uuid import UUID, uuid4
 
 from apiflask.views import MethodView
+from flask import stream_with_context
 from flask_jwt_extended import get_current_user
 
 from cookgpt import docs, logging
@@ -268,6 +269,7 @@ def read_stream(chat_id: UUID):
 
         return Response(iter(entries), status=200)
 
+    @stream_with_context
     def get_stream(entry_id: bytes):
         logging.debug("Streaming %r from %s", stream, entry_id)
 
