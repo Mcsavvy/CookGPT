@@ -12,7 +12,7 @@ from cookgpt.chatbot.data import examples as ex
 from cookgpt.chatbot.data import schemas as sc
 from cookgpt.chatbot.memory import get_memory_input_key
 from cookgpt.chatbot.models import Chat
-from cookgpt.chatbot.utils import get_stream_name, get_thread
+from cookgpt.chatbot.utils import get_stream_name, get_thread, make_dummy_chat
 from cookgpt.ext import db
 from cookgpt.ext.auth import auth_required
 from cookgpt.utils import abort, api_output
@@ -59,7 +59,7 @@ class ChatsView(MethodView):
         """Delete all messages in a thread."""
         logging.info("DELETE all chats from thread")
         thread = get_thread(json_data["thread_id"])
-        logging.info("Using default thread %s", thread.id)
+        logging.info("Clearing thread %s", thread.id)
         thread.clear()
         return {"message": "All chats deleted"}
 
@@ -94,19 +94,11 @@ class ChatView(MethodView):
     @app.doc(description=docs.CHAT_DELETE_CHAT)
     def delete(self, chat_id):
         """Delete a single chat from a thread."""
-        user = get_current_user()
-        # chat = (
-        #     Chat.query.join(Thread)
-        #     .filter(Chat.id == chat_id, Thread.user_id == user.id)
-        #     .first()
-        # )
         logging.info("DELETE chat %s from thread", chat_id)
-        chat = Chat.query.filter(
-            Chat.id == chat_id, Chat.thread_id == user.default_thread.id
-        ).first()
+        chat = db.session.get(Chat, chat_id)
         if not chat:
             return {"message": "Chat not found"}, 404
-        logging.info("Using default thread %s", chat.thread.id)
+        logging.info("Deleting from thread %s", chat.thread.id)
         chat.delete()
         return {"message": "Chat deleted"}
 
@@ -272,8 +264,8 @@ def read_stream(chat_id: UUID):
 
 app.add_url_rule(
     "/<uuid:chat_id>",
-    view_func=ChatView.as_view("chat"),
+    view_func=ChatView.as_view("singlechat"),
     methods=["GET", "DELETE"],
 )
-app.add_url_rule("/thread", view_func=ChatsView.as_view("thread"))
+app.add_url_rule("/all", view_func=ChatsView.as_view("allchats"))
 app.add_url_rule("/", view_func=ChatView.as_view("query"), methods=["POST"])
