@@ -1,8 +1,6 @@
 """Chatbot views"""
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
-from typing import Optional as O
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from apiflask.views import MethodView
 from flask import stream_with_context
@@ -12,7 +10,6 @@ from cookgpt import docs, logging
 from cookgpt.chatbot import app
 from cookgpt.chatbot.data import examples as ex
 from cookgpt.chatbot.data import schemas as sc
-from cookgpt.chatbot.data.enums import MessageType
 from cookgpt.chatbot.memory import get_memory_input_key
 from cookgpt.chatbot.models import Chat
 from cookgpt.chatbot.utils import get_stream_name
@@ -22,34 +19,6 @@ from cookgpt.utils import abort, api_output
 
 if TYPE_CHECKING:
     from cookgpt.auth.models import User
-
-
-def make_dummy_chat(
-    response: str,
-    id: O[UUID] = None,
-    previous_chat_id: O[UUID] = None,
-    next_chat_id: O[UUID] = None,
-    thread_id: O[UUID] = None,
-    sent_time: O[datetime] = None,
-    chat_type: MessageType = MessageType.RESPONSE,
-    cost: int = 0,
-    streaming: bool = False,
-):
-    """make fake response"""
-
-    return {
-        "chat": {
-            "id": id or uuid4(),
-            "content": response,
-            "chat_type": chat_type,
-            "cost": cost,
-            "previous_chat_id": previous_chat_id,
-            "next_chat_id": next_chat_id,
-            "sent_time": sent_time or datetime.now(tz=timezone.utc),
-            "thread_id": thread_id or uuid4(),
-        },
-        "streaming": streaming,
-    }
 
 
 class ThreadView(MethodView):
@@ -105,19 +74,9 @@ class ChatView(MethodView):
     @app.doc(description=docs.CHAT_GET_CHAT)
     def get(self, chat_id):
         """Get a single chat from a thread."""
-        # TODO: allow user to select thread
-        logging.info("GET chat %s from thread", chat_id)
-        user = get_current_user()
-        thread = user.default_thread
-        logging.info("Using default thread %s", thread.id)
-        # chat = (
-        #     Chat.query.join(Thread)
-        #     .filter(Chat.id == chat_id, Thread.user_id == user.id)
-        #     .first()
-        # )
-        chat = Chat.query.filter(
-            Chat.id == chat_id, Chat.thread_id == thread.id
-        ).first()
+        logging.info("GET chat %s", chat_id)
+        get_current_user()
+        chat = Chat.query.filter(Chat.id == chat_id).first()
         if not chat:
             abort(404, "Chat not found")
         return chat

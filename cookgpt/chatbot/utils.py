@@ -1,7 +1,14 @@
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional, Sequence
+from uuid import UUID, uuid4
 
 import tiktoken
+
+from cookgpt.chatbot.data.enums import MessageType
+from cookgpt.chatbot.models import Thread
+from cookgpt.ext.database import db
+from cookgpt.utils import abort
 
 if TYPE_CHECKING:
     from cookgpt.auth.models import User
@@ -64,3 +71,41 @@ def use_chat_callback(cb: "Optional[ChatCallbackHandler]" = None):
         yield cb
     finally:
         cb.unregister()
+
+
+def get_thread(thread_id: str | UUID, required=True):
+    """Get a thread using it's ID"""
+    if isinstance(thread_id, str):
+        thread_id = UUID(thread_id)
+    thread = db.session.get(Thread, thread_id)
+    if not thread and required:
+        abort(404, "Thread not found")
+    return thread
+
+
+def make_dummy_chat(
+    response: str,
+    id: Optional[UUID] = None,
+    previous_chat_id: Optional[UUID] = None,
+    next_chat_id: Optional[UUID] = None,
+    thread_id: Optional[UUID] = None,
+    sent_time: Optional[datetime] = None,
+    chat_type: MessageType = MessageType.RESPONSE,
+    cost: int = 0,
+    streaming: bool = False,
+):
+    """make fake response"""
+
+    return {
+        "chat": {
+            "id": id or uuid4(),
+            "content": response,
+            "chat_type": chat_type,
+            "cost": cost,
+            "previous_chat_id": previous_chat_id,
+            "next_chat_id": next_chat_id,
+            "sent_time": sent_time or datetime.now(tz=timezone.utc),
+            "thread_id": thread_id or uuid4(),
+        },
+        "streaming": streaming,
+    }
