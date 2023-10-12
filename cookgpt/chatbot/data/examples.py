@@ -17,6 +17,8 @@ ChatExample = {
     "thread_id": Uuid,
 }
 
+ThreadExample = {"id": Uuid, "chat_count": 2, "cost": 220, "is_default": True}
+
 
 class Chat:
     class Get:
@@ -24,9 +26,7 @@ class Chat:
         NotFound = {"message": "chat not found"}
 
     class Post:
-        Body = {
-            "query": Query,
-        }
+        Body = {"query": Query, "thread_id": Uuid}
         Response = {
             "chat": ChatExample,
             "streaming": True,
@@ -39,9 +39,37 @@ class Chat:
 
 class Chats:
     class Get:
+        QueryParams = {"thread_id": Uuid}
         Response = {"chats": [ChatExample]}
         NotFound = {"message": "thread not found"}
 
     class Delete:
+        Body = {"thread_id": Uuid}
         Response = {"message": "all messages deleted"}
-        NotFound = {"message": "thread not found"}
+        NotFound = {"message": "chat not found"}
+
+
+class Thread:
+    class Delete:
+        Response = {"message": "thread deleted"}
+
+    class Get:
+        Response = ThreadExample
+
+    class Post:
+        Body = {"title": "Jollof Rice Recipe"}
+        Response = ThreadExample
+
+    class Patch:
+        Body = {"title": "Jollof Rice Recipe"}
+        Response = ThreadExample
+
+    NotFound = {"message": "thread not found"}
+
+
+class Threads:
+    class Get:
+        Response = {"threads": [ThreadExample, ThreadExample]}
+
+    class Delete:
+        Response = {"message": "all threads deleted"}
