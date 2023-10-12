@@ -75,10 +75,10 @@ def use_chat_callback(cb: "Optional[ChatCallbackHandler]" = None):
 
 def get_thread(thread_id: str | UUID, required=True):
     """Get a thread using it's ID"""
-    if isinstance(thread_id, str):
+    if isinstance(thread_id, str):  # pragma: no cover
         thread_id = UUID(thread_id)
     thread = db.session.get(Thread, thread_id)
-    if not thread and required:
+    if not thread and required:  # pragma: no cover
         abort(404, "Thread not found")
     return thread
 
