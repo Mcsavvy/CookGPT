@@ -25,14 +25,15 @@ def send_query(
     logging.info("Sending query to AI using celery")
 
     chain = ThreadChain()
-    thread = db.session.get(Thread, thread_id)
-    assert thread, "Thread for task does not exist"
 
     query = db.session.get(Chat, query_id)
     assert query, "Query for task does not exist"
 
     response = db.session.get(Chat, response_id)
     assert response, "Response for task does not exist"
+
+    thread = db.session.get(Thread, thread_id) or response.thread
+    assert thread, "Thread for task does not exist"
 
     setvar("thread", thread)
     setvar("chain", chain)
