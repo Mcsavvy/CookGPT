@@ -153,10 +153,15 @@ class Thread:
 
             title = ThreadTitle(allow_none=True)
 
-        class Response(ThreadSchema):
+        class Response(Schema):
             """Details of the created thread"""
 
-            pass
+            message = SuccessMessage(
+                metadata={
+                    "example": "thread created",
+                },
+            )
+            thread = fields.Nested(ThreadSchema)
 
     class Get:
         class Response(ThreadSchema):
@@ -173,8 +178,15 @@ class Thread:
                 metadata={"description": "the new name of the thread"},
             )
 
-        class Response(ThreadSchema):
+        class Response(Schema):
             """Details of the thread"""
+
+            message = SuccessMessage(
+                metadata={
+                    "example": "thread updated",
+                },
+            )
+            thread = fields.Nested(ThreadSchema)
 
     class NotFound(Schema):
         """Thread not found error."""

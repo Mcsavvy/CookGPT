@@ -58,11 +58,11 @@ class Thread:
 
     class Post:
         Body = {"title": "Jollof Rice Recipe"}
-        Response = ThreadExample
+        Response = {"message": "thread created", "thread": ThreadExample}
 
     class Patch:
         Body = {"title": "Jollof Rice Recipe"}
-        Response = ThreadExample
+        Response = {"message": "thread updated", "thread": ThreadExample}
 
     NotFound = {"message": "thread not found"}
 
