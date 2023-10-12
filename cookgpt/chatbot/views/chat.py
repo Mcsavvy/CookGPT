@@ -1,4 +1,4 @@
-"""Chatbot views"""
+"""Chatbot chat views"""
 from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
@@ -22,11 +22,15 @@ if TYPE_CHECKING:
 
 
 class ChatsView(MethodView):
-    """thread endpoints"""
+    """chats endpoints"""
 
     decorators = [auth_required()]
 
-    @app.input(sc.Chats.Get.Body, example=ex.Chats.Get.Body)
+    @app.input(
+        sc.Chats.Get.QueryParams,
+        example=ex.Chats.Get.QueryParams,
+        location="query",
+    )
     @app.output(
         sc.Chats.Get.Response,
         200,
@@ -40,10 +44,10 @@ class ChatsView(MethodView):
         description="An error when the specified thread is not found",
     )
     @app.doc(description=docs.CHAT_GET_CHATS)
-    def get(self, json_data: dict):
+    def get(self, query_data):
         """Get all messages in a thread."""
         logging.info("GET all chats from thread")
-        thread = get_thread(json_data["thread_id"])
+        thread = get_thread(query_data["thread_id"])
         logging.info("Using thread %s", thread.id)
         return {"chats": thread.chats}
 
@@ -264,8 +268,8 @@ def read_stream(chat_id: UUID):
 
 app.add_url_rule(
     "/<uuid:chat_id>",
-    view_func=ChatView.as_view("singlechat"),
+    view_func=ChatView.as_view("single_chat"),
     methods=["GET", "DELETE"],
 )
-app.add_url_rule("/all", view_func=ChatsView.as_view("allchats"))
+app.add_url_rule("/all", view_func=ChatsView.as_view("all_chats"))
 app.add_url_rule("/", view_func=ChatView.as_view("query"), methods=["POST"])
