@@ -51,6 +51,7 @@ class ThreadSchema(Schema):
     """Thread Schema"""
 
     id = ThreadId()
+    title = ThreadTitle()
     chat_count = ThreadChatCount()
     cost = ThreadCost()
     is_default = ThreadIsDefault(attribute="default")
