@@ -25,14 +25,20 @@ def app() -> Generator["App", None, None]:
     app = create_app()
     app_ctx = app.app_context()
     app_ctx.push()
-    db.create_all()
     try:
         yield app
     finally:
-        db.session.rollback()
-        db.drop_all()
         app_ctx.pop()
         config.setenv(old_env)
+
+
+@pytest.fixture(scope="module", autouse=True)
+def database(app: "App"):
+    """The database"""
+    db.create_all()
+    yield db.session
+    db.session.rollback()
+    db.drop_all()
 
 
 @pytest.fixture(scope="function")
@@ -185,3 +191,9 @@ def add_jwt_salt():
     yield salt_adder
 
     jwt._user_claims_callback = old_claims_callback
+
+
+@pytest.fixture(scope="function")
+def auth_header(access_token: str) -> dict[str, str]:
+    """An authorization header"""
+    return {"Authorization": f"Bearer {access_token}"}
