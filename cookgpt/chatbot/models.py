@@ -92,6 +92,11 @@ class Thread(BaseModelMixin, db.Model):  # type: ignore
         return sum(chat.cost for chat in self.chats)  # type: ignore
 
     @property
+    def chat_count(self) -> int:
+        """number of messages in the thread"""
+        return len(self.chats)  # type: ignore
+
+    @property
     def last_chat(self) -> "Chat":
         """get the last chat in the thread"""
         return (
