@@ -500,10 +500,13 @@
                   "$ref": "#/components/schemas/Thread:Post:Response"
                 },
                 "example": {
-                  "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "chat_count": 2,
-                  "cost": 220,
-                  "is_default": true
+                  "message": "thread created",
+                  "thread": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "chat_count": 2,
+                    "cost": 220,
+                    "is_default": true
+                  }
                 }
               }
             },
@@ -923,10 +926,13 @@
                   "$ref": "#/components/schemas/Thread:Patch:Response"
                 },
                 "example": {
-                  "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                  "chat_count": 2,
-                  "cost": 220,
-                  "is_default": true
+                  "message": "thread updated",
+                  "thread": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "chat_count": 2,
+                    "cost": 220,
+                    "is_default": true
+                  }
                 }
               }
             },
@@ -1405,7 +1411,7 @@
           }
         }
       },
-      "Thread:Post:Response": {
+      "Thread": {
         "type": "object",
         "properties": {
           "id": {
@@ -1413,6 +1419,11 @@
             "format": "uuid",
             "description": "chat's thread id",
             "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "title": {
+            "type": "string",
+            "description": "title of the thread",
+            "example": "Jollof Rice Recipe"
           },
           "chat_count": {
             "type": "integer",
@@ -1428,6 +1439,19 @@
             "type": "boolean",
             "description": "indicates if this thread is the default thread",
             "example": true
+          }
+        }
+      },
+      "Thread:Post:Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "success message",
+            "example": "thread created"
+          },
+          "thread": {
+            "$ref": "#/components/schemas/Thread"
           }
         }
       },
@@ -1441,32 +1465,6 @@
           },
           "auth_info": {
             "$ref": "#/components/schemas/AuthInfo"
-          }
-        }
-      },
-      "Thread": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "chat's thread id",
-            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-          },
-          "chat_count": {
-            "type": "integer",
-            "description": "number of chats in this thread",
-            "example": 2
-          },
-          "cost": {
-            "type": "integer",
-            "description": "cost of all chats in this thread",
-            "example": 220
-          },
-          "is_default": {
-            "type": "boolean",
-            "description": "indicates if this thread is the default thread",
-            "example": true
           }
         }
       },
@@ -1575,6 +1573,11 @@
             "description": "chat's thread id",
             "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
           },
+          "title": {
+            "type": "string",
+            "description": "title of the thread",
+            "example": "Jollof Rice Recipe"
+          },
           "chat_count": {
             "type": "integer",
             "description": "number of chats in this thread",
@@ -1606,26 +1609,13 @@
       "Thread:Patch:Response": {
         "type": "object",
         "properties": {
-          "id": {
+          "message": {
             "type": "string",
-            "format": "uuid",
-            "description": "chat's thread id",
-            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+            "description": "success message",
+            "example": "thread updated"
           },
-          "chat_count": {
-            "type": "integer",
-            "description": "number of chats in this thread",
-            "example": 2
-          },
-          "cost": {
-            "type": "integer",
-            "description": "cost of all chats in this thread",
-            "example": 220
-          },
-          "is_default": {
-            "type": "boolean",
-            "description": "indicates if this thread is the default thread",
-            "example": true
+          "thread": {
+            "$ref": "#/components/schemas/Thread"
           }
         }
       },
