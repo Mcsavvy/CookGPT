@@ -61,7 +61,7 @@ Each user has a `max_chat_cost` which is the total number of tokens that he/she 
 For now, the AI's memory has not been optimized and it remembers all chats that it has had with the user. This means that the AI's memory will grow linearly as the user interact with it. This will be fixed in subsequent versions of the API."""
 
 
-CHAT_GET_CHATS = """Use this endpoint to get a list of all chats that the user has participated in. The chats are sorted in descending order of the last message sent in the chat."""
+CHAT_GET_CHATS = """Use this endpoint to get a list of all messages exchanged between the user and the ai in a thread. The chats are sorted in descending order of the last message sent in the thread."""
 
 
 CHAT_DELETE_CHATS = """Use this endpoint to delete all chats in the thread. **This action cannot be undone**."""

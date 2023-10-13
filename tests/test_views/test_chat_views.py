@@ -11,15 +11,22 @@ from cookgpt.chatbot.models import Chat, Thread
 from tests.utils import Random
 
 
-class TestThreadView:
+class TestChatsView:
     """Test the thread view"""
 
     def test_get_all_chats_in_thread(
-        self, client: "FlaskClient", access_token: str, query: "Chat"
+        self,
+        client: "FlaskClient",
+        access_token: str,
+        query: "Chat",
+        thread: Thread,
     ):
         """Test that a user can get all the chats in a thread"""
         headers = {"Authorization": f"Bearer {access_token}"}
-        response = client.get(url_for("chatbot.thread"), headers=headers)
+        response = client.get(
+            url_for("chatbot.all_chats", thread_id=thread.id),
+            headers=headers,
+        )
 
         assert response.status_code == 200
         assert response.json is not None
@@ -44,7 +51,11 @@ class TestThreadView:
 
         assert len(cast(list[Chat], thread.chats)) == 2
         headers = {"Authorization": f"Bearer {access_token}"}
-        response = client.delete(url_for("chatbot.thread"), headers=headers)
+        response = client.delete(
+            url_for("chatbot.all_chats"),
+            headers=headers,
+            json={"thread_id": str(thread.id)},
+        )
 
         assert response.status_code == 200
         assert "message" in response.json  # type: ignore
@@ -61,7 +72,7 @@ class TestChatView:
         """test get a chat"""
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.get(
-            url_for("chatbot.chat", chat_id=query.id), headers=headers
+            url_for("chatbot.single_chat", chat_id=query.id), headers=headers
         )
 
         assert response.status_code == 200
@@ -82,7 +93,7 @@ class TestChatView:
         """test get a chat that does not exist"""
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.get(
-            url_for("chatbot.chat", chat_id=uuid4()), headers=headers
+            url_for("chatbot.single_chat", chat_id=uuid4()), headers=headers
         )
 
         assert response.status_code == 404
@@ -100,7 +111,7 @@ class TestChatView:
         query = Random.chat(thread_id=thread.id, order=0)
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.delete(
-            url_for("chatbot.chat", chat_id=query.id), headers=headers
+            url_for("chatbot.single_chat", chat_id=query.id), headers=headers
         )
 
         assert response.status_code == 200
@@ -114,7 +125,7 @@ class TestChatView:
         """test delete a chat that does not exist"""
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.delete(
-            url_for("chatbot.chat", chat_id=uuid4()), headers=headers
+            url_for("chatbot.single_chat", chat_id=uuid4()), headers=headers
         )
 
         assert response.status_code == 404
@@ -127,7 +138,7 @@ class TestChatView:
     ):
         """Send a query to the chatbot"""
         headers = {"Authorization": f"Bearer {access_token}"}
-        data = {"query": "test query"}
+        data = {"query": "test query", "thread_id": str(thread.id)}
         response = client.post(
             url_for("chatbot.query", stream=False), headers=headers, json=data
         )
@@ -175,7 +186,7 @@ class TestChatView:
     ):
         """Send a query to the chatbot"""
         headers = {"Authorization": f"Bearer {access_token}"}
-        data = {"query": "test query"}
+        data = {"query": "test query", "thread_id": str(thread.id)}
         response = client.post(
             url_for("chatbot.query", stream=True),
             headers=headers,
@@ -228,7 +239,7 @@ class TestChatView:
         """
         thread.user.update(max_chat_cost=0)
         headers = {"Authorization": f"Bearer {access_token}"}
-        data = {"query": "test query"}
+        data = {"query": "test query", "thread_id": str(thread.id)}
         response = client.post(
             url_for("chatbot.query"), headers=headers, json=data
         )
@@ -268,7 +279,7 @@ class TestChatView:
         """
         thread.user.update(max_chat_cost=0)
         headers = {"Authorization": f"Bearer {access_token}"}
-        data = {"query": "test query"}
+        data = {"query": "test query", "thread_id": str(thread.id)}
         response = client.post(
             url_for("chatbot.query"), headers=headers, json=data
         )
@@ -353,12 +364,8 @@ class TestChatView:
         client.post(
             url_for("chatbot.query", stream=True),
             headers={"Authorization": f"Bearer {access_token}"},
-            json={"query": "test query"},
+            json={"query": "test query", "thread_id": str(thread.id)},
         )
-
-        chat = thread.last_chat
-        stream = get_stream_name(thread.user, chat)
-        task_id = app.redis.get(f"{stream}:task")
 
         chat = thread.last_chat
         stream = get_stream_name(thread.user, chat)
@@ -378,6 +385,7 @@ class TestChatView:
         for token in response.response:
             content_bytes += cast(bytes, token)
         content = content_bytes.decode()
+        print(f"content: {content}")
         assert content
 
 

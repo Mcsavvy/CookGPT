@@ -92,6 +92,11 @@ class Thread(BaseModelMixin, db.Model):  # type: ignore
         return sum(chat.cost for chat in self.chats)  # type: ignore
 
     @property
+    def chat_count(self) -> int:
+        """number of messages in the thread"""
+        return len(self.chats)  # type: ignore
+
+    @property
     def last_chat(self) -> "Chat":
         """get the last chat in the thread"""
         return (
@@ -199,6 +204,11 @@ class ThreadMixin:
             )
         return thread
 
+    @property
+    def total_chat_cost(self):
+        """total cost of all messages"""
+        return sum(trd.cost for trd in self.threads)  # type: ignore
+
     def create_thread(
         self, title: str, default=False, closed=False, commit=True
     ):
@@ -232,7 +242,7 @@ class ThreadMixin:
             if previous_chat:
                 thread = previous_chat.thread
             else:
-                thread = self.default_thread
+                raise RuntimeError("thread_id or previous_chat must be given")
         else:
             thread = db.session.get(Thread, thread_id)
             if thread is None:

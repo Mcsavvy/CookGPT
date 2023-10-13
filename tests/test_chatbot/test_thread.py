@@ -157,14 +157,13 @@ class TestThreadMixin:
         assert thread2 in threads
 
     def test_add_message(self, user: "User"):
-        thread = user.create_thread(
-            title="Test Thread", closed=False, default=True
-        )
+        thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_message(
             content="What's your name?",
             chat_type=MessageType.QUERY,
             cost=10,
             commit=True,
+            thread_id=thread.id,
         )
 
         assert query.chat_type == MessageType.QUERY
@@ -251,15 +250,12 @@ class TestThreadMixin:
 
     def test_add_query(self, user: "User"):
         """test add_query method"""
-        thread = user.create_thread(
-            title="Test Thread",
-            closed=False,
-            default=True,
-        )
+        thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_query(
             content="What's your name?",
             cost=5,
             commit=True,
+            thread_id=thread.id,
         )
         assert query.chat_type == MessageType.QUERY
         assert query in cast(list[Chat], thread.chats)
@@ -275,18 +271,19 @@ class TestThreadMixin:
         thread = user.create_thread(
             title="Test Thread",
             closed=False,
-            default=True,
         )
         query = user.add_query(
             content="What's your name?",
             cost=5,
             commit=True,
+            thread_id=thread.id,
         )
         response = user.add_response(
             content="My name is Bot.",
             cost=5,
             previous_chat=query,
             commit=True,
+            thread_id=thread.id,
         )
         assert response.chat_type == MessageType.RESPONSE
         assert response in cast(list[Chat], thread.chats)
@@ -298,6 +295,18 @@ class TestThreadMixin:
         assert response.cost == 5
         assert query.next_chat == response
         assert response.previous_chat_id == query.id
+
+    def test_total_chat_cost(self, user: "User"):
+        """test total_chat_cost property"""
+        for t in range(5):
+            thread = user.create_thread(
+                title=f"Test Thread {t}",
+                closed=False,
+            )
+            for c in range(5):
+                Random.chat(thread_id=thread.id, order=c, cost=5)
+
+        assert user.total_chat_cost == 125
 
     def test_clear_chats(self, user: "User"):
         """test clear_chats method"""
