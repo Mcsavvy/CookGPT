@@ -1,8 +1,6 @@
-"""Chatbot views"""
-from datetime import datetime, timezone
+"""Chatbot chat views"""
 from typing import TYPE_CHECKING, Any
-from typing import Optional as O
-from uuid import UUID, uuid4
+from uuid import UUID
 
 from apiflask.views import MethodView
 from flask import stream_with_context
@@ -12,10 +10,9 @@ from cookgpt import docs, logging
 from cookgpt.chatbot import app
 from cookgpt.chatbot.data import examples as ex
 from cookgpt.chatbot.data import schemas as sc
-from cookgpt.chatbot.data.enums import MessageType
 from cookgpt.chatbot.memory import get_memory_input_key
 from cookgpt.chatbot.models import Chat
-from cookgpt.chatbot.utils import get_stream_name
+from cookgpt.chatbot.utils import get_stream_name, get_thread, make_dummy_chat
 from cookgpt.ext import db
 from cookgpt.ext.auth import auth_required
 from cookgpt.utils import abort, api_output
@@ -24,55 +21,37 @@ if TYPE_CHECKING:
     from cookgpt.auth.models import User
 
 
-def make_dummy_chat(
-    response: str,
-    id: O[UUID] = None,
-    previous_chat_id: O[UUID] = None,
-    next_chat_id: O[UUID] = None,
-    thread_id: O[UUID] = None,
-    sent_time: O[datetime] = None,
-    chat_type: MessageType = MessageType.RESPONSE,
-    cost: int = 0,
-    streaming: bool = False,
-):
-    """make fake response"""
-
-    return {
-        "chat": {
-            "id": id or uuid4(),
-            "content": response,
-            "chat_type": chat_type,
-            "cost": cost,
-            "previous_chat_id": previous_chat_id,
-            "next_chat_id": next_chat_id,
-            "sent_time": sent_time or datetime.now(tz=timezone.utc),
-            "thread_id": thread_id or uuid4(),
-        },
-        "streaming": streaming,
-    }
-
-
-class ThreadView(MethodView):
-    """thread endpoints"""
+class ChatsView(MethodView):
+    """chats endpoints"""
 
     decorators = [auth_required()]
 
+    @app.input(
+        sc.Chats.Get.QueryParams,
+        example=ex.Chats.Get.QueryParams,
+        location="query",
+    )
     @app.output(
         sc.Chats.Get.Response,
         200,
         example=ex.Chats.Get.Response,
         description="All messages in the thread",
     )
+    @api_output(
+        sc.Thread.NotFound,
+        404,
+        example=ex.Thread.NotFound,
+        description="An error when the specified thread is not found",
+    )
     @app.doc(description=docs.CHAT_GET_CHATS)
-    def get(self):
+    def get(self, query_data):
         """Get all messages in a thread."""
-        # TODO: allow user to select thread
         logging.info("GET all chats from thread")
-        user = get_current_user()
-        thread = user.default_thread
-        logging.info("Using default thread %s", thread.id)
+        thread = get_thread(query_data["thread_id"])
+        logging.info("Using thread %s", thread.id)
         return {"chats": thread.chats}
 
+    @app.input(sc.Chats.Delete.Body, example=ex.Chats.Delete.Body)
     @app.output(
         sc.Chats.Delete.Response,
         200,
@@ -80,13 +59,11 @@ class ThreadView(MethodView):
         description="Success message",
     )
     @app.doc(description=docs.CHAT_DELETE_CHATS)
-    def delete(self):
+    def delete(self, json_data):
         """Delete all messages in a thread."""
         logging.info("DELETE all chats from thread")
-        # TODO: allow user to select thread
-        user = get_current_user()
-        thread = user.default_thread
-        logging.info("Using default thread %s", thread.id)
+        thread = get_thread(json_data["thread_id"])
+        logging.info("Clearing thread %s", thread.id)
         thread.clear()
         return {"message": "All chats deleted"}
 
@@ -105,19 +82,9 @@ class ChatView(MethodView):
     @app.doc(description=docs.CHAT_GET_CHAT)
     def get(self, chat_id):
         """Get a single chat from a thread."""
-        # TODO: allow user to select thread
-        logging.info("GET chat %s from thread", chat_id)
-        user = get_current_user()
-        thread = user.default_thread
-        logging.info("Using default thread %s", thread.id)
-        # chat = (
-        #     Chat.query.join(Thread)
-        #     .filter(Chat.id == chat_id, Thread.user_id == user.id)
-        #     .first()
-        # )
-        chat = Chat.query.filter(
-            Chat.id == chat_id, Chat.thread_id == thread.id
-        ).first()
+        logging.info("GET chat %s", chat_id)
+        get_current_user()
+        chat = Chat.query.filter(Chat.id == chat_id).first()
         if not chat:
             abort(404, "Chat not found")
         return chat
@@ -131,19 +98,11 @@ class ChatView(MethodView):
     @app.doc(description=docs.CHAT_DELETE_CHAT)
     def delete(self, chat_id):
         """Delete a single chat from a thread."""
-        user = get_current_user()
-        # chat = (
-        #     Chat.query.join(Thread)
-        #     .filter(Chat.id == chat_id, Thread.user_id == user.id)
-        #     .first()
-        # )
         logging.info("DELETE chat %s from thread", chat_id)
-        chat = Chat.query.filter(
-            Chat.id == chat_id, Chat.thread_id == user.default_thread.id
-        ).first()
+        chat = db.session.get(Chat, chat_id)
         if not chat:
             return {"message": "Chat not found"}, 404
-        logging.info("Using default thread %s", chat.thread.id)
+        logging.info("Deleting from thread %s", chat.thread.id)
         chat.delete()
         return {"message": "Chat deleted"}
 
@@ -168,6 +127,12 @@ class ChatView(MethodView):
         example=ex.Chat.Post.Response,
         description="A dummy response",
     )
+    @api_output(
+        sc.Thread.NotFound,
+        404,
+        example=ex.Thread.NotFound,
+        description="An error when the specified thread is not found",
+    )
     @app.doc(description=docs.CHAT_POST_CHAT)
     def post(self, json_data: dict, query_data: dict) -> Any:
         """Send a message to the chatbot."""
@@ -179,6 +144,7 @@ class ChatView(MethodView):
         input_key = get_memory_input_key()
         query: str = json_data["query"]
         user: "User" = get_current_user()
+        thread = get_thread(json_data["thread_id"])
 
         stream_response = query_data["stream"]
 
@@ -186,10 +152,7 @@ class ChatView(MethodView):
             logging.info("POST chat to thread (streamed)")
         else:
             logging.info("POST chat to thread")
-
-        # TODO: allow user to select thread
-        thread = user.default_thread
-        logging.info("Using default thread %s", thread.id)
+        logging.info("Using thread %s", thread.id)
         if thread.cost >= user.max_chat_cost:
             return (
                 make_dummy_chat(
@@ -251,7 +214,7 @@ def read_stream(chat_id: UUID):
     chat = db.session.get(Chat, chat_id)
     if not chat:
         abort(404, "Chat does not exist.")
-    logging.debug("Using default thread %s", chat.thread.id)
+    logging.debug("Using thread %s", chat.thread.id)
     user: "User" = chat.thread.user
     stream = get_stream_name(user, chat)
 
@@ -305,8 +268,8 @@ def read_stream(chat_id: UUID):
 
 app.add_url_rule(
     "/<uuid:chat_id>",
-    view_func=ChatView.as_view("chat"),
+    view_func=ChatView.as_view("single_chat"),
     methods=["GET", "DELETE"],
 )
-app.add_url_rule("/thread", view_func=ThreadView.as_view("thread"))
+app.add_url_rule("/all", view_func=ChatsView.as_view("all_chats"))
 app.add_url_rule("/", view_func=ChatView.as_view("query"), methods=["POST"])

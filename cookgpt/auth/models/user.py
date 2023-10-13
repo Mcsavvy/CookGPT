@@ -71,11 +71,6 @@ class User(
         """get user's name"""
         return (self.username or self.first_name).title()
 
-    @property
-    def total_chat_cost(self):
-        """total cost of all messages"""
-        return sum(trd.cost for trd in self.threads)  # type: ignore
-
     def validate_password(self, password):
         """verify that a password can be used to authenticate as this user"""
         return check_password_hash(self.password, password)

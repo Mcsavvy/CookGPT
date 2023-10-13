@@ -2,7 +2,7 @@
   "info": {
     "description": "Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered cooking assistance.\n\nThe API allows you to perform various actions such as user authentication, managing user information, and interacting with the AI chat functionality.\n\nThe API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.",
     "title": "Cookgpt",
-    "version": "0.2.4"
+    "version": "0.3.0"
   },
   "tags": [
     {
@@ -86,6 +86,19 @@
             },
             "description": "insufficient permissions"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thread:NotFound"
+                },
+                "example": {
+                  "message": "thread not found"
+                }
+              }
+            },
+            "description": "An error when the specified thread is not found"
+          },
           "200": {
             "content": {
               "application/json": {
@@ -122,7 +135,154 @@
                 "$ref": "#/components/schemas/Chat:Post:Body"
               },
               "example": {
-                "query": "Hi, I need a recipe for rice"
+                "query": "Hi, I need a recipe for rice",
+                "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/chat/all": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "thread_id",
+            "description": "id of thread to get chats from",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chats:Get:Response"
+                },
+                "example": {
+                  "chats": [
+                    {
+                      "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                      "content": "Okay, tell me what type of rice so I can suggest recipes",
+                      "chat_type": "RESPONSE",
+                      "cost": 0,
+                      "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                      "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                      "sent_time": "2021-01-01 00:00:00",
+                      "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "All messages in the thread"
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "could not validate input data"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thread:NotFound"
+                },
+                "example": {
+                  "message": "thread not found"
+                }
+              }
+            },
+            "description": "An error when the specified thread is not found"
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "summary": "Get all messages in a thread.",
+        "description": "Use this endpoint to get a list of all messages exchanged between the user and the ai in a thread. The chats are sorted in descending order of the last message sent in the thread.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Chats:Delete:Response"
+                },
+                "example": {
+                  "message": "chat deleted"
+                }
+              }
+            },
+            "description": "Success message"
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "could not validate input data"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          }
+        },
+        "tags": [
+          "chat"
+        ],
+        "summary": "Delete all messages in a thread.",
+        "description": "Use this endpoint to delete all chats in the thread. **This action cannot be undone**.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Chats:Delete:Body"
+              },
+              "example": {
+                "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
               }
             }
           }
@@ -330,32 +490,37 @@
       }
     },
     "/chat/thread": {
-      "get": {
+      "post": {
         "parameters": [],
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Chats:Get:Response"
+                  "$ref": "#/components/schemas/Thread:Post:Response"
                 },
                 "example": {
-                  "chats": [
-                    {
-                      "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                      "content": "Okay, tell me what type of rice so I can suggest recipes",
-                      "chat_type": "RESPONSE",
-                      "cost": 0,
-                      "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                      "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                      "sent_time": "2021-01-01 00:00:00",
-                      "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-                    }
-                  ]
+                  "message": "thread created",
+                  "thread": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "chat_count": 2,
+                    "cost": 220,
+                    "is_default": true
+                  }
                 }
               }
             },
-            "description": "All messages in the thread"
+            "description": "Successful response"
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "could not validate input data"
           },
           "403": {
             "content": {
@@ -369,48 +534,22 @@
           }
         },
         "tags": [
-          "chat"
+          "thread"
         ],
-        "summary": "Get all messages in a thread.",
-        "description": "Use this endpoint to get a list of all chats that the user has participated in. The chats are sorted in descending order of the last message sent in the chat.",
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
-      },
-      "delete": {
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Chats:Delete:Response"
-                },
-                "example": {
-                  "message": "chat deleted"
-                }
+        "summary": "Create a new thread.",
+        "description": "You can optionally supply the title of the thread to create by         supplying the `title` field in the body of the request",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Thread:Post:Body"
+              },
+              "example": {
+                "title": "Jollof Rice Recipe"
               }
-            },
-            "description": "Success message"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPError"
-                }
-              }
-            },
-            "description": "insufficient permissions"
+            }
           }
         },
-        "tags": [
-          "chat"
-        ],
-        "summary": "Delete all messages in a thread.",
-        "description": "Use this endpoint to delete all chats in the thread. **This action cannot be undone**.",
         "security": [
           {
             "BearerAuth": []
@@ -459,6 +598,92 @@
         ],
         "summary": "Refresh the access token.",
         "description": "Use this endpoint to refresh an access token. The access token is used to authenticate the user for a limited time. The refresh token is used to get a new access token when the old one expires. \n\nThe refresh token should be sent in the **Authorization** header as a `Bearer` token for all requests that require authentication.\n\nThe output of this endpoint is similar to the `/auth/login` endpoint.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/chat/threads": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Threads:Get:Response"
+                },
+                "example": {
+                  "threads": [
+                    {
+                      "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                      "chat_count": 2,
+                      "cost": 220,
+                      "is_default": true
+                    },
+                    {
+                      "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                      "chat_count": 2,
+                      "cost": 220,
+                      "is_default": true
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          }
+        },
+        "tags": [
+          "thread"
+        ],
+        "summary": "Get all threads",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Threads:Delete:Response"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          }
+        },
+        "tags": [
+          "thread"
+        ],
+        "summary": "Delete all threads",
         "security": [
           {
             "BearerAuth": []
@@ -627,6 +852,201 @@
         "summary": "Read a streamed response bit by bit.",
         "description": "Use this endpoint to read the AI assistant's response bit by bit. This endpoint is used when the AI assistant is streaming it's response. The `chat_id` url parameter is used to specify the chat that you want to read from. The `id` field in the response body from the `/chat` endpoint contains the `chat_id`."
       }
+    },
+    "/chat/thread/{thread_id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thread:Get:Response"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Not found"
+          }
+        },
+        "tags": [
+          "thread"
+        ],
+        "summary": "Get details of a thread.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thread:Patch:Response"
+                },
+                "example": {
+                  "message": "thread updated",
+                  "thread": {
+                    "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "chat_count": 2,
+                    "cost": 220,
+                    "is_default": true
+                  }
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "could not validate input data"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Not found"
+          }
+        },
+        "tags": [
+          "thread"
+        ],
+        "summary": "Modify a thread's information",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Thread:Patch:Body"
+              },
+              "example": {
+                "title": "Jollof Rice Recipe"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "schema": {
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Thread:Delete:Response"
+                },
+                "example": {
+                  "message": "thread deleted"
+                }
+              }
+            },
+            "description": "Successful response"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "Not found"
+          }
+        },
+        "tags": [
+          "thread"
+        ],
+        "summary": "Delete a thread and all chats within it",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
     }
   },
   "openapi": "3.0.2",
@@ -674,10 +1094,17 @@
             "type": "string",
             "description": "chat content",
             "example": "Hi, I need a recipe for rice"
+          },
+          "thread_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "the id of the thread this chat belongs to",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
           }
         },
         "required": [
-          "query"
+          "query",
+          "thread_id"
         ]
       },
       "Chat": {
@@ -705,7 +1132,7 @@
           },
           "cost": {
             "type": "integer",
-            "description": "chat cost",
+            "description": "cost of this chat",
             "example": 100
           },
           "previous_chat_id": {
@@ -746,6 +1173,74 @@
             "type": "boolean",
             "description": "indicates if the chatbot is streaming",
             "example": true
+          }
+        }
+      },
+      "Thread:NotFound": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "error message",
+            "example": "thread not found"
+          }
+        }
+      },
+      "Chats:Get:Response": {
+        "type": "object",
+        "properties": {
+          "chats": {
+            "type": "array",
+            "description": "list of chats",
+            "example": [
+              {
+                "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "content": "Okay, tell me what type of rice so I can suggest recipes",
+                "chat_type": "RESPONSE",
+                "cost": 0,
+                "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "sent_time": "2021-01-01 00:00:00",
+                "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+              },
+              {
+                "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "content": "Okay, tell me what type of rice so I can suggest recipes",
+                "chat_type": "RESPONSE",
+                "cost": 0,
+                "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "sent_time": "2021-01-01 00:00:00",
+                "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+              }
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Chat"
+            }
+          }
+        }
+      },
+      "Chats:Delete:Body": {
+        "type": "object",
+        "properties": {
+          "thread_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "id of thread to be cleared",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          }
+        },
+        "required": [
+          "thread_id"
+        ]
+      },
+      "Chats:Delete:Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "success message",
+            "example": "all chats deleted"
           }
         }
       },
@@ -905,47 +1400,58 @@
           }
         }
       },
-      "Chats:Get:Response": {
+      "Thread:Post:Body": {
         "type": "object",
         "properties": {
-          "chats": {
-            "type": "array",
-            "description": "list of chats",
-            "example": [
-              {
-                "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "content": "Okay, tell me what type of rice so I can suggest recipes",
-                "chat_type": "RESPONSE",
-                "cost": 0,
-                "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "sent_time": "2021-01-01 00:00:00",
-                "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-              },
-              {
-                "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "content": "Okay, tell me what type of rice so I can suggest recipes",
-                "chat_type": "RESPONSE",
-                "cost": 0,
-                "previous_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "next_chat_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                "sent_time": "2021-01-01 00:00:00",
-                "thread_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
-              }
-            ],
-            "items": {
-              "$ref": "#/components/schemas/Chat"
-            }
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "description": "title of the thread",
+            "example": "Jollof Rice Recipe"
           }
         }
       },
-      "Chats:Delete:Response": {
+      "Thread": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "chat's thread id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "title": {
+            "type": "string",
+            "description": "title of the thread",
+            "example": "Jollof Rice Recipe"
+          },
+          "chat_count": {
+            "type": "integer",
+            "description": "number of chats in this thread",
+            "example": 2
+          },
+          "cost": {
+            "type": "integer",
+            "description": "cost of all chats in this thread",
+            "example": 220
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "indicates if this thread is the default thread",
+            "example": true
+          }
+        }
+      },
+      "Thread:Post:Response": {
         "type": "object",
         "properties": {
           "message": {
             "type": "string",
             "description": "success message",
-            "example": "all chats deleted"
+            "example": "thread created"
+          },
+          "thread": {
+            "$ref": "#/components/schemas/Thread"
           }
         }
       },
@@ -959,6 +1465,36 @@
           },
           "auth_info": {
             "$ref": "#/components/schemas/AuthInfo"
+          }
+        }
+      },
+      "Threads:Get:Response": {
+        "type": "object",
+        "properties": {
+          "threads": {
+            "type": "array",
+            "description": "all threads",
+            "example": [
+              {
+                "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                "chat_count": 2,
+                "cost": 220,
+                "is_default": true
+              }
+            ],
+            "items": {
+              "$ref": "#/components/schemas/Thread"
+            }
+          }
+        }
+      },
+      "Threads:Delete:Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "success message",
+            "example": "all threads deleted"
           }
         }
       },
@@ -987,7 +1523,7 @@
           },
           "cost": {
             "type": "integer",
-            "description": "chat cost",
+            "description": "cost of this chat",
             "example": 100
           },
           "previous_chat_id": {
@@ -1025,6 +1561,71 @@
             "type": "string",
             "description": "success message",
             "example": "chat deleted"
+          }
+        }
+      },
+      "Thread:Get:Response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "chat's thread id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "title": {
+            "type": "string",
+            "description": "title of the thread",
+            "example": "Jollof Rice Recipe"
+          },
+          "chat_count": {
+            "type": "integer",
+            "description": "number of chats in this thread",
+            "example": 2
+          },
+          "cost": {
+            "type": "integer",
+            "description": "cost of all chats in this thread",
+            "example": 220
+          },
+          "is_default": {
+            "type": "boolean",
+            "description": "indicates if this thread is the default thread",
+            "example": true
+          }
+        }
+      },
+      "Thread:Patch:Body": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true,
+            "description": "the new name of the thread",
+            "example": "Jollof Rice Recipe"
+          }
+        }
+      },
+      "Thread:Patch:Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "success message",
+            "example": "thread updated"
+          },
+          "thread": {
+            "$ref": "#/components/schemas/Thread"
+          }
+        }
+      },
+      "Thread:Delete:Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "success message",
+            "example": "thread deleted"
           }
         }
       }
