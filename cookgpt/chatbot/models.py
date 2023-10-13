@@ -199,6 +199,11 @@ class ThreadMixin:
             )
         return thread
 
+    @property
+    def total_chat_cost(self):
+        """total cost of all messages"""
+        return sum(trd.cost for trd in self.threads)  # type: ignore
+
     def create_thread(
         self, title: str, default=False, closed=False, commit=True
     ):
