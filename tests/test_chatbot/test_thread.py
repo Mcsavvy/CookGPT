@@ -157,14 +157,13 @@ class TestThreadMixin:
         assert thread2 in threads
 
     def test_add_message(self, user: "User"):
-        thread = user.create_thread(
-            title="Test Thread", closed=False, default=True
-        )
+        thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_message(
             content="What's your name?",
             chat_type=MessageType.QUERY,
             cost=10,
             commit=True,
+            thread_id=thread.id,
         )
 
         assert query.chat_type == MessageType.QUERY
@@ -251,15 +250,12 @@ class TestThreadMixin:
 
     def test_add_query(self, user: "User"):
         """test add_query method"""
-        thread = user.create_thread(
-            title="Test Thread",
-            closed=False,
-            default=True,
-        )
+        thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_query(
             content="What's your name?",
             cost=5,
             commit=True,
+            thread_id=thread.id,
         )
         assert query.chat_type == MessageType.QUERY
         assert query in cast(list[Chat], thread.chats)
@@ -275,18 +271,19 @@ class TestThreadMixin:
         thread = user.create_thread(
             title="Test Thread",
             closed=False,
-            default=True,
         )
         query = user.add_query(
             content="What's your name?",
             cost=5,
             commit=True,
+            thread_id=thread.id,
         )
         response = user.add_response(
             content="My name is Bot.",
             cost=5,
             previous_chat=query,
             commit=True,
+            thread_id=thread.id,
         )
         assert response.chat_type == MessageType.RESPONSE
         assert response in cast(list[Chat], thread.chats)
