@@ -242,7 +242,7 @@ class ThreadMixin:
             if previous_chat:
                 thread = previous_chat.thread
             else:
-                thread = self.default_thread
+                raise RuntimeError("thread_id or previous_chat must be given")
         else:
             thread = db.session.get(Thread, thread_id)
             if thread is None:
