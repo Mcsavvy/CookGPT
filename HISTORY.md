@@ -2,6 +2,11 @@ Changelog
 =========
 
 
+0.4.0 (2023-10-13)
+------------------
+- Chat Threads. [Isaac Olumide Ogunfolaju]
+
+
 0.3.0 (2023-10-02)
 ------------------
 - Streaming Response 💥💫 [mcsavvy]
