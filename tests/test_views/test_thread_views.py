@@ -1,3 +1,4 @@
+from typing import cast
 from uuid import uuid4
 
 import pytest
@@ -24,7 +25,7 @@ class TestThreadView:
         )
         assert response.status_code == 200
 
-        data = response.json
+        data = cast(dict, response.json)
         assert data["id"] == str(thread.id)
         assert data["title"] == "Test Thread"
         assert data["chat_count"] == 2
@@ -49,7 +50,7 @@ class TestThreadView:
             headers=auth_header,
         )
         assert response.status_code == 200
-        data = response.json
+        data = cast(dict, response.json)
         assert data["id"] == str(thread.id)
         assert data["title"] == "Test Thread"
         assert data["chat_count"] == 0
@@ -64,9 +65,9 @@ class TestThreadView:
         )
         assert response.status_code == 201
 
-        assert response.json.get("message")
+        assert cast(dict, response.json).get("message")
 
-        data = response.json["thread"]
+        data = cast(dict, cast(dict, response.json)["thread"])
         assert data["id"]
         assert data["title"] == "New Thread"
         assert data["chat_count"] == 0
@@ -85,9 +86,9 @@ class TestThreadView:
             headers=auth_header,
         )
         assert response.status_code == 200
-        assert response.json.get("message")
+        assert cast(dict, response.json).get("message")
 
-        data = response.json["thread"]
+        data = cast(dict, cast(dict, response.json)["thread"])
         assert data["id"] == str(thread.id)
         assert data["title"] == "Updated Thread"
         assert data["chat_count"] == 0
@@ -121,7 +122,7 @@ class TestThreadsView:
             url_for("chatbot.all_threads"), headers=auth_header
         )
         assert response.status_code == 200
-        assert len(response.json["threads"]) == 0
+        assert len(cast(dict, response.json)["threads"]) == 0
 
         user.create_thread(title="Test Thread 1")
         user.create_thread(title="Test Thread 2")
@@ -129,8 +130,8 @@ class TestThreadsView:
             url_for("chatbot.all_threads"), headers=auth_header
         )
         assert response.status_code == 200
-        assert len(response.json["threads"]) == 2
-        for thread in response.json["threads"]:
+        assert len(cast(dict, response.json)["threads"]) == 2
+        for thread in cast(dict[str, list[dict]], response.json)["threads"]:
             assert thread["id"]
             assert thread["title"]
             assert thread["chat_count"] == 0
