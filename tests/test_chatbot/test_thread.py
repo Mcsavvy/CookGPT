@@ -296,6 +296,18 @@ class TestThreadMixin:
         assert query.next_chat == response
         assert response.previous_chat_id == query.id
 
+    def test_total_chat_cost(self, user: "User"):
+        """test total_chat_cost property"""
+        for t in range(5):
+            thread = user.create_thread(
+                title=f"Test Thread {t}",
+                closed=False,
+            )
+            for c in range(5):
+                Random.chat(thread_id=thread.id, order=c, cost=5)
+
+        assert user.total_chat_cost == 125
+
     def test_clear_chats(self, user: "User"):
         """test clear_chats method"""
 
