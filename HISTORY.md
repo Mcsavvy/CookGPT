@@ -2,6 +2,42 @@ Changelog
 =========
 
 
+0.5.0 (2023-10-14)
+------------------
+
+New
+~~~
+- Feat(chat): Implicit thread creation. [Isaac Olumide Ogunfolaju]
+- Feat(makefile): Add OpenAPI spec generation. [Isaac Olumide
+  Ogunfolaju]
+
+Changes
+~~~~~~~
+- Chore: generated coverage. [Isaac Olumide Ogunfolaju]
+- Refactor: Simplify logic for creating a new thread. [Isaac Olumide
+  Ogunfolaju]
+- Chore(openapi): generated openapi spec. [Isaac Olumide Ogunfolaju]
+
+Fix
+~~~
+- Update default thread title to "New Thread" [Isaac Olumide Ogunfolaju]
+
+Docs
+~~~~
+- Docs: update docs_path to root directory. [Isaac Olumide Ogunfolaju]
+
+Tests
+~~~~~
+- Test: Test implicit thread creation. [Isaac Olumide Ogunfolaju]
+- Test: test add_message method with no thread_id or previous_chat.
+  [Isaac Olumide Ogunfolaju]
+- Test: Split test into multiple methods. [Isaac Olumide Ogunfolaju]
+
+Other
+~~~~~
+- Implicit Thread Creation. [github-actions[bot]]
+
+
 0.4.2 (2023-10-14)
 ------------------
 - Build: Add setup-python action and generate changelog. [Isaac Olumide
