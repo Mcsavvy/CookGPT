@@ -156,7 +156,7 @@ class TestThreadMixin:
         assert thread1 in threads
         assert thread2 in threads
 
-    def test_add_message(self, user: "User"):
+    def test_add_query_message(self, user: "User"):
         thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_message(
             content="What's your name?",
@@ -175,7 +175,15 @@ class TestThreadMixin:
         assert query.content == "What's your name?"
         assert query.cost == 10
 
-        # adding messages using previous_chat's thread
+    def test_add_response_message_using_previous_chat(self, user: "User"):
+        thread = user.create_thread(title="Test Thread", closed=False)
+        query = user.add_message(
+            content="What's your name?",
+            chat_type=MessageType.QUERY,
+            cost=10,
+            commit=True,
+            thread_id=thread.id,
+        )
         response = user.add_message(
             content="My name is Bot.",
             chat_type=MessageType.RESPONSE,
@@ -194,7 +202,8 @@ class TestThreadMixin:
         assert query.next_chat == response
         assert response.previous_chat_id == query.id
 
-        # adding messages using thread_id
+    def test_add_query_message_using_thread_id(self, user: "User"):
+        thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_message(
             content="What's your name?",
             chat_type=MessageType.QUERY,
@@ -206,23 +215,9 @@ class TestThreadMixin:
         assert query.chat_type == MessageType.QUERY
         assert query in cast(list[Chat], thread.chats)
         assert query.thread_id == thread.id
-        assert query.order == 2
+        assert query.order == 0
 
-        # adding messages using default thread
-        response = user.add_message(
-            content="My name is Bot.",
-            chat_type=MessageType.RESPONSE,
-            cost=10,
-            previous_chat=query,
-            commit=True,
-        )
-
-        assert response.chat_type == MessageType.RESPONSE
-        assert response in cast(list[Chat], thread.chats)
-        assert response.thread_id == thread.id
-        assert response.order == 3
-
-        # adding to non existent thread
+    def test_add_message_to_non_existent_thread(self, user: "User"):
         with pytest.raises(ValueError) as exc_info:
             user.add_message(
                 content="My name is Bot.",
@@ -233,7 +228,7 @@ class TestThreadMixin:
             )
         exc_info.match("thread_id is invalid")
 
-        # adding to another user's thread
+    def test_add_message_to_another_users_thread(self, user: "User"):
         user2 = Random.user()
         thread2 = user2.create_thread(
             title="Test Thread 2", closed=False, default=False
