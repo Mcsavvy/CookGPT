@@ -2,6 +2,28 @@ Changelog
 =========
 
 
+0.4.1 (2023-10-14)
+------------------
+
+Changes
+~~~~~~~
+- Chore: Update deploy workflow and release workflow. [Isaac Olumide
+  Ogunfolaju]
+- Chore(ci): update merge method to merge. [Isaac Olumide Ogunfolaju]
+- Refactor: improve release message script. [Isaac Olumide Ogunfolaju]
+
+Fix
+~~~
+- Fix(workflow): installed gitchangelog in release.yml. [Isaac Olumide
+  Ogunfolaju]
+
+Other
+~~~~~
+- Bump version to 0.4.0. [github-actions[bot]]
+- Bump version to 0.3.0. [github-actions[bot]]
+- Bump version to 0.2.4. [github-actions[bot]]
+
+
 0.4.0 (2023-10-13)
 ------------------
 - Chat Threads. [Isaac Olumide Ogunfolaju]
