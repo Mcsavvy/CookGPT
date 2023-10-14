@@ -54,7 +54,7 @@ jobs:
       - uses: pascalgn/automerge-action@v0.15.6
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MERGE_METHOD: squash
+          MERGE_METHOD: merge
           MERGE_COMMIT_MESSAGE: ${{ github.event.pull_request.title }}
           MERGE_DELETE_BRANCH: true
           PULL_REQUEST: ${{ github.event.number }}
