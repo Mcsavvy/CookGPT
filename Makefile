@@ -79,3 +79,8 @@ release:          ## Create a new tag for release.
 .PHONY: hooks
 hooks:            ## Add git hooks to local environment
 	@ln -f .githooks/pre-commit .git/hooks/pre-commit
+
+.PHONY: spec
+spec:             ## Generate OpenAPI spec.
+	@$(ENV_PREFIX)/flask spec > openapi.json
+	echo "OpenAPI spec generated at openapi.json"

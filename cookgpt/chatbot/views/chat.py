@@ -144,7 +144,11 @@ class ChatView(MethodView):
         input_key = get_memory_input_key()
         query: str = json_data["query"]
         user: "User" = get_current_user()
-        thread = get_thread(json_data["thread_id"])
+
+        if "thread_id" in json_data:
+            thread = get_thread(json_data["thread_id"])
+        else:
+            thread = user.create_thread(title="New Thread")
 
         stream_response = query_data["stream"]
 
