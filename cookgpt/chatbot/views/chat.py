@@ -146,9 +146,7 @@ class ChatView(MethodView):
         user: "User" = get_current_user()
 
         if "thread_id" in json_data:
-            thread = get_thread(json_data["thread_id"], required=True)
-            if not thread:
-                thread = user.create_thread(title="New Thread")
+            thread = get_thread(json_data["thread_id"])
         else:
             thread = user.create_thread(title="New Thread")
 
