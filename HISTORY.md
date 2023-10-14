@@ -2,6 +2,12 @@ Changelog
 =========
 
 
+0.4.2 (2023-10-14)
+------------------
+- Build: Add setup-python action and generate changelog. [Isaac Olumide
+  Ogunfolaju]
+
+
 0.4.1 (2023-10-14)
 ------------------
 
