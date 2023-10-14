@@ -31,7 +31,9 @@ class App(APIFlask):
     redis: "Redis"
 
     def __init__(self, *args, **kwargs):
-        kwargs.update(title="Cookgpt", version=VERSION, docs_ui="elements")
+        kwargs.update(
+            title="Cookgpt", version=VERSION, docs_ui="elements", docs_path="/"
+        )
         super().__init__(*args, **kwargs)
 
         self.schema_name_resolver = schema_name_resolver
