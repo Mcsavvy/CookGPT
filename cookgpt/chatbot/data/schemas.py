@@ -65,9 +65,11 @@ class Chat:
             query = ChatContent(required=True)
             thread_id = ThreadId(
                 metadata={
-                    "description": "the id of the thread this chat belongs to"
+                    "description": (
+                        "The id of the thread this chat belongs to. "
+                        "If not specified, a new thread will be created."
+                    ),
                 },
-                required=True,
             )
 
         class QueryParams(Schema):
