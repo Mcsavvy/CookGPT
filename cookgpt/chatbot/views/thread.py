@@ -37,7 +37,7 @@ class ThreadView(MethodView):
         You can optionally supply the title of the thread to create by \
         supplying the `title` field in the body of the request
         """
-        title = json_data.get("title", "Untitled Thread")
+        title = json_data.get("title", "New Thread")
         user: "User" = get_current_user()
         logging.info(f"POST thread {title!r} by {user.name!r}")
         thread = user.create_thread(title=title)
