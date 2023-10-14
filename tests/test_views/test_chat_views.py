@@ -8,6 +8,7 @@ from flask.testing import FlaskClient
 from cookgpt.app import App
 from cookgpt.chatbot.data.enums import MessageType
 from cookgpt.chatbot.models import Chat, Thread
+from cookgpt.chatbot.utils import get_thread
 from tests.utils import Random
 
 
@@ -177,6 +178,40 @@ class TestChatView:
         assert chats[1].next_chat_id is None
         assert chats[1].thread_id == thread.id
         assert chats[1].chat_type == MessageType.RESPONSE
+
+    def test_send_query__non_existent_thread(
+        self, client: "FlaskClient", auth_header: dict
+    ):
+        """Send query to chatbot using a non-existent thread"""
+        data = {"query": "test query", "thread_id": uuid4()}
+        response = client.post(
+            url_for("chatbot.query", stream=False),
+            headers=auth_header,
+            json=data,
+        )
+
+        assert response.status_code == 404
+        assert response.json is not None
+        assert "message" in response.json
+        assert "not found" in response.json["message"].lower()
+
+    def test_send_query__no_thread_id(
+        self, client: "FlaskClient", auth_header: dict
+    ):
+        """Test implicit thread creation"""
+        data = {"query": "test query"}
+        response = client.post(
+            url_for("chatbot.query", stream=False),
+            headers=auth_header,
+            json=data,
+        )
+
+        assert response.status_code == 201
+        assert response.json is not None
+        thread = get_thread(response.json["chat"]["thread_id"])
+
+        assert thread.chat_count == 2
+        assert cast(list[Chat], thread.chats)[0].content == "test query"
 
     def test_send_query__streaming(
         self,
