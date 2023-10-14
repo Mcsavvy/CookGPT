@@ -17,6 +17,11 @@ jobs:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
           fetch-depth: 0
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.10.5'
+      - name: Install gitchangelog
+        run: pip install gitchangelog
       - name: Generate Changelog
         run: .github/release_message.sh > release_message.md
       - name: Release
@@ -29,13 +34,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.10.5'
-      - name: Install gitchangelog
-        run: pip install gitchangelog
-      - name: Generate Changelog
-        run: .github/release_message.sh > pr_body.md
       - name: Create Pull Request
         run: |
           TAG=$(git tag -l | tail -1)
