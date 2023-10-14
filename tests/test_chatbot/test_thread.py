@@ -243,6 +243,17 @@ class TestThreadMixin:
             )
         exc_info.match("thread not owned by user")
 
+    def test_add_message__no_thread_id_or_previous_chat(self, user: "User"):
+        """test add_message method with no thread_id or previous_chat"""
+        with pytest.raises(RuntimeError) as exc_info:
+            user.add_message(
+                content="My name is Bot.",
+                chat_type=MessageType.RESPONSE,
+                cost=10,
+                commit=True,
+            )
+        exc_info.match("thread_id or previous_chat must be given")
+
     def test_add_query(self, user: "User"):
         """test add_query method"""
         thread = user.create_thread(title="Test Thread", closed=False)
