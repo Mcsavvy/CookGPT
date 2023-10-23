@@ -2,6 +2,20 @@ Changelog
 =========
 
 
+0.5.1 (2023-10-23)
+------------------
+
+Changes
+~~~~~~~
+- Chore: added coverage. [mcsavvy]
+
+Fix
+~~~
+- Chat/threads now returns user scoped threads. [mcsavvy]
+
+  Fixes #30
+
+
 0.5.0 (2023-10-14)
 ------------------
 
