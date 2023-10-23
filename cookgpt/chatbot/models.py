@@ -191,6 +191,8 @@ class Thread(BaseModelMixin, db.Model):  # type: ignore
 class ThreadMixin:
     """Mixin class for handling threads"""
 
+    id: "UUID"
+
     @property
     def default_thread(self) -> "Thread":
         """Get the default thread for this object"""
@@ -308,3 +310,9 @@ class ThreadMixin:
         )
         for thread in threads:
             thread.clear()
+
+    def get_active_threads(self) -> Sequence[Thread]:
+        """Get all active threads"""
+        return Thread.query.filter(
+            Thread.user_id == self.id, Thread.closed == False  # noqa: E712
+        ).all()

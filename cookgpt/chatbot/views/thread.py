@@ -75,11 +75,11 @@ class ThreadsView(MethodView):
     decorators = [auth_required(), app.doc(tags=["thread"])]
 
     @app.output(sc.Threads.Get.Response, example=ex.Threads.Get.Response)
-    def get(self):
+    def get(self) -> dict:
         """Get all threads"""
+        user: "User" = get_current_user()
         logging.info("GET all threads")
-        threads = list(Thread.query.filter(Thread.closed.__eq__(False)).all())
-        return {"threads": threads}
+        return {"threads": user.get_active_threads()}
 
     @app.output(sc.Threads.Delete.Response)
     def delete(self):
