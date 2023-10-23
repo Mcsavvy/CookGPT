@@ -1,0 +1,2 @@
+#!/bin/bash
+GH_TOKEN=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 gh codespace ssh -c ubiquitous-space-waffle-9p7977wvj5jcpjrv
