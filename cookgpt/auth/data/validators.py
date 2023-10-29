@@ -131,33 +131,33 @@ class Password(v.Validator):
         self.field_name = field_name
 
     def __call__(self, value):
-        import string
+        # import string
 
-        errors = []
-        checks = 0
+        # errors = []
+        # checks = 0
         useValidator(
             v.Length, min=8, error=self.LENGTH_ERR, field_name=self.field_name
         )(value)
-        if any(char in string.ascii_lowercase for char in value):
-            checks += 1
-        else:
-            errors.append(self.LOWERCASE_ERR)
-        if any(char in string.ascii_uppercase for char in value):
-            checks += 1
-        else:
-            errors.append(self.UPPERCASE_ERR)
-        if any(char in string.digits for char in value):
-            checks += 1
-        else:
-            errors.append(self.DIGIT_ERR)
-        if any(char in string.punctuation for char in value):
-            checks += 1
-        else:
-            errors.append(self.PUNCTUATION_ERR)
-        if checks > 2:
-            errors.clear()
-        if len(errors) > 0:
-            raise ValidationError(errors, field_name=self.field_name)
+        # if any(char in string.ascii_lowercase for char in value):
+        #     checks += 1
+        # else:
+        #     errors.append(self.LOWERCASE_ERR)
+        # if any(char in string.ascii_uppercase for char in value):
+        #     checks += 1
+        # else:
+        #     errors.append(self.UPPERCASE_ERR)
+        # if any(char in string.digits for char in value):
+        #     checks += 1
+        # else:
+        #     errors.append(self.DIGIT_ERR)
+        # if any(char in string.punctuation for char in value):
+        #     checks += 1
+        # else:
+        #     errors.append(self.PUNCTUATION_ERR)
+        # if checks > 2:
+        #     errors.clear()
+        # if len(errors) > 0:
+        #     raise ValidationError(errors, field_name=self.field_name)
         return value
 
 

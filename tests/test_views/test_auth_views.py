@@ -112,7 +112,7 @@ class TestSignupView:
 
     def test_signup_invalid_data(self, client: "Client"):
         """Test signup with invalid data"""
-        data = Random.user_data(password="password")
+        data = Random.user_data(password="pass")
         response = client.post(url_for("auth.signup"), json=data)
         assert response.status_code == 406
 
