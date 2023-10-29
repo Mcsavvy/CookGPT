@@ -2,6 +2,26 @@ Changelog
 =========
 
 
+0.5.2 (2023-10-29)
+------------------
+
+New
+~~~
+- Feat: Add gevent to dependencies. [mcsavvy]
+
+Changes
+~~~~~~~
+- Chore: added code coverage. [mcsavvy]
+- Refactor: Remove password validators. [mcsavvy]
+- Chore: add test for creating user without last name. [mcsavvy]
+- Refactor: made lastname optional. [mcsavvy]
+- Chore: Update environment and Procfile configurations. [mcsavvy]
+
+Docs
+~~~~
+- Docs: Update Cookgpt API documentation. [mcsavvy]
+
+
 0.5.1 (2023-10-23)
 ------------------
 
