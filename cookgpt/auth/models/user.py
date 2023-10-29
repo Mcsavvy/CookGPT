@@ -29,7 +29,7 @@ class User(
     serialize_rules = ("-password",)
 
     first_name = db.Column(db.String(30), nullable=False)
-    last_name = db.Column(db.String(30), nullable=False)
+    last_name = db.Column(db.String(30), nullable=True)
     user_type = db.Column(
         db.Enum(UserType), nullable=False, default=UserType.COOK
     )

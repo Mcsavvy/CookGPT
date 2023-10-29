@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 import click
 from marshmallow.utils import INCLUDE
@@ -12,7 +12,7 @@ from cookgpt.auth.models import User
 
 @app.cli.command("create-user")
 @click.option("--fname", "-f", required=True, help="first name of the admin")
-@click.option("--lname", "-l", required=True, help="last name of the admin")
+@click.option("--lname", "-l", required=False, help="last name of the admin")
 @click.option("--email", "-e", required=True, help="admin's email")
 @click.option("--password", "-p", required=True, help="admin's password")
 @click.option("--username", "-u", help="admin's username")
@@ -29,7 +29,7 @@ from cookgpt.auth.models import User
     type=click.Choice(["ADMIN", "COOK"], False),
 )
 def create_user(
-    fname: str,
+    fname: Optional[str],
     lname: str,
     email: str,
     password: str,
@@ -92,7 +92,7 @@ def create_user(
 
 @app.cli.command("create-admin")
 @click.option("--fname", "-f", required=True, help="first name of the admin")
-@click.option("--lname", "-l", required=True, help="last name of the admin")
+@click.option("--lname", "-l", required=False, help="last name of the admin")
 @click.option("--email", "-e", required=True, help="admin's email")
 @click.option("--password", "-p", required=True, help="admin's password")
 @click.option("--username", "-u", help="admin's username")
@@ -118,7 +118,7 @@ def create_admin(fname, lname, email, password, username, allow_existing):
 
 @app.cli.command("create-cook")
 @click.option("--fname", "-f", required=True, help="first name of the cook")
-@click.option("--lname", "-l", required=True, help="last name of the cook")
+@click.option("--lname", "-l", required=False, help="last name of the cook")
 @click.option("--email", "-e", required=True, help="cook's email")
 @click.option("--password", "-p", required=True, help="cook's password")
 @click.option("--username", "-u", help="cook's username")

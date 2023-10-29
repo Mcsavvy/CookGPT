@@ -26,7 +26,7 @@ class Name(v.Validator):
     LENGTH_ERR = ""
     CHARSET_ERR = ""
 
-    def __init__(self, field_name="first_name"):
+    def __init__(self, field_name="name"):
         self.field_name = field_name
 
     def __call__(self, value):
@@ -46,10 +46,10 @@ class Name(v.Validator):
 class FirstName(Name):
     """first name validator"""
 
-    LENGTH_ERR = "First Name must be between 2 and 25 characters long"
-    CHARSET_ERR = "First Name can only contain letters"
+    LENGTH_ERR = "Name must be between 2 and 25 characters long"
+    CHARSET_ERR = "Name can only contain letters"
 
-    def __init__(self, field_name="first_name"):
+    def __init__(self, field_name="name"):
         super().__init__(field_name)
 
 

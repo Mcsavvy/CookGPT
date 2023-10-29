@@ -126,10 +126,10 @@ class Auth:
     class Signup:
         class Body(Schema):
             first_name = FirstName(required=True)
-            last_name = LastName(required=True)
+            last_name = LastName(required=False, allow_none=True)
             email = Email(required=True)
             password = Password(required=True)
-            username = Username(allow_none=True)
+            username = Username(allow_none=True, required=False)
 
         class Response(Schema):
             message = fields.String(
