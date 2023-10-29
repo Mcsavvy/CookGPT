@@ -71,6 +71,27 @@ class TestCreateAdmin:
         assert user.username == uname
         assert user.user_type == UserType.ADMIN
 
+    def test_create_no_lastname(self, faker):
+        """test creating an admin without last name"""
+
+        fname = faker.first_name()
+        email = faker.unique.email()
+        pword = faker.password()
+        uname = faker.user_name()
+
+        with pytest.raises(SystemExit) as excinfo:
+            create_admin.main(
+                ["-f", fname, "-e", email, "-p", pword, "-u", uname]
+            )
+        assert excinfo.value.code == 0
+        user = User.query.filter(User.email == email).first()
+        assert user is not None
+        assert user.first_name == fname
+        assert user.last_name is None
+        assert user.username == uname
+        assert user.email == email
+        assert user.password != pword
+
     def test_create_no_username(self, faker):
         """test creating an admin without username"""
 

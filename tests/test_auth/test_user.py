@@ -31,6 +31,11 @@ class TestUserModel:
         for key in keys:
             assert key in dict, f"{key} not in dict"
 
+    def test_create_user_no_last_name(self):
+        """Test creating a user without a last name"""
+        user = Random.user(last_name=None)
+        assert user.last_name is None
+
     @pytest.mark.usefixtures("app")
     def test_create_user_with_same_username(self):
         """Test creating a user with the same username"""
