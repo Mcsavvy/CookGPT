@@ -23,6 +23,7 @@ tiktoken = "*"
 celery = "*"
 redis = {version = "*", extras = ["hiredis"]}
 rich = "*"
+gevent = "*"
 
 [dev-packages]
 ipython = "8.14.0"
