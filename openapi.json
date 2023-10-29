@@ -2,7 +2,7 @@
   "info": {
     "description": "Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered cooking assistance.\n\nThe API allows you to perform various actions such as user authentication, managing user information, and interacting with the AI chat functionality.\n\nThe API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.",
     "title": "Cookgpt",
-    "version": "0.4.2"
+    "version": "0.5.1"
   },
   "tags": [
     {
@@ -1352,6 +1352,7 @@
           },
           "last_name": {
             "type": "string",
+            "nullable": true,
             "description": "user's last name",
             "example": "Doe"
           },
@@ -1375,7 +1376,6 @@
         "required": [
           "email",
           "first_name",
-          "last_name",
           "password"
         ]
       },
