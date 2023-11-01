@@ -70,7 +70,8 @@ release:          ## Create a new tag for release.
 	@git tag $${TAG} || exit $$?
 	@echo "$${TAG}" > cookgpt/VERSION
 	@$(ENV_PREFIX)/gitchangelog > HISTORY.md
-	$(MAKE) spec
+	echo "generating OpenAPI spec..."
+	@$(ENV_PREFIX)/flask spec > openapi.json
 	@git add cookgpt/VERSION HISTORY.md openapi.json
 	@git commit --no-verify -m "release: version $${TAG} 🚀" || exit $$?
 	@git push -u origin HEAD --tags || exit $$?
