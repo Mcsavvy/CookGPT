@@ -2,6 +2,16 @@ Changelog
 =========
 
 
+0.5.3 (2023-11-01)
+------------------
+
+Changes
+~~~~~~~
+- Chore: update Makefile for release command. [mcsavvy]
+- Refactor: Simplify user query in login function. [mcsavvy]
+- Refactor: Improve password hashing and authentication. [mcsavvy]
+
+
 0.5.2 (2023-10-29)
 ------------------
 
