@@ -45,9 +45,10 @@ def login(json_data: dict) -> Any:
     user: Optional[User]
 
     logging.info("Attempting to log in user: %s", login)
-    user = User.query.filter(
-        (User.username == login) | (User.email == login)
-    ).first()
+    if "@" in login:
+        user = User.query.filter(User.email == login).first()
+    else:
+        user = User.query.filter(User.username == login).first()
     if user is None:
         logging.debug("User does not exist: %s", login)
         abort(404, "User does not exist")
