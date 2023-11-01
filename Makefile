@@ -66,11 +66,12 @@ release:          ## Create a new tag for release.
 	@git checkout dev || exit $$?
 	echo "Current version is $$(cat cookgpt/VERSION)"
 	@read -p "Version? (provide the next x.y.z semver) : " TAG
-	@echo "creating git tag : $${TAG}"
+	echo "creating git tag : $${TAG}"
 	@git tag $${TAG} || exit $$?
 	@echo "$${TAG}" > cookgpt/VERSION
 	@$(ENV_PREFIX)/gitchangelog > HISTORY.md
-	@git add cookgpt/VERSION HISTORY.md
+	$(MAKE) spec
+	@git add cookgpt/VERSION HISTORY.md openapi.json
 	@git commit --no-verify -m "release: version $${TAG} 🚀" || exit $$?
 	@git push -u origin HEAD --tags || exit $$?
 	@git checkout $${PREV_BRANCH} || exit $$?
