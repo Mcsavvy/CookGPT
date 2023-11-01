@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Optional
 
 from apiflask import HTTPTokenAuth
 from apiflask.scaffold import _annotate
+from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required
 
 from cookgpt import docs
@@ -15,6 +16,7 @@ auth = HTTPTokenAuth(description=docs.SECURITY)
 
 
 jwt = JWTManager()
+bcrypt = Bcrypt()
 
 
 def auth_required(
@@ -118,3 +120,4 @@ def refresh_expiring_jwts(response):
 def init_app(app: "App"):
     """Initializes extension"""
     jwt.init_app(app)
+    bcrypt.init_app(app)

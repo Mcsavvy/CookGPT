@@ -2,12 +2,11 @@
 
 from typing import cast
 
-from werkzeug.security import check_password_hash, generate_password_hash
-
 from cookgpt.auth.data.enums import UserType
 from cookgpt.auth.models.tokens import TokenMixin
 from cookgpt.base import BaseModelMixin
 from cookgpt.chatbot.models import ThreadMixin
+from cookgpt.ext.auth import bcrypt
 from cookgpt.ext.database import db
 
 
@@ -73,14 +72,12 @@ class User(
 
     def validate_password(self, password):
         """verify that a password can be used to authenticate as this user"""
-        return check_password_hash(self.password, password)
+        return bcrypt.check_password_hash(self.password, password)
 
     @classmethod
     def create(cls, commit=True, **kwargs) -> "User":
         """create a new user"""
 
-        if "password" in kwargs:
-            kwargs["password"] = generate_password_hash(kwargs["password"])
         if (
             "username" in kwargs
             and cls.query.filter_by(username=kwargs["username"]).first()
@@ -91,12 +88,14 @@ class User(
             and cls.query.filter_by(email=kwargs["email"]).first()
         ):
             raise cls.CreateError("email is taken")
+        if "password" in kwargs:
+            kwargs["password"] = bcrypt.generate_password_hash(
+                kwargs["password"]
+            )
         return super().create(commit, **kwargs)
 
     def update(self, commit=True, **kwargs) -> "User":
         """update a user"""
-        if "password" in kwargs:
-            kwargs["password"] = generate_password_hash(kwargs["password"])
         # if username is used by a different user, raise error
         if (
             "username" in kwargs
@@ -111,6 +110,10 @@ class User(
             and self.query.filter_by(email=kwargs["email"]).first()
         ):
             raise self.UpdateError("email is taken")
+        if "password" in kwargs:
+            kwargs["password"] = bcrypt.generate_password_hash(
+                kwargs["password"]
+            )
         return super().update(commit, **kwargs)
 
     def get_type(self) -> str:  # pragma: no cover

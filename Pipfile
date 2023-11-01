@@ -24,6 +24,7 @@ celery = "*"
 redis = {version = "*", extras = ["hiredis"]}
 rich = "*"
 gevent = "*"
+flask-bcrypt = "*"
 
 [dev-packages]
 ipython = "8.14.0"
