@@ -6,7 +6,8 @@ from cookgpt.utils import make_field
 from . import examples as ex
 from . import validators as v
 
-Id = make_field(fields.UUID, "user's id", ex.Uuid)
+UserID = make_field(fields.UUID, "user's id", ex.Uuid)
+UserName = make_field(fields.String, "user's fullname", ex.UserName)
 FirstName = make_field(
     fields.String,
     "user's first name",
@@ -69,7 +70,7 @@ Datetime = make_field(
 class UserSchema(Schema):
     """user schema"""
 
-    id = Id()
+    id = UserID()
     first_name = FirstName()
     last_name = LastName()
     username = Username()
@@ -91,6 +92,8 @@ class UserSchema(Schema):
 class AuthInfoSchema(Schema):
     """user auth info schema"""
 
+    user_id = UserID()
+    user_name = UserName()
     atoken = AuthToken(
         metadata={
             "description": "a JWT to authenticate a user",

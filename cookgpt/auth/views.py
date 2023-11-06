@@ -59,6 +59,8 @@ def login(json_data: dict) -> Any:
     return {
         "message": "Successfully logged in",
         "auth_info": {
+            "user_id": user.id,
+            "user_name": user.name,
             "atoken": token.access_token,
             "atoken_expiry": token.atoken_expiry,
             "rtoken": token.refresh_token,
@@ -138,6 +140,8 @@ def refresh() -> Any:
     return {
         "message": "Refreshed access token",
         "auth_info": {
+            "user_id": token.user.id,
+            "user_name": token.user.name,
             "atoken": token.access_token,
             "atoken_expiry": token.atoken_expiry,
             "rtoken": token.refresh_token,

@@ -68,7 +68,7 @@ class User(
     @property
     def name(self):
         """get user's name"""
-        return (self.username or self.first_name).title()
+        return "{} {}".format(self.first_name, self.last_name)
 
     def validate_password(self, password):
         """verify that a password can be used to authenticate as this user"""

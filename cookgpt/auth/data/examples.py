@@ -5,6 +5,7 @@ FirstName = "John"
 LastName = "Doe"
 Username = "johndoe"
 Email = "johndoe@example.com"
+UserName = "John Doe"
 Password = "Password123!"
 AuthToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9..."
 AuthType = "Bearer"
@@ -25,6 +26,8 @@ User = {
 }
 
 AuthInfo = {
+    "user_id": Uuid,
+    "user_name": UserName,
     "atoken": AuthToken,
     "atoken_expiry": DateTime,
     "rtoken": AuthToken,
