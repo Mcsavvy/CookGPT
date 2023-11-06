@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+0.6.0 (2023-11-06)
+------------------
+
+New
+~~~
+- Feat: Add user_id and user_name to AuthInfoSchema. [mcsavvy]
+
+
 0.5.5 (2023-11-01)
 ------------------
 

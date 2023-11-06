@@ -2,7 +2,7 @@
   "info": {
     "description": "Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered cooking assistance.\n\nThe API allows you to perform various actions such as user authentication, managing user information, and interacting with the AI chat functionality.\n\nThe API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.",
     "title": "Cookgpt",
-    "version": "0.5.5"
+    "version": "0.6.0"
   },
   "tags": [
     {
@@ -307,6 +307,8 @@
                 "example": {
                   "message": "Successfully logged in",
                   "auth_info": {
+                    "user_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "user_name": "John Doe",
                     "atoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
                     "atoken_expiry": "2021-01-01 00:00:00",
                     "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
@@ -570,6 +572,8 @@
                 "example": {
                   "message": "Refreshed access token",
                   "auth_info": {
+                    "user_id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                    "user_name": "John Doe",
                     "atoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
                     "atoken_expiry": "2021-01-01 00:00:00",
                     "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
@@ -1265,6 +1269,17 @@
       "AuthInfo": {
         "type": "object",
         "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "user's id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "user_name": {
+            "type": "string",
+            "description": "user's fullname",
+            "example": "John Doe"
+          },
           "atoken": {
             "type": "string",
             "description": "a JWT to authenticate a user",
