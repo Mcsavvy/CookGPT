@@ -2,6 +2,14 @@ Changelog
 =========
 
 
+0.6.1 (2023-11-06)
+------------------
+
+Changes
+~~~~~~~
+- Refactor(user): improve name property implementation. [mcsavvy]
+
+
 0.6.0 (2023-11-06)
 ------------------
 
