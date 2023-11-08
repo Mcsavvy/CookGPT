@@ -2,6 +2,27 @@ Changelog
 =========
 
 
+0.6.2 (2023-11-08)
+------------------
+
+New
+~~~
+- Feat: Add Sentry for monitoring and error tracking. [mcsavvy]
+
+  - Add Sentry to dependencies
+  - Loaded Sentry in app.py
+  - Added default Sentry configuration
+  - Added `APP_NAME` to settings.toml
+  - Added dynaconf validator for `SENTRY_DSN`
+  - Added user context to Sentry on authentication
+  - Ignored sentry file in code coverage
+  - Generated new coverage report
+
+Changes
+~~~~~~~
+- Refactor(ci): Move codecov upload to deploy.yml. [mcsavvy]
+
+
 0.6.1 (2023-11-06)
 ------------------
 
