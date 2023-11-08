@@ -33,6 +33,17 @@ jobs:
           MERGE_DELETE_BRANCH: false
           PULL_REQUEST: ${{ github.event.number }}
           PULL_REQUEST_BRANCH: ${{ github.event.pull_request.head.ref }}
+  upload-code-coverage:
+    name: Upload code coverage
+    runs-on: ubuntu-latest
+    needs: [automerge]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   deploy-doc:
     name: Deploy API doc on Bump
     runs-on: ubuntu-latest
