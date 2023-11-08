@@ -1,4 +1,5 @@
 [default]
+APP_NAME = "CookGPT"
 DEBUG = false
 EXTENSIONS = [
     "cookgpt.ext.config:init_app",
@@ -8,6 +9,24 @@ EXTENSIONS = [
     "cookgpt.ext.redisflow:init_app"
 ]
 
+# SENTRY
+SENTRY_INTEGRATIONS = [
+    "flask",
+    "sqlalchemy",
+    "logging",
+    "celery",
+    "redis",
+]
+SENTRY_IGNORED_LOGGERS = []
+SENTRY_ENABLE_TRACING = true
+SENTRY_PROFILES_SAMPLE_RATE = 1.0
+SENTRY_TRACES_SAMPLE_RATE = 1.0
+SENTRY_DEBUG = false
+SENTRY_ATTACH_STACKTRACE = true
+SENTRY_INCLUDE_SOURCE_CONTEXT = true
+SENTRY_INCLUDE_LOCAL_VARIABLES = true
+SENTRY_MAX_BREADCRUMBS = 100
+SENTRY_SEND_DEFAULT_PII = true
 
 # RedisFlow
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = true

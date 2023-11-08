@@ -32,7 +32,7 @@ class App(APIFlask):
 
     def __init__(self, *args, **kwargs):
         kwargs.update(
-            title="Cookgpt", version=VERSION, docs_ui="elements", docs_path="/"
+            title="CookGPT", version=VERSION, docs_ui="elements", docs_path="/"
         )
         super().__init__(*args, **kwargs)
 
@@ -70,8 +70,12 @@ def add_application_info(response):
 def create_app(**config):
     import os
 
+    from cookgpt import sentry
+    from cookgpt.ext.config import config as settings
+
     os.environ.setdefault("FLASK_ENV", "PRODUCTION")
     logging.debug(f"FLASK_ENV: {os.environ.get('FLASK_ENV')}")
+    sentry.setup(settings)
     logging.info("Creating app cookgpt...")
     app = App(__name__)
     app.config.update(config)  # Override with passed config

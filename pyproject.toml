@@ -55,4 +55,5 @@ omit = [
     "cookgpt/ext/admin.py",
     "cookgpt/ext/database.py",
     "cookgpt/logging.py",
+    "cookgpt/sentry.py",
 ]

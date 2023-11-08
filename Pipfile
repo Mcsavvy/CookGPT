@@ -25,6 +25,7 @@ redis = {version = "*", extras = ["hiredis"]}
 rich = "*"
 gevent = "*"
 flask-bcrypt = "*"
+sentry-sdk = {extras = ["sqlalchemy", "celery", "flask"], version = "*"}
 
 [dev-packages]
 ipython = "8.14.0"

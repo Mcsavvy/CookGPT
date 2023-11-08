@@ -4,12 +4,14 @@ from apiflask import HTTPTokenAuth
 from apiflask.scaffold import _annotate
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, jwt_required
+from sentry_sdk import set_user
 
 from cookgpt import docs
 from cookgpt.ext.database import db
 
 if TYPE_CHECKING:  # pragma: no cover
     from cookgpt.app import App
+    from cookgpt.auth.models.user import User
 
 
 auth = HTTPTokenAuth(description=docs.SECURITY)
@@ -51,9 +53,13 @@ def token_verification_callback(header: dict, payload: dict):
     from cookgpt.auth.models import Token
 
     token = db.session.get(Token, UUID(payload["jti"]))
-    if token is None:
+    if token is None:  # pragma: no cover
         return False
-    return token.active
+    if token.active:
+        user: "User" = token.user
+        set_user({"id": user.id, "username": user.name, "email": user.email})
+        return True
+    return False  # pragma: no cover
 
 
 @jwt.token_in_blocklist_loader
@@ -64,13 +70,15 @@ def token_in_blocklist_callback(header: dict, payload: dict):
     from cookgpt.auth.models import Token
 
     token = db.session.get(Token, UUID(payload["jti"]))
-    if token is None:
+    if token is None:  # pragma: no cover
         return False
     return token.revoked
 
 
 @jwt.token_verification_failed_loader
-def token_verification_failed_callback(header: dict, payload: dict):
+def token_verification_failed_callback(
+    header: dict, payload: dict
+):  # pragma: no cover
     """Token verification failed callback"""
     from flask_jwt_extended.config import config
 

@@ -25,9 +25,16 @@ TIMEDELTAS = Validator(
 )
 
 APP_ESSENTIALS = Validator(
+    "APP_NAME",
     "SECRET_KEY",
     "SQLALCHEMY_DATABASE_URI",
     must_exist=True,
+)
+
+SENTRY = Validator(
+    "SENTRY_DSN",
+    must_exist=True,
+    env="production",
 )
 
 
