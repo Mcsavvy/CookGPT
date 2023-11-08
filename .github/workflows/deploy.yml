@@ -26,6 +26,10 @@ jobs:
         heroku_app_name: "mkpbackend"
         heroku_email: "davemcsavvii@gmail.com"
         env_file: ".env.production"
+    - name: Get version
+      id: get_version
+      run: |
+        echo ::set-output name=version::$(cat cookgpt/VERSION)
     - name: Create Sentry release
       uses: getsentry/action-release@v1
       env:
@@ -34,6 +38,7 @@ jobs:
         SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
       with:
         environment: production
+        version: "CookGPT@${{ steps.get_version.outputs.version }}"
   automerge:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
