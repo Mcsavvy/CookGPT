@@ -6,6 +6,9 @@ on:
   pull_request:
     types: [ opened ]
     branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -13,7 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     - name: Deploy to Heroku
       uses: akhileshns/heroku-deploy@v3.12.12
       with:
@@ -21,7 +26,16 @@ jobs:
         heroku_app_name: "mkpbackend"
         heroku_email: "davemcsavvii@gmail.com"
         env_file: ".env.production"
+    - name: Create Sentry release
+      uses: getsentry/action-release@v1
+      env:
+        SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+        SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+      with:
+        environment: production
   automerge:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     needs: [deploy]
     steps:
@@ -67,7 +81,7 @@ jobs:
       - name: Comment pull request with API diff
         uses: bump-sh/github-action@v1
         with:
-          doc: ${{env.BUMP_DOC_ID}}
+          doc: ${{vars.BUMP_DOC_ID}}
           token: ${{secrets.BUMP_TOKEN}}
           file: openapi.json
           command: diff
