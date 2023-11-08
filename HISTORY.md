@@ -2,6 +2,18 @@ Changelog
 =========
 
 
+0.6.21 (2023-11-08)
+-------------------
+
+New
+~~~
+- Feat(ci): Add sentry release step to deployment. [mcsavvy]
+
+Changes
+~~~~~~~
+- Chore: Add step to get version for Sentry release. [mcsavvy]
+
+
 0.6.2 (2023-11-08)
 ------------------
 
