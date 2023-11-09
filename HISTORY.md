@@ -2,6 +2,18 @@ Changelog
 =========
 
 
+0.6.3 (2023-11-09)
+------------------
+
+Changes
+~~~~~~~
+- Refactor(auth): Update validation for user's name. [mcsavvy]
+- Chore(chatbot): Modified chatbot system command. [mcsavvy]
+
+  - Instructed AI to refer to user by name
+  - Include Nutrition Information in recipes
+
+
 0.6.21 (2023-11-08)
 -------------------
 
