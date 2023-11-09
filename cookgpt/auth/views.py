@@ -8,6 +8,7 @@ from cookgpt import docs, logging
 from cookgpt.auth import app
 from cookgpt.auth.data import examples as ex
 from cookgpt.auth.data import schemas as sc
+from cookgpt.auth.data import validators as v
 from cookgpt.auth.data.enums import UserType
 from cookgpt.auth.models import Token
 from cookgpt.ext.auth import auth_required
@@ -114,6 +115,13 @@ def signup(json_data: dict) -> Any:
     from cookgpt.auth.models import User
 
     logging.info("Signing up user...")
+    name: str = json_data.pop("first_name")
+    first_name, last_name = v.FirstNameOrFullName()(name)
+    logging.debug("First name: %s", first_name)
+    json_data["first_name"] = first_name
+    if last_name is not None:
+        logging.debug("Last name: %s", last_name)
+        json_data["last_name"] = last_name
     try:
         User.create(**json_data, user_type=UserType.COOK)
     except User.CreateError as err:

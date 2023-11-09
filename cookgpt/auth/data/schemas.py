@@ -7,7 +7,9 @@ from . import examples as ex
 from . import validators as v
 
 UserID = make_field(fields.UUID, "user's id", ex.Uuid)
-UserName = make_field(fields.String, "user's fullname", ex.UserName)
+UserName = make_field(
+    fields.String, "user's name", ex.UserName, validate=v.FirstNameOrFullName()
+)
 FirstName = make_field(
     fields.String,
     "user's first name",
@@ -128,7 +130,7 @@ class Auth:
 
     class Signup:
         class Body(Schema):
-            first_name = FirstName(required=True)
+            first_name = UserName(required=True)
             last_name = LastName(required=False, allow_none=True)
             email = Email(required=True)
             password = Password(required=True)

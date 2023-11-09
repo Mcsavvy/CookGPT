@@ -29,7 +29,7 @@ class Name(v.Validator):
     def __init__(self, field_name="name"):
         self.field_name = field_name
 
-    def __call__(self, value):
+    def __call__(self, value: str) -> str:
         useValidator(
             v.Length,
             min=2,
@@ -41,6 +41,29 @@ class Name(v.Validator):
             v.Regexp, self.field_name, r"^[a-zA-Z]+$", error=self.CHARSET_ERR
         )(value)
         return value
+
+
+class FirstNameOrFullName(v.Validator):
+    """full name or first name validator"""
+
+    FORMAT_ERR = "Name must be a valid name or full name"
+
+    def __init__(self, field_name="name"):
+        self.field_name = field_name
+
+    def __call__(self, value: str):
+        fname = lname = None
+        name = value.strip().split(" ")
+        if len(name) == 2:
+            fname, lname = name
+        elif len(name) == 1:
+            fname = name[0]
+        else:
+            raise ValidationError(self.FORMAT_ERR, field_name=self.field_name)
+        fname = FirstName()(fname.strip())
+        if lname is not None:
+            lname = LastName()(lname.strip())
+        return (fname, lname)
 
 
 class FirstName(Name):
