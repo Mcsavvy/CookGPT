@@ -26,6 +26,8 @@ rich = "*"
 gevent = "*"
 flask-bcrypt = "*"
 sentry-sdk = {extras = ["sqlalchemy", "celery", "flask"], version = "*"}
+eventlet = "*"
+flask-socketio = "*"
 
 [dev-packages]
 ipython = "8.14.0"

@@ -12,6 +12,9 @@
     {
       "name": "chat",
       "description": "The AI chat functionality allows users to interact with an AI-powered cooking assistant. The assistant can be used to create recipes, get cooking advice, and more.\n\nChats with the AI are organized into threads. Each thread has a unique ID that is used to identify the thread. The thread ID is used to get the chat messages in the thread, and to send messages to the thread.\n\nEvery user has a default thread which would be used for all interactions with the AI assistant.\n\n> Subsequent versions of the API will allow users to create new threads and interact with the AI assistant in multiple threads.\n\n---\n\nEach user has a `max_chat_cost` which is the total number of tokens that he/she is allowed to spend on chats with the AI assistant. The cost of a chat is the number of tokens used in the query and the response.\n\n> Subsequent versions of the API will allow users to purchase more tokens.\n\n### Chat Memory Optimization\nFor now, the AI's memory has not been optimized and it remembers all chats that it has had with the user. This means that the AI's memory will grow linearly as the user interact with it. This will be fixed in subsequent versions of the API."
+    },
+    {
+      "name": "Socketchef"
     }
   ],
   "servers": [
@@ -557,6 +560,25 @@
             "BearerAuth": []
           }
         ]
+      }
+    },
+    "/socketchef/": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Socketchef"
+        ],
+        "summary": "Index"
       }
     },
     "/auth/refresh": {

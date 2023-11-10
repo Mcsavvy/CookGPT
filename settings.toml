@@ -5,7 +5,7 @@ EXTENSIONS = [
     "cookgpt.ext.config:init_app",
     "cookgpt.ext.database:init_app",
     "cookgpt.ext.auth:init_app",
-    # "cookgpt.ext.admin:init_app",
+    "cookgpt.ext.admin:init_app",
     "cookgpt.ext.redisflow:init_app"
 ]
 
@@ -35,7 +35,8 @@ CELERY_TASKS = [
 ]
 
 # Logging
-LOG_LEVEL = "INFO"
+LOG_LEVEL = "DEBUG"
+LOGGER_NAME = "cookgpt"
 LOG_SHOW_TIME = false
 LOG_HANDLER_CLASS = "rich.logging.RichHandler"
 
@@ -45,6 +46,7 @@ SQLALCHEMY_ENGINE_OPTIONS = {"isolation_level" = "READ UNCOMMITTED"}
 BLUEPRINTS = [
     "cookgpt.auth:app",
     "cookgpt.chatbot:app",
+    "socketchef.app:app",
 ]
 PASSWORD_SCHEMES = ['pbkdf2_sha512', 'md5_crypt']
 

@@ -9,6 +9,7 @@ from redis import Redis  # type: ignore
 from cookgpt import logging  # noqa: F401
 from cookgpt import docs
 from cookgpt.ext.config import config
+from socketchef.app import socketio
 
 VERSION = Path(__file__).parent.joinpath("VERSION").read_text().strip()
 
@@ -78,6 +79,7 @@ def create_app(**config):
     sentry.setup(settings)
     logging.info("Creating app cookgpt...")
     app = App(__name__)
+    socketio.init_app(app)
     app.config.update(config)  # Override with passed config
     logging.info("Loading extensions...")
     app.config.load_extensions()  # Load extensions
