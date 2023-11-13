@@ -17,7 +17,7 @@ ChatExample = {
     "thread_id": Uuid,
 }
 
-ThreadExample = {"id": Uuid, "chat_count": 2, "cost": 220, "is_default": True}
+ThreadExample = {"id": Uuid, "chat_count": 2, "cost": 220}
 
 
 class Chat:

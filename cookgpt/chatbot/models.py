@@ -74,16 +74,14 @@ class Thread(BaseModelMixin, db.Model):  # type: ignore
     user_id = db.Column(db.Uuid, db.ForeignKey("user.id"), nullable=False)
     # last_chat_id = db.Column(db.Uuid, db.ForeignKey("chat.id"))
     closed = db.Column(db.Boolean, nullable=False, default=False)
-    default = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         num_chats = len(self.chats)  # type: ignore
-        return "Thread[{}](user={}, chats={}, closed={}, default={})".format(
+        return "Thread[{}](user={}, chats={}, closed={})".format(
             self.id.hex[:6],
             self.user.name,
             num_chats,
             "✔" if self.closed else "✗",
-            "✔" if self.default else "✗",
         )
 
     @property
@@ -194,26 +192,11 @@ class ThreadMixin:
     id: "UUID"
 
     @property
-    def default_thread(self) -> "Thread":
-        """Get the default thread for this object"""
-
-        thread = Thread.query.filter_by(
-            default=True, user=self, closed=False
-        ).first()
-        if thread is None:
-            thread = self.create_thread(
-                title="Default Thread", default=True, commit=True
-            )
-        return thread
-
-    @property
     def total_chat_cost(self):
         """total cost of all messages"""
         return sum(trd.cost for trd in self.threads)  # type: ignore
 
-    def create_thread(
-        self, title: str, default=False, closed=False, commit=True
-    ):
+    def create_thread(self, title: str, closed=False, commit=True):
         """Create a new thread"""
         logging.debug(
             "creating thread: %r for %s %s",
@@ -224,7 +207,6 @@ class ThreadMixin:
         return Thread.create(
             title=title,
             user=self,
-            default=default,
             closed=closed,
             commit=commit,
         )

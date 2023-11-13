@@ -29,9 +29,6 @@ ThreadChatCount = make_field(
 ThreadCost = make_field(
     fields.Integer, "cost of all chats in this thread", 220
 )
-ThreadIsDefault = make_field(
-    fields.Boolean, "indicates if this thread is the default thread", True
-)
 
 
 class ChatSchema(Schema):
@@ -54,7 +51,6 @@ class ThreadSchema(Schema):
     title = ThreadTitle()
     chat_count = ThreadChatCount()
     cost = ThreadCost()
-    is_default = ThreadIsDefault(attribute="default")
 
 
 class Chat:
