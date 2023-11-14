@@ -47,8 +47,6 @@ CHAT = """The AI chat functionality allows users to interact with an AI-powered 
 
 Chats with the AI are organized into threads. Each thread has a unique ID that is used to identify the thread. The thread ID is used to get the chat messages in the thread, and to send messages to the thread.
 
-Every user has a default thread which would be used for all interactions with the AI assistant.
-
 > Subsequent versions of the API will allow users to create new threads and interact with the AI assistant in multiple threads.
 
 ---

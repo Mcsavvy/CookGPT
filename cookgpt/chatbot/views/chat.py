@@ -15,6 +15,12 @@ from cookgpt.chatbot.models import Chat
 from cookgpt.chatbot.utils import get_stream_name, get_thread, make_dummy_chat
 from cookgpt.ext import db
 from cookgpt.ext.auth import auth_required
+from cookgpt.ext.cache import (
+    cache,
+    chat_cache_key,
+    chats_cache_key,
+    threads_cache_key,
+)
 from cookgpt.utils import abort, api_output
 
 if TYPE_CHECKING:
@@ -44,6 +50,7 @@ class ChatsView(MethodView):
         description="An error when the specified thread is not found",
     )
     @app.doc(description=docs.CHAT_GET_CHATS)
+    @cache.cached(timeout=0, make_cache_key=chats_cache_key)
     def get(self, query_data):
         """Get all messages in a thread."""
         logging.info("GET all chats from thread")
@@ -65,6 +72,7 @@ class ChatsView(MethodView):
         thread = get_thread(json_data["thread_id"])
         logging.info("Clearing thread %s", thread.id)
         thread.clear()
+
         return {"message": "All chats deleted"}
 
 
@@ -80,6 +88,7 @@ class ChatView(MethodView):
         description="A single chat",
     )
     @app.doc(description=docs.CHAT_GET_CHAT)
+    @cache.cached(timeout=0, make_cache_key=chat_cache_key)
     def get(self, chat_id):
         """Get a single chat from a thread."""
         logging.info("GET chat %s", chat_id)
@@ -149,6 +158,7 @@ class ChatView(MethodView):
             thread = get_thread(json_data["thread_id"])
         else:
             thread = user.create_thread(title="New Thread")
+            cache.delete(threads_cache_key(user_id=user.pk))
 
         stream_response = query_data["stream"]
 

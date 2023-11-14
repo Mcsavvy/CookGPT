@@ -58,7 +58,7 @@ class FirstNameOrFullName(v.Validator):
             fname, lname = name
         elif len(name) == 1:
             fname = name[0]
-        else:
+        else:  # pragma: no cover
             raise ValidationError(self.FORMAT_ERR, field_name=self.field_name)
         fname = FirstName()(fname.strip())
         if lname is not None:

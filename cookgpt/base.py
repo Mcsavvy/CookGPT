@@ -30,6 +30,11 @@ class BaseModelMixin(SerializerMixin):
     def __repr__(self):
         return f"<{self.__class__.__name__} {self.id}>"  # pragma: no cover
 
+    @property
+    def pk(self):
+        """Returns primary key"""
+        return str(self.id)
+
     @classmethod
     def create(cls, commit=True, **kwargs):
         """Creates model"""

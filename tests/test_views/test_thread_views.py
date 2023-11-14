@@ -30,7 +30,6 @@ class TestThreadView:
         assert data["title"] == "Test Thread"
         assert data["chat_count"] == 2
         assert data["cost"] != 0
-        assert data["is_default"] is False
         thread.delete()
 
     def test_get_thread_not_found(
@@ -41,21 +40,6 @@ class TestThreadView:
             headers=auth_header,
         )
         assert response.status_code == 404
-
-    def test_get_default_thread(
-        self, client: FlaskClient, thread: Thread, auth_header: dict
-    ):
-        response = client.get(
-            url_for("chatbot.single_thread", thread_id=thread.id),
-            headers=auth_header,
-        )
-        assert response.status_code == 200
-        data = cast(dict, response.json)
-        assert data["id"] == str(thread.id)
-        assert data["title"] == "Test Thread"
-        assert data["chat_count"] == 0
-        assert data["cost"] == 0
-        assert data["is_default"] is True
 
     def test_create_thread(self, client: FlaskClient, auth_header: dict):
         response = client.post(
@@ -72,7 +56,6 @@ class TestThreadView:
         assert data["title"] == "New Thread"
         assert data["chat_count"] == 0
         assert data["cost"] == 0
-        assert data["is_default"] is False
         thread = get_thread(data["id"])
         thread.delete()
 
@@ -93,7 +76,6 @@ class TestThreadView:
         assert data["title"] == "Updated Thread"
         assert data["chat_count"] == 0
         assert data["cost"] == 0
-        assert data["is_default"] is False
         thread.delete()
 
     def test_delete_thread(
@@ -136,7 +118,6 @@ class TestThreadsView:
             assert thread["title"]
             assert thread["chat_count"] == 0
             assert thread["cost"] == 0
-            assert thread["is_default"] is False
 
     def test_delete_threads(
         self, client: FlaskClient, user: User, auth_header: dict

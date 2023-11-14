@@ -96,3 +96,12 @@ def make_field(
         return field(*a, **k)
 
     return helper
+
+
+def cast_func_to(type: Callable[P, R]):
+    """cast function"""
+
+    def cast(func: Callable) -> Callable[P, R]:
+        return func  # type: ignore
+
+    return cast

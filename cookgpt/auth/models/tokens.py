@@ -10,6 +10,7 @@ from flask_jwt_extended import (
 from sqlalchemy.orm.dynamic import AppenderQuery
 
 from cookgpt.base import BaseModelMixin
+from cookgpt.ext import cache
 from cookgpt.ext.database import db
 from cookgpt.globals import current_app as app
 from cookgpt.utils import utcnow, utcnow_from__ts
@@ -43,34 +44,32 @@ class Token(db.Model, BaseModelMixin):  # type: ignore
 
     def atoken_has_expired(self):
         """Checks if access token has expired"""
-        import jwt
-
-        try:
-            decode_token(self.access_token)
-        except jwt.exceptions.ExpiredSignatureError:
-            return True
-        return False
+        expiry = self.atoken_expiry
+        return expiry <= utcnow()
 
     def rtoken_has_expired(self):
         """Checks if refresh token has expired"""
-        import jwt
-
-        try:
-            decode_token(self.refresh_token)
-        except jwt.exceptions.ExpiredSignatureError:
-            return True
-        return False
+        expiry = self.rtoken_expiry
+        return expiry <= utcnow()
 
     @property
     def atoken_expiry(self):
         """Gets access_token expiry time"""
+        key = f"atoken_expiry:{self.access_token}"
+        if cache.has(key):
+            return datetime.fromtimestamp(cache.get(key), tz=timezone.utc)
         decoded = decode_token(self.access_token, allow_expired=True)
+        cache.set(key, decoded["exp"], timeout=0)
         return datetime.fromtimestamp(decoded["exp"], tz=timezone.utc)
 
     @property
     def rtoken_expiry(self):
         """Gets refresh_token expiry time"""
+        key = f"rtoken_expiry:{self.refresh_token}"
+        if cache.has(key):  # pragma: no cover
+            return datetime.fromtimestamp(cache.get(key), tz=timezone.utc)
         decoded = decode_token(self.refresh_token, allow_expired=True)
+        cache.set(key, decoded["exp"], timeout=0)
         return datetime.fromtimestamp(decoded["exp"], tz=timezone.utc)
 
     @classmethod

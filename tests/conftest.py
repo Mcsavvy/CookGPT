@@ -91,7 +91,6 @@ def thread(user: User) -> Generator[Thread, None, None]:
     thread = Thread.create(
         user_id=user.id,
         title="Test Thread",
-        default=True,
         commit=True,
     )
     yield thread
