@@ -104,6 +104,22 @@ class TestSignupView:
         assert response.status_code == 201
         assert response.json == {"message": "Successfully signed up"}
 
+    def test_signup_firstname_split(self, client: "Client"):
+        """Test signup with firstname split"""
+        data = Random.user_data()
+        first_name = data["first_name"]
+        last_name = data["last_name"]
+        data["first_name"] += " " + data.pop("last_name")
+        response = client.post(url_for("auth.signup"), json=data)
+        assert response.status_code == 201
+        assert response.json == {"message": "Successfully signed up"}
+        assert (
+            User.query.filter_by(
+                first_name=first_name, last_name=last_name
+            ).first()
+            is not None
+        )
+
     def test_signup_missing_data(self, client: "Client"):
         """Test signup with missing data"""
         data = Random.user_data(email=False)

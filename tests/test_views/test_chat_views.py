@@ -213,6 +213,32 @@ class TestChatView:
         assert thread.chat_count == 2
         assert cast(list[Chat], thread.chats)[0].content == "test query"
 
+    def test_send_query_existing_chats(
+        self,
+        client: "FlaskClient",
+        auth_header: dict[str, str],
+        thread: "Thread",
+    ):
+        """Test sending a query when there are existing chats in the thread"""
+        data = {"query": "I'm great, you?", "thread_id": str(thread.id)}
+        thread.add_query("Hi")
+        thread.add_response("How are you?")
+        client.post(
+            url_for("chatbot.query", stream=False),
+            headers=auth_header,
+            json=data,
+        )
+        data = {"query": "Alright", "thread_id": str(thread.id)}
+        response = client.post(
+            url_for("chatbot.query", stream=False),
+            headers=auth_header,
+            json=data,
+        )
+        assert response.status_code == 201
+        assert response.json is not None
+        thread = get_thread(response.json["chat"]["thread_id"])
+        assert thread.chat_count == 6
+
     def test_send_query__streaming(
         self,
         client: "FlaskClient",
