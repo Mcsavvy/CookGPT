@@ -1,12 +1,16 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional, Sequence
+from typing import TYPE_CHECKING, Optional, Sequence, cast
 from uuid import UUID, uuid4
 
 import tiktoken
+from langchain.adapters import openai
+from langchain.schema.messages import BaseMessage
 
+from cookgpt import logging
 from cookgpt.chatbot.data.enums import MessageType
 from cookgpt.chatbot.models import Thread
+from cookgpt.ext.cache import cache
 from cookgpt.ext.database import db
 from cookgpt.utils import abort
 
@@ -15,38 +19,44 @@ if TYPE_CHECKING:
     from cookgpt.chatbot.callback import ChatCallbackHandler
     from cookgpt.chatbot.models import Chat
 
+encoding = tiktoken.get_encoding("cl100k_base")
+
 
 def num_tokens_from_messages(
     messages: Sequence[dict], model="gpt-3.5-turbo-0613"
 ):
     """Returns the number of tokens used by a list of messages."""
-    try:
-        encoding = tiktoken.encoding_for_model(model)
-    except KeyError:  # pragma: no cover
-        encoding = tiktoken.get_encoding("cl100k_base")
-    if (
-        model == "gpt-3.5-turbo-0613"
-    ):  # note: future models may deviate from this
-        num_tokens = 0
-        for message in messages:
-            # every message follows <im_start>{role/name}\n{content}<im_end>\n
-            num_tokens += 4
-            for key, value in message.items():
-                num_tokens += len(encoding.encode(value))
-                # if there's a name, the role is omitted
-                if key == "name":  # pragma: no cover
-                    num_tokens += (
-                        -1
-                    )  # role is always required and always 1 token
-        num_tokens += 2  # every reply is primed with <im_start>assistant
-        return num_tokens
-    else:
-        raise NotImplementedError(
-            (
-                "num_tokens_from_messages() is not presently "
-                f"implemented for model {model}."
-            )
-        )
+    num_tokens = 0
+    for message in messages:
+        cost = 4
+        # every message follows <im_start>{role/name}\n{content}<im_end>\n
+        if "id" in message:
+            if cache.has(f"chat:{message['id']}:cost"):
+                logging.debug("Using cached cost for %s", message["id"][:6])
+                num_tokens += cast(
+                    int, cache.get(f"chat:{message['id']}:cost")
+                )
+                continue  # pragma: no cover
+            logging.debug("Computing cost for %s", message["id"][:6])
+        else:
+            logging.debug("Computing cost for unsaved message")
+        for key, value in message.items():
+            cost += len(encoding.encode(value))
+            if key == "name":  # pragma: no cover
+                cost += -1  # role is always required and always 1 token
+        if "id" in message:
+            cache.set(f"chat:{message['id']}:cost", cost, timeout=0)
+        num_tokens += cost
+    num_tokens += 2  # every reply is primed with <im_start>assistant
+    return num_tokens
+
+
+def convert_message_to_dict(message: "BaseMessage") -> dict:
+    """convert message to dict"""
+    converted = openai.convert_message_to_dict(message)
+    if "id" in message.additional_kwargs:
+        converted["id"] = message.additional_kwargs["id"]
+    return converted
 
 
 def get_stream_name(user: "User", chat: "Chat") -> str:

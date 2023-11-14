@@ -82,10 +82,16 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
             Chat.thread_id == thread.id, Chat.content != ""
         )
         for chat in cast(Iterable[Chat], chats_query):
-            if chat.chat_type == MessageType.QUERY:
-                chats.append(HumanMessage(content=chat.content))
-            else:
-                chats.append(AIMessage(content=chat.content))
+            msg_cls = (
+                HumanMessage
+                if chat.chat_type == MessageType.QUERY
+                else AIMessage
+            )
+            chats.append(
+                msg_cls(
+                    content=chat.content, additional_kwargs={"id": chat.pk}
+                )
+            )
         return chats
 
     def add_user_message(self, message: str) -> None:

@@ -3,6 +3,7 @@ APP_NAME = "CookGPT"
 DEBUG = false
 EXTENSIONS = [
     "cookgpt.ext.config:init_app",
+    "cookgpt.ext.cache:init_app",
     "cookgpt.ext.database:init_app",
     "cookgpt.ext.auth:init_app",
     # "cookgpt.ext.admin:init_app",
@@ -27,6 +28,9 @@ SENTRY_INCLUDE_SOURCE_CONTEXT = true
 SENTRY_INCLUDE_LOCAL_VARIABLES = true
 SENTRY_MAX_BREADCRUMBS = 100
 SENTRY_SEND_DEFAULT_PII = true
+
+# Caching
+CACHE_DEFAULT_TIMEOUT = 300
 
 # RedisFlow
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = true

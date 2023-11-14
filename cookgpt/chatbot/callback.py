@@ -3,13 +3,15 @@
 from typing import Any, Dict, List, cast
 from uuid import UUID
 
-from langchain.adapters.openai import convert_message_to_dict
 from langchain.callbacks import OpenAICallbackHandler
 from langchain.callbacks.openai_info import get_openai_token_cost_for_model
 from langchain.schema import BaseMessage, ChatGeneration, LLMResult
 
 from cookgpt import logging
-from cookgpt.chatbot.utils import num_tokens_from_messages
+from cookgpt.chatbot.utils import (
+    convert_message_to_dict,
+    num_tokens_from_messages,
+)
 from cookgpt.ext.config import config
 from cookgpt.globals import response, setvar, user
 from cookgpt.utils import utcnow
@@ -44,14 +46,15 @@ class ChatCallbackHandler(OpenAICallbackHandler):
     ):
         """Compute the cost of the prompt."""
         logging.debug("Computing prompt tokens...")
+        messages_raw = []
         messages_raw = [convert_message_to_dict(m) for m in messages]
         logging.debug("Messages: %s", messages_raw)
         num_tokens = num_tokens_from_messages(messages_raw, model_name)
-        prompt_cost = get_openai_token_cost_for_model(model_name, num_tokens)
-        logging.debug("Prompt cost: %s", prompt_cost)
-        self.total_tokens += num_tokens
-        self.prompt_tokens += num_tokens
-        self.total_cost += prompt_cost
+        # prompt_cost = get_openai_token_cost_for_model(model_name, num_tokens)
+        # logging.debug("Prompt cost: %s", prompt_cost)
+        # self.total_tokens += num_tokens
+        # self.prompt_tokens += num_tokens
+        # self.total_cost += prompt_cost
         self._query_cost = num_tokens
 
     def on_chain_start(

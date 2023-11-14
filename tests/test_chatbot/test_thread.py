@@ -15,7 +15,6 @@ class TestThreadModel:
             title="Test Thread",
             user_id=user_id,
             closed=False,
-            default=False,
             commit=True,
         )
 
@@ -23,10 +22,11 @@ class TestThreadModel:
         assert thread.title == "Test Thread"
         assert thread.user_id == user_id
         assert thread.closed is False
-        assert thread.default is False
 
     def test_add_chat(self, thread: Thread):
-        thread2 = Random.user().default_thread
+        thread2 = Random.user().create_thread(
+            title="Test Thread 2", closed=False
+        )
         chat = thread.add_chat(
             content="What's your name?",
             chat_type=MessageType.QUERY,
@@ -129,25 +129,21 @@ class TestThreadMixin:
         thread = user.create_thread(
             title="Test Thread",
             closed=False,
-            default=False,
         )
 
         assert thread.id is not None
         assert thread.title == "Test Thread"
         assert thread.user_id == user.id
         assert thread.closed is False
-        assert thread.default is False
 
     def test_get_threads(self, user: "User"):
         thread1 = user.create_thread(
             title="Test Thread 1",
             closed=False,
-            default=False,
         )
         thread2 = user.create_thread(
             title="Test Thread 2",
             closed=False,
-            default=False,
         )
 
         threads = cast(list[Thread], user.threads)
@@ -230,9 +226,7 @@ class TestThreadMixin:
 
     def test_add_message_to_another_users_thread(self, user: "User"):
         user2 = Random.user()
-        thread2 = user2.create_thread(
-            title="Test Thread 2", closed=False, default=False
-        )
+        thread2 = user2.create_thread(title="Test Thread 2", closed=False)
         with pytest.raises(ValueError) as exc_info:
             user.add_message(
                 content="My name is Bot.",
