@@ -2,6 +2,45 @@ Changelog
 =========
 
 
+0.7.1 (2023-11-14)
+------------------
+
+New
+~~~
+- Feat: Add pk property to BaseModelMixin. [Isaac Olumide Ogunfolaju]
+- Feat(cache): add cache functionality to the application. [Isaac
+  Olumide Ogunfolaju]
+
+Changes
+~~~~~~~
+- Refactor(settings): rearrange extensions in settings.toml. [Isaac
+  Olumide Ogunfolaju]
+- Refactor: reformat code and import statements. [Isaac Olumide
+  Ogunfolaju]
+- Chore: Implemented caching to speedup code ⚡ [Isaac Olumide
+  Ogunfolaju]
+- Chore: Generated coverage report. [Isaac Olumide Ogunfolaju]
+- Refactor(logging): cast functions to specified type. [Isaac Olumide
+  Ogunfolaju]
+- Refactor(thread): Removed default threads. [Isaac Olumide Ogunfolaju]
+
+Fix
+~~~
+- Fix(validators): Fix coverage issue with else statement. [Isaac
+  Olumide Ogunfolaju]
+
+Tests
+~~~~~
+- Test: Add test for sending a query with existing chats. [Isaac Olumide
+  Ogunfolaju]
+
+Other
+~~~~~
+- Merge pull request #43 from Mcsavvy/app-caching. [mcsavvy]
+
+  Add caching functionality
+
+
 0.6.3 (2023-11-09)
 ------------------
 
