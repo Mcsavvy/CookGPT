@@ -15,8 +15,12 @@ from cookgpt.chatbot.models import Chat
 from cookgpt.chatbot.utils import get_stream_name, get_thread, make_dummy_chat
 from cookgpt.ext import db
 from cookgpt.ext.auth import auth_required
-from cookgpt.ext.cache import (cache, chat_cache_key, chats_cache_key,
-                               threads_cache_key)
+from cookgpt.ext.cache import (
+    cache,
+    chat_cache_key,
+    chats_cache_key,
+    threads_cache_key,
+)
 from cookgpt.utils import abort, api_output
 
 if TYPE_CHECKING:
