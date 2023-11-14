@@ -1,9 +1,11 @@
 from importlib.metadata import EntryPoint
 from pathlib import Path
 from socket import gethostname
+from typing import cast
 
 from apiflask import APIFlask
 from dynaconf import Dynaconf, FlaskDynaconf
+from flask import current_app as flask_current_app
 from redis import Redis  # type: ignore
 
 from cookgpt import logging  # noqa: F401
@@ -73,7 +75,7 @@ def create_app(**config):
     from cookgpt import sentry
     from cookgpt.ext.config import config as settings
 
-    os.environ.setdefault("FLASK_ENV", "PRODUCTION")
+    os.environ.setdefault("FLASK_ENV", "TESTING")
     logging.debug(f"FLASK_ENV: {os.environ.get('FLASK_ENV')}")
     sentry.setup(settings)
     logging.info("Creating app cookgpt...")
@@ -96,3 +98,6 @@ def create_app_wsgi():  # pragma: no cover
     # https://github.com/pallets/flask/issues/4170
     app = create_app()
     return app
+
+
+current_app = cast(App, flask_current_app)

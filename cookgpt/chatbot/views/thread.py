@@ -12,6 +12,7 @@ from cookgpt.chatbot.data import schemas as sc
 from cookgpt.chatbot.models import Thread
 from cookgpt.chatbot.utils import get_thread
 from cookgpt.ext.auth import auth_required
+from cookgpt.ext.cache import cache, thread_cache_key, threads_cache_key
 
 if TYPE_CHECKING:
     from cookgpt.auth.models.user import User
@@ -23,6 +24,7 @@ class ThreadView(MethodView):
     decorators = [auth_required(), app.doc(tags=["thread"])]
 
     @app.output(sc.Thread.Get.Response)
+    @cache.cached(timeout=0, make_cache_key=thread_cache_key)
     def get(self, thread_id: UUID):
         """Get details of a thread."""
         logging.info(f"GET thread using id {thread_id}")
@@ -75,6 +77,7 @@ class ThreadsView(MethodView):
     decorators = [auth_required(), app.doc(tags=["thread"])]
 
     @app.output(sc.Threads.Get.Response, example=ex.Threads.Get.Response)
+    @cache.cached(timeout=0, make_cache_key=threads_cache_key)
     def get(self) -> dict:
         """Get all threads"""
         user: "User" = get_current_user()

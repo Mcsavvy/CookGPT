@@ -4,7 +4,13 @@ from uuid import UUID, uuid4
 
 from cookgpt import logging
 from cookgpt.base import BaseModelMixin
-from cookgpt.ext.database import db
+from cookgpt.ext import cache, db
+from cookgpt.ext.cache import (
+    chat_cache_key,
+    chats_cache_key,
+    thread_cache_key,
+    threads_cache_key,
+)
 from cookgpt.utils import utcnow
 
 from .data.enums import MessageType
@@ -57,6 +63,36 @@ class Chat(BaseModelMixin, db.Model):  # type: ignore
         if self.next_chat:
             return self.next_chat.id
         return None
+
+    @classmethod
+    def create(self, commit=True, **attrs):
+        """Create the chat"""
+        chat = super().create(commit, **attrs)
+        if commit:
+            cache.delete(chats_cache_key(thread_id=chat.thread.pk))
+            cache.delete(thread_cache_key(thread_id=chat.thread.pk))
+            cache.delete(threads_cache_key(user_id=chat.thread.user.pk))
+        return chat
+
+    def update(self, commit=True, **attrs):
+        """Update the chat"""
+        super().update(commit, **attrs)
+        if commit:
+            cache.delete(chat_cache_key(chat_id=self.pk))
+            cache.delete(chats_cache_key(thread_id=self.thread.pk))
+        return self
+
+    def delete(self, commit=True):
+        """Delete the chat"""
+        super().delete(commit)
+        if commit:
+            cache.delete(chat_cache_key(chat_id=self.pk))
+            cache.delete(chats_cache_key(thread_id=self.thread.pk))
+            cache.delete(thread_cache_key(thread_id=self.thread.pk))
+            cache.delete(threads_cache_key(user_id=self.thread.user.pk))
+            # Delete the previous chat's cache
+            if self.previous_chat:  # pragma: no cover
+                cache.delete(chat_cache_key(chat_id=self.previous_chat.pk))
 
 
 class Thread(BaseModelMixin, db.Model):  # type: ignore
@@ -184,6 +220,29 @@ class Thread(BaseModelMixin, db.Model):  # type: ignore
             Chat.previous_chat_id == None,  # noqa: E711
         ).all():
             cast(Chat, chat).delete()
+
+    @classmethod
+    def create(self, commit=True, **attrs):
+        """Create the thread"""
+        thread = super().create(commit, **attrs)
+        if commit:
+            cache.delete(threads_cache_key(user_id=thread.user.pk))
+        return thread
+
+    def update(self, commit=True, **attrs):
+        """Update the thread"""
+        thread = super().update(commit, **attrs)
+        if commit:
+            cache.delete(thread_cache_key(thread_id=self.pk))
+            cache.delete(threads_cache_key(user_id=self.user.pk))
+        return thread
+
+    def delete(self, commit=True):
+        """Delete the thread"""
+        super().delete(commit)
+        if commit:
+            cache.delete(thread_cache_key(thread_id=self.pk))
+            cache.delete(threads_cache_key(user_id=self.user.pk))
 
 
 class ThreadMixin:
