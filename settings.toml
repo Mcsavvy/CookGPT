@@ -2,8 +2,8 @@
 APP_NAME = "CookGPT"
 DEBUG = false
 EXTENSIONS = [
-    "cookgpt.ext.cache:init_app",
     "cookgpt.ext.config:init_app",
+    "cookgpt.ext.cache:init_app",
     "cookgpt.ext.database:init_app",
     "cookgpt.ext.auth:init_app",
     # "cookgpt.ext.admin:init_app",
