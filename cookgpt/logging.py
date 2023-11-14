@@ -3,6 +3,7 @@ from logging import Logger, _nameToLevel
 from logging.config import dictConfig
 
 from cookgpt.ext.config import config
+from cookgpt.utils import cast_func_to
 
 # debug settings
 debug_mode = config.get("DEBUG", False)
@@ -73,37 +74,44 @@ def get_logger() -> "Logger":
     return logging.getLogger("cookgpt")
 
 
+@cast_func_to(logging.log)
 def log(level: str, msg: str, *args, **kwargs):
     """log"""
     lvl = _nameToLevel[level.upper()]
     get_logger().log(lvl, msg, *args, **kwargs)
 
 
+@cast_func_to(logging.debug)
 def debug(msg: str, *args, **kwargs):
     """debug"""
     get_logger().debug(msg, *args, **kwargs)
 
 
+@cast_func_to(logging.info)
 def info(msg, *args, **kwargs):
     """info"""
     get_logger().info(msg, *args, **kwargs)
 
 
+@cast_func_to(logging.warning)
 def warning(msg, *args, **kwargs):
     """warning"""
     get_logger().warning(msg, *args, **kwargs)
 
 
+@cast_func_to(logging.error)
 def error(msg, *args, **kwargs):
     """error"""
     get_logger().error(msg, *args, **kwargs)
 
 
+@cast_func_to(logging.critical)
 def critical(msg, *args, **kwargs):
     """critical"""
     get_logger().critical(msg, *args, **kwargs)
 
 
+@cast_func_to(logging.exception)
 def exception(msg, *args, exc_info=True, **kwargs):
     """exception"""
     get_logger().exception(msg, *args, exc_info=exc_info, **kwargs)
