@@ -2,6 +2,20 @@ Changelog
 =========
 
 
+0.7.21 (2023-11-15)
+-------------------
+
+Changes
+~~~~~~~
+- Chore: Added coverage. [Isaac Olumide Ogunfolaju]
+- Refactor: improve chat retrieval and parsing. [Isaac Olumide
+  Ogunfolaju]
+
+Fix
+~~~
+- Fix(coverage): Fixed coverage issues. [Isaac Olumide Ogunfolaju]
+
+
 0.7.2 (2023-11-15)
 ------------------
 
