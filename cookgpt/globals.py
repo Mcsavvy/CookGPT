@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 
 
 T = TypeVar("T")
+D = TypeVar("D")
 Missing = object()
 
 
@@ -70,7 +71,7 @@ chat_cost: "tuple[int, int]" = LocalProxy(  # type: ignore[assignment]
 
 def setvar(var: "ContextVar[T] | str", value: "T") -> None:
     """set context variable"""
-    logging.debug(f"Setting context variable {var!r} to {value!r}")
+    logging.debug(f"Setting context variable {var!r}")
     if isinstance(var, str):
         if not var.startswith("_"):
             var = "_" + var
@@ -109,13 +110,18 @@ def getvar(var: str, _type: Type[T]) -> T:
 
 
 @overload
-def getvar(var: str, _default: T) -> T:
+def getvar(var: str, _default: D) -> D:
+    ...
+
+
+@overload
+def getvar(var: str, _type: Type[T], _default: D) -> T | D:
     ...
 
 
 def getvar(var, _type=None, _default=Missing):
     """get context variable"""
-    logging.debug(f"Getting context variable {var}")
+    logging.debug(f"Getting context variable {var!r}")
     if isinstance(var, str):
         if not var.startswith("_"):
             var = "_" + var
