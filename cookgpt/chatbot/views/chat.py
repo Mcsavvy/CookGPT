@@ -56,7 +56,8 @@ class ChatsView(MethodView):
         logging.info("GET all chats from thread")
         thread = get_thread(query_data["thread_id"])
         logging.info("Using thread %s", thread.id)
-        return {"chats": thread.chats}
+
+        return {"chats": [sc.parse_chat(chat) for chat in thread.chats]}
 
     @app.input(sc.Chats.Delete.Body, example=ex.Chats.Delete.Body)
     @app.output(
@@ -96,7 +97,7 @@ class ChatView(MethodView):
         chat = Chat.query.filter(Chat.id == chat_id).first()
         if not chat:
             abort(404, "Chat not found")
-        return chat
+        return sc.parse_chat(chat)
 
     @app.output(
         sc.Chat.Delete.Response,

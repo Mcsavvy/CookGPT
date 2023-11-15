@@ -1,10 +1,15 @@
 """Chatbot data validation schemas."""
+from typing import TYPE_CHECKING, Any
+
 from apiflask import Schema, fields
 
 from cookgpt.utils import make_field
 
 from . import examples as ex
 from .enums import MessageType
+
+if TYPE_CHECKING:
+    from cookgpt.chatbot.models import Chat as ChatModel
 
 ChatType = make_field(
     fields.Enum, "chat type", MessageType.QUERY.value, enum=MessageType
@@ -29,6 +34,20 @@ ThreadChatCount = make_field(
 ThreadCost = make_field(
     fields.Integer, "cost of all chats in this thread", 220
 )
+
+
+def parse_chat(chat: "ChatModel") -> dict[str, Any]:
+    """convert message to dict"""
+    return {
+        "id": chat.id,
+        "content": chat.content,
+        "chat_type": chat.chat_type,
+        "cost": chat.cost,
+        "previous_chat_id": chat.previous_chat_id,
+        "next_chat_id": chat.next_chat_id,
+        "sent_time": chat.sent_time,
+        "thread_id": chat.thread_id,
+    }
 
 
 class ChatSchema(Schema):
