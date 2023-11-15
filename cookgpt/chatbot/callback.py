@@ -4,7 +4,6 @@ from typing import Any, Dict, List, cast
 from uuid import UUID
 
 from langchain.callbacks import OpenAICallbackHandler
-from langchain.callbacks.openai_info import get_openai_token_cost_for_model
 from langchain.schema import BaseMessage, ChatGeneration, LLMResult
 
 from cookgpt import logging
@@ -23,6 +22,7 @@ class ChatCallbackHandler(OpenAICallbackHandler):
     var = None
     verbose: bool = config.LANGCHAIN_VERBOSE
     _query_cost: int = 0
+    raise_error = True
 
     def compute_completion_tokens(self, result: LLMResult, model_name: str):
         """Compute the cost of the result."""
@@ -35,13 +35,13 @@ class ChatCallbackHandler(OpenAICallbackHandler):
             ai_message.additional_kwargs["id"] = response.pk
         ai_message_raw = convert_message_to_dict(ai_message)
         num_tokens = num_tokens_from_messages([ai_message_raw], model_name)
-        completion_cost = get_openai_token_cost_for_model(
-            model_name, num_tokens, is_completion=True
-        )
-        logging.debug("Completion cost: %s", completion_cost)
+        # completion_cost = get_openai_token_cost_for_model(
+        # model_name, num_tokens, is_completion=True
+        # )
+        # logging.debug("Completion cost: $%s", completion_cost)
         self.total_tokens += num_tokens
         self.completion_tokens += num_tokens
-        self.total_cost += completion_cost
+        # self.total_cost += completion_cost
         setvar("chat_cost", (self._query_cost, num_tokens))
         self._query_cost = 0
 
@@ -52,7 +52,7 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         logging.debug("Computing prompt tokens...")
         messages_raw = []
         messages_raw = [convert_message_to_dict(m) for m in messages]
-        logging.debug("Messages: %s", messages_raw)
+        # logging.debug("Messages: %s", messages_raw)
         num_tokens = num_tokens_from_messages(messages_raw, model_name)
         # prompt_cost = get_openai_token_cost_for_model(model_name, num_tokens)
         # logging.debug("Prompt cost: %s", prompt_cost)
