@@ -2,11 +2,32 @@
 Application cache.
 """
 
+from typing import TYPE_CHECKING
+
+import click
 from flask import request
 from flask_caching import Cache
 from flask_jwt_extended import get_current_user
 
+from cookgpt import logging
+
+if TYPE_CHECKING:
+    from cookgpt.app import App
+
 cache = Cache(with_jinja2_ext=False)
+
+
+@click.group()
+def cache_cli():
+    """Cache commands."""
+    pass
+
+
+@cache_cli.command("clear")
+def clear_cache():
+    """Clear the cache."""
+    cache.clear()
+    logging.info("🚮 Cleared cache.")
 
 
 def thread_cache_key(*args, **kwargs) -> str:
@@ -37,9 +58,10 @@ def chats_cache_key(*args, **kwargs) -> str:
     return f"chats:{thread_id}"
 
 
-def init_app(app):
+def init_app(app: "App"):
     """Initialize Flask-Caching."""
 
+    app.cli.add_command(cache_cli, "cache")
     cache.init_app(
         app,
         config={
