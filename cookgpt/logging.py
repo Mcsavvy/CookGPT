@@ -78,40 +78,47 @@ def get_logger() -> "Logger":
 def log(level: str, msg: str, *args, **kwargs):
     """log"""
     lvl = _nameToLevel[level.upper()]
+    kwargs.setdefault("stacklevel", 2)
     get_logger().log(lvl, msg, *args, **kwargs)
 
 
 @cast_func_to(logging.debug)
 def debug(msg: str, *args, **kwargs):
     """debug"""
+    kwargs.setdefault("stacklevel", 2)
     get_logger().debug(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.info)
 def info(msg, *args, **kwargs):
     """info"""
+    kwargs.setdefault("stacklevel", 2)
     get_logger().info(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.warning)
 def warning(msg, *args, **kwargs):
     """warning"""
+    kwargs.setdefault("stacklevel", 2)
     get_logger().warning(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.error)
 def error(msg, *args, **kwargs):
     """error"""
+    kwargs.setdefault("stacklevel", 2)
     get_logger().error(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.critical)
 def critical(msg, *args, **kwargs):
     """critical"""
+    kwargs.setdefault("stacklevel", 2)
     get_logger().critical(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.exception)
 def exception(msg, *args, exc_info=True, **kwargs):
     """exception"""
+    kwargs.setdefault("stacklevel", 2)
     get_logger().exception(msg, *args, exc_info=exc_info, **kwargs)
