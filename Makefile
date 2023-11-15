@@ -53,7 +53,6 @@ clean:            ## Clean unused files.
 	@rm -rf .cache
 	@rm -rf .pytest_cache
 	@rm -rf .mypy_cache
-	@rm -rf .coverage
 	@rm -rf .ruff_cache
 	@rm -rf *.egg-info
 	@rm -rf htmlcov
