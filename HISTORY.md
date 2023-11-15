@@ -2,6 +2,36 @@ Changelog
 =========
 
 
+0.7.2 (2023-11-15)
+------------------
+
+New
+~~~
+- Feat: Improve caching for messages cost. [Isaac Olumide Ogunfolaju]
+
+  This is done by including the id of the chat when computing the cost of
+  a message. This way, the cost of a message is cached for each chat using
+  it's id as a key.
+
+  System messages are cached for each user, using the user id as a key.
+
+Changes
+~~~~~~~
+- Refactor(callback): remove unused code and logs. [Isaac Olumide
+  Ogunfolaju]
+- Chore: Improved annotations and logging. [Isaac Olumide Ogunfolaju]
+- Refactor(logging): add default stacklevel to log functions. [Isaac
+  Olumide Ogunfolaju]
+
+Fix
+~~~
+- Fix(caching): Corrected cached values, fixes #45. [Isaac Olumide
+  Ogunfolaju]
+
+  Fixes #4
+- Fix(make): Disallow cleaning of coverage. [Isaac Olumide Ogunfolaju]
+
+
 0.7.1 (2023-11-14)
 ------------------
 
