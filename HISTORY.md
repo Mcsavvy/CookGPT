@@ -2,6 +2,15 @@ Changelog
 =========
 
 
+0.7.3 (2023-11-15)
+------------------
+
+New
+~~~
+- Feat(cache): add cache command to clear cache. [Isaac Olumide
+  Ogunfolaju]
+
+
 0.7.21 (2023-11-15)
 -------------------
 
