@@ -12,7 +12,8 @@ from cookgpt.chatbot.data import schemas as sc
 from cookgpt.chatbot.models import Thread
 from cookgpt.chatbot.utils import get_thread
 from cookgpt.ext.auth import auth_required
-from cookgpt.ext.cache import cache, thread_cache_key, threads_cache_key
+from cookgpt.ext.cache import thread_cache_key  # noqa
+from cookgpt.ext.cache import cache, threads_cache_key
 
 if TYPE_CHECKING:
     from cookgpt.auth.models.user import User
@@ -29,7 +30,7 @@ class ThreadView(MethodView):
         """Get details of a thread."""
         logging.info(f"GET thread using id {thread_id}")
         thread = get_thread(thread_id)
-        return thread
+        return sc.Thread.Get.Response().dump(thread)
 
     @app.input(sc.Thread.Post.Body, example=ex.Thread.Post.Body)
     @app.output(sc.Thread.Post.Response, 201, example=ex.Thread.Post.Response)
@@ -82,7 +83,9 @@ class ThreadsView(MethodView):
         """Get all threads"""
         user: "User" = get_current_user()
         logging.info("GET all threads")
-        return {"threads": user.get_active_threads()}
+        return sc.Threads.Get.Response().dump(
+            {"threads": user.get_active_threads()}
+        )
 
     @app.output(sc.Threads.Delete.Response)
     def delete(self):
