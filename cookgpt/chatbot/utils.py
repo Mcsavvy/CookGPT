@@ -1,6 +1,6 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Optional, Sequence, cast
+from typing import TYPE_CHECKING, Literal, Optional, Sequence, cast
 from uuid import UUID, uuid4
 
 import tiktoken
@@ -12,6 +12,7 @@ from cookgpt.chatbot.data.enums import MessageType
 from cookgpt.chatbot.models import Thread
 from cookgpt.ext.cache import cache
 from cookgpt.ext.database import db
+from cookgpt.globals import getvar
 from cookgpt.utils import abort
 
 if TYPE_CHECKING:
@@ -26,26 +27,65 @@ def num_tokens_from_messages(
     messages: Sequence[dict], model="gpt-3.5-turbo-0613"
 ):
     """Returns the number of tokens used by a list of messages."""
+    from cookgpt.auth.models import User
+
     num_tokens = 0
     for message in messages:
+        role = cast(Literal["user", "assistant", "system"], message["role"])
         cost = 4
-        # every message follows <im_start>{role/name}\n{content}<im_end>\n
+
+        # check if message is cached
         if "id" in message:
-            if cache.has(f"chat:{message['id']}:cost"):
-                logging.debug("Using cached cost for %s", message["id"][:6])
-                num_tokens += cast(
-                    int, cache.get(f"chat:{message['id']}:cost")
+            id = cast(str, message["id"])
+            cache_key = f"chat:{id}:cost"
+            if cache.has(cache_key):
+                logging.debug(
+                    "Using cached %s message cost for chat %r", role, id[:6]
                 )
+                num_tokens += cast(int, cache.get(cache_key))
                 continue  # pragma: no cover
-            logging.debug("Computing cost for %s", message["id"][:6])
+
+        # check if system message is cached
+        elif role == "system" and (
+            user := getvar("user", _default=None, _type=User)
+        ):
+            id = user.pk
+            cache_key = f"system_msg:{id}:cost"
+            if cache.has(cache_key):
+                logging.debug(
+                    "Using cached system message cost for %r", user.name
+                )
+                num_tokens += cast(int, cache.get(cache_key))
+                continue
         else:
-            logging.debug("Computing cost for unsaved message")
+            if role == "system":
+                logging.warning("Working outside of user context. ")
+            else:
+                logging.warning("ID not found in %s message.", role)
         for key, value in message.items():
             cost += len(encoding.encode(value))
             if key == "name":  # pragma: no cover
                 cost += -1  # role is always required and always 1 token
+        logging.debug("Computed cost for %s message: %s", role, cost)
+        # cache the cost
         if "id" in message:
-            cache.set(f"chat:{message['id']}:cost", cost, timeout=0)
+            id = cast(str, message["id"])
+            cache_key = f"chat:{id}:cost"
+            logging.debug("Caching cost for %s message %r", role, id[:6])
+            cache.set(cache_key, cost, timeout=0)
+        # cache the system message cost
+        elif role == "system" and (
+            user := getvar("user", _default=None, _type=User)
+        ):
+            id = user.pk
+            cache_key = f"system_msg:{id}:cost"
+            logging.debug("Caching system message cost for %r", user.name)
+            cache.set(cache_key, cost, timeout=0)
+        else:
+            logging.warning(
+                "Unable to cache cost for %s message: %r", role, message
+            )
+
         num_tokens += cost
     num_tokens += 2  # every reply is primed with <im_start>assistant
     return num_tokens

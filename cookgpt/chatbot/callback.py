@@ -13,7 +13,7 @@ from cookgpt.chatbot.utils import (
     num_tokens_from_messages,
 )
 from cookgpt.ext.config import config
-from cookgpt.globals import response, setvar, user
+from cookgpt.globals import getvar, response, setvar, user
 from cookgpt.utils import utcnow
 
 
@@ -26,9 +26,13 @@ class ChatCallbackHandler(OpenAICallbackHandler):
 
     def compute_completion_tokens(self, result: LLMResult, model_name: str):
         """Compute the cost of the result."""
+        from cookgpt.chatbot.models import Chat
+
         logging.debug("Computing completion tokens...")
         ai_message = cast(ChatGeneration, result.generations[0][0]).message
-        logging.debug("AI message: %s", ai_message)
+        # set the id of the response
+        if (response := getvar("response", Chat, None)) is not None:
+            ai_message.additional_kwargs["id"] = response.pk
         ai_message_raw = convert_message_to_dict(ai_message)
         num_tokens = num_tokens_from_messages([ai_message_raw], model_name)
         completion_cost = get_openai_token_cost_for_model(

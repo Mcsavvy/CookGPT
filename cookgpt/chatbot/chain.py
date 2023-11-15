@@ -14,7 +14,7 @@ from cookgpt.chatbot.data.fake_data import responses
 from cookgpt.chatbot.data.prompts import prompt as PROMPT
 from cookgpt.chatbot.memory import BaseMemory, ThreadMemory
 from cookgpt.ext.config import config
-from cookgpt.globals import setvar
+from cookgpt.globals import getvar, setvar
 
 
 def get_llm() -> BaseChatModel:  # pragma: no cover
@@ -110,6 +110,8 @@ class ThreadChain(ConversationChain):
     ) -> Dict[str, Any]:
         from langchain.schema import HumanMessage
 
+        from cookgpt.chatbot.models import Chat
+
         # ensure that the input key is provided
         assert config.CHATBOT_CHAIN_INPUT_KEY in inputs, (
             "Please provide a value for the input key "
@@ -117,7 +119,11 @@ class ThreadChain(ConversationChain):
         )
 
         input: str = inputs[config.CHATBOT_CHAIN_INPUT_KEY]
-        inputs[config.CHATBOT_CHAIN_INPUT_KEY] = [HumanMessage(content=input)]
+        msg = HumanMessage(content=input)
+        # set the id of the query
+        if (query := getvar("query", Chat, None)) is not None:
+            msg.additional_kwargs["id"] = query.pk
+        inputs[config.CHATBOT_CHAIN_INPUT_KEY] = [msg]
 
         return super().__call__(
             inputs,
