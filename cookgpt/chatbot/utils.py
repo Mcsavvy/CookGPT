@@ -57,7 +57,7 @@ def num_tokens_from_messages(
                 )
                 num_tokens += cast(int, cache.get(cache_key))
                 continue
-        else:
+        else:  # pragma: no cover
             if role == "system":
                 logging.warning("Working outside of user context. ")
             else:
@@ -81,7 +81,7 @@ def num_tokens_from_messages(
             cache_key = f"system_msg:{id}:cost"
             logging.debug("Caching system message cost for %r", user.name)
             cache.set(cache_key, cost, timeout=0)
-        else:
+        else:  # pragma: no cover
             logging.warning(
                 "Unable to cache cost for %s message: %r", role, message
             )
