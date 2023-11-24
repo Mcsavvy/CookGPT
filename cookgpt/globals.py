@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from contextvars import ContextVar, Token
 from typing import TYPE_CHECKING, Optional, Type, TypeVar, cast, overload
 
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
     from cookgpt.chatbot.chain import ThreadChain
     from cookgpt.chatbot.memory import BaseMemory, SingleThreadHistory
     from cookgpt.chatbot.models import Chat, Thread
+    from cookgpt.socketchef.app import Namespace
 
 
 T = TypeVar("T")
@@ -66,6 +68,11 @@ query: "Chat" = LocalProxy(_query_var)  # type: ignore[assignment]
 response: "Chat" = LocalProxy(_response_var)  # type: ignore[assignment]
 chat_cost: "tuple[int, int]" = LocalProxy(  # type: ignore[assignment]
     _chat_cost_var
+)
+_namespace_var: "ContextVar[Namespace]" = ContextVar("namespace")
+namespace: "Namespace" = LocalProxy(  # type: ignore
+    _namespace_var,
+    unbound_message=("Working outside of a namespace."),
 )
 
 
@@ -132,6 +139,21 @@ def getvar(var, _type=None, _default=Missing):
     if _default is not Missing:  # pragma: no cover
         return var.get(_default)
     return var.get()
+
+
+@contextmanager
+def use_namespace(namespace: "Namespace"):
+    """Use a namespace."""
+    token = _namespace_var.set(namespace)
+    try:
+        yield
+    finally:
+        _namespace_var.reset(token)
+
+
+def is_namespace_context() -> bool:
+    """Check if the current context is in a namespace."""
+    return _namespace_var.get(None) is not None
 
 
 __all__ = [

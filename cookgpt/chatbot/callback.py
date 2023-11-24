@@ -12,7 +12,14 @@ from cookgpt.chatbot.utils import (
     num_tokens_from_messages,
 )
 from cookgpt.ext.config import config
-from cookgpt.globals import getvar, response, setvar, user
+from cookgpt.globals import (
+    getvar,
+    is_namespace_context,
+    response,
+    setvar,
+    user,
+)
+from cookgpt.socketchef.app import namespace
 from cookgpt.utils import utcnow
 
 
@@ -115,6 +122,16 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         if self.verbose:  # pragma: no cover
             print(token, end="", flush=True)
         assert response, "No response found."
+        if is_namespace_context():
+            namespace.emit(
+                "new_token",
+                {
+                    "token": token,
+                    "chat_id": response.pk,
+                    "thread_id": response.thread.pk,
+                },
+            )
+        # NOTE: Use redis for backwards compatibility
         stream = get_stream_name(user, response)
         app.redis.xadd(
             stream,

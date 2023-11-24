@@ -10,6 +10,11 @@ EXTENSIONS = [
     "cookgpt.ext.redisflow:init_app"
 ]
 
+
+# SOCKET.io
+MESSAGE_QUEUE_ENABLED = true
+NAMESPACES.chat = "socketchef.namespaces:ChatNamespace"
+
 # SENTRY
 SENTRY_INTEGRATIONS = [
     "flask",

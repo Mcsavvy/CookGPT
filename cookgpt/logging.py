@@ -1,6 +1,7 @@
 import logging
 from logging import Logger, _nameToLevel
 from logging.config import dictConfig
+from typing import ParamSpec, TypeVar
 
 from cookgpt.ext.config import config
 from cookgpt.utils import cast_func_to
@@ -67,6 +68,10 @@ dictConfig(
         },
     }
 )
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 def get_logger() -> "Logger":

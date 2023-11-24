@@ -8,6 +8,8 @@ PORT = os.getenv("PORT", "8000")
 bind = os.getenv("GUNICORN_BIND", f"{HOST}:{PORT}")
 workers = int(os.getenv("GUNICORN_WORKERS", "1"))
 threads = int(os.getenv("GUNICORN_THREADS", "1"))
+worker_class = os.getenv("GUNICORN_WORKER_CLASS", "eventlet")
+timeout = 0
 
 # Logging
 loglevel = os.getenv("GUNICORN_LOG_LEVEL", os.getenv("LOG_LEVEL", "info"))
