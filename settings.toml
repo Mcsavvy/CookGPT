@@ -106,7 +106,7 @@ SQLALCHEMY_ENGINE_OPTIONS.connect_args.connect_timeout = 60
 
 EXTENSIONS = [
     "dynaconf_merge",
-    # "quick_tests:init_app"
+    "cookgpt.ext.cors:init_app",
 ]
 
 
