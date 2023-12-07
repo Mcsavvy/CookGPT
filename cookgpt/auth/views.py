@@ -1,6 +1,8 @@
 from typing import Any, Optional, cast
 from uuid import UUID
 
+from apiflask.views import MethodView
+
 # from apiflask.views import MethodView
 from flask_jwt_extended import get_current_user, get_jwt
 
@@ -160,35 +162,64 @@ def refresh() -> Any:
     }
 
 
-# class UserView(MethodView):
-#     """User view"""
+class UserView(MethodView):
+    """User view"""
 
-#     decorators = [auth_required]
+    decorators = [auth_required()]
 
-#     @app.output(UserSchema.Out, example=ex.User.Out)
-#     def get(self):
-#         """get user details"""
-#         user = get_current_user()
-#         return user
+    @app.output(
+        sc.User.Info.Response,
+        description="User information",
+        example=ex.User.Info.Response,
+    )
+    @app.doc(tags=["user"], description=docs.USER_INFO)
+    def get(self):
+        """Get user's information"""
+        user = get_current_user()
+        user.user_type = user.type
+        return user
 
-#     @app.input(UserUpdate.In, example=ex.UserUpdate.In)
-#     @app.output(UserUpdate.Out, example=ex.UserUpdate.Out)
-#     def patch(self, json_data):
-#         """update user details"""
-#         from cookgpt.models import User
+    @app.input(sc.User.Update.Body, example=ex.User.Update.Body)
+    @app.output(
+        sc.User.Update.Response,
+        description="Success message after modifying user info",
+        example=ex.User.Update.Response,
+    )
+    @api_output(
+        sc.User.Update.Error,
+        422,
+        "Error while updating user",
+        example=ex.User.Update.Error,
+    )
+    @app.doc(tags=["user"], description=docs.USER_UPDATE)
+    def patch(self, json_data):
+        """Update user's information"""
+        from cookgpt.auth.models import User
 
-#         user: User = get_current_user()  # type: ignore
-#         user.update(**json_data)
-#         return user
+        user: User = get_current_user()  # type: ignore
+        try:
+            updated = user.update(**json_data)
+        except User.UpdateError as err:
+            abort(422, err.args[0])
+        if not updated:  # pragma: no cover
+            {"message": "No changes made"}
+        return {"message": "Successfully updated user"}
 
-#     @app.output(UserDelete.Out, example=ex.UserDelete.Out)
-#     def delete(self):
-#         """delete user"""
-#         from cookgpt.models import User
+    @app.output(
+        sc.User.Delete.Response,
+        description="Success message after deletion of user",
+        example=ex.User.Delete.Response,
+    )
+    @api_output(
+        sc.User.Delete.Error,
+        422,
+        "Error while deleting user",
+        example=ex.User.Delete.Error,
+    )
+    @app.doc(tags=["user"], description=docs.USER_DELETE)
+    def delete(self):
+        """Delete a user"""
+        abort(422, "Cannot delete user")
 
-#         user: User = get_current_user()  # type: ignore
-#         user.delete()
-#         return {"message": "user deleted"}
 
-
-# app.add_url_rule("/user", view_func=UserView.as_view("user"))  # type: ignore
+app.add_url_rule("/user", view_func=UserView.as_view("user"))  # type: ignore

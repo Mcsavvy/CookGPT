@@ -1,6 +1,7 @@
 """data validation & serialization schemas"""
 from apiflask import Schema, fields
 
+from cookgpt.auth.data.enums import UserType as UserT
 from cookgpt.utils import make_field
 
 from . import examples as ex
@@ -58,14 +59,33 @@ AuthToken = make_field(
 )
 
 UserType = make_field(
-    fields.String,
+    fields.Enum,
     "the type of user",
     ex.UserType,
+    UserT,
 )
 
 Datetime = make_field(
     fields.DateTime,
     example=ex.DateTime,
+)
+
+ProfilePicture = make_field(
+    fields.URL,
+    "the url of the user's profile picture",
+    ex.ProfilePicture,
+)
+
+MaxChatCost = make_field(
+    fields.Integer,
+    "the maximum allowed cost of a user's chat",
+    ex.MaxChatCost,
+)
+
+TotalChatCost = make_field(
+    fields.Integer,
+    "the total cost of a user's chat",
+    ex.TotalChatCost,
 )
 
 
@@ -77,18 +97,10 @@ class UserSchema(Schema):
     last_name = LastName()
     username = Username()
     email = Email()
-    max_chat_cost = fields.Integer(
-        metadata={
-            "description": "the maximum allowed cost of a user's chat",
-            "example": ex.MaxChatCost,
-        }
-    )
-    total_chat_cost = fields.Integer(
-        metadata={
-            "description": "the total cost of a user's chat",
-            "example": ex.TotalChatCost,
-        }
-    )
+    user_type = UserType()  # type: ignore
+    profile_picture = ProfilePicture()
+    max_chat_cost = MaxChatCost()
+    total_chat_cost = TotalChatCost()
 
 
 class AuthInfoSchema(Schema):
@@ -116,7 +128,7 @@ class AuthInfoSchema(Schema):
             "description": "the time the refresh token expires",
         }
     )
-    user_type = UserType()
+    user_type = UserType()  # type: ignore
     auth_type = fields.String(
         metadata={
             "description": "the type of authentication",
@@ -202,29 +214,56 @@ class Auth:
             auth_info = fields.Nested(AuthInfoSchema)
 
 
-class UserUpdate:
-    """Update user data"""
+class User:
+    """User data"""
 
-    class In(Schema):
-        first_name = FirstName()
-        last_name = LastName()
-        email = Email()
-        password = Password()
-        username = Username()
+    class Info:
+        """Get user data"""
 
-    class Out(Schema):
-        message = fields.String()
-        user = fields.Nested(UserSchema)
+        class Response(UserSchema):
+            pass
 
-    class Error(Schema):
-        message = fields.String()
+    class Update:
+        """Update user data"""
 
+        class Body(Schema):
+            first_name = FirstName()
+            last_name = LastName()
+            email = Email()
+            password = Password()
+            username = Username()
 
-class UserDelete:
-    """Delete user data"""
+        class Response(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "success message",
+                    "example": ex.User.Update.Response["message"],
+                }
+            )
 
-    class In(Schema):
-        pass
+        class Error(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "error message",
+                    "example": ex.User.Update.Error["message"],
+                }
+            )
 
-    class Out(Schema):
-        message = fields.String()
+    class Delete:
+        """Delete user data"""
+
+        class Response(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "success message",
+                    "example": ex.User.Delete.Response["message"],
+                }
+            )
+
+        class Error(Schema):
+            message = fields.String(
+                metadata={
+                    "description": "error message",
+                    "example": ex.User.Delete.Error["message"],
+                }
+            )

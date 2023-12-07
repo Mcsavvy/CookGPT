@@ -43,6 +43,13 @@ AUTH_LOGOUT = """Use this endpoint to logout a user. This will invalidate the us
 AUTH_SIGNUP = """Use this endpoint to register a new user. If an error occurs, the error message will be returned in the response body."""
 
 
+USER_INFO = """Get all information about a user."""
+
+USER_UPDATE = """Update a user's information. Each of the fields in the request body is optional. Only the fields that are specified will be updated."""
+
+USER_DELETE = """Delete a user's account. **This action cannot be undone**."""
+
+
 CHAT = """The AI chat functionality allows users to interact with an AI-powered cooking assistant. The assistant can be used to create recipes, get cooking advice, and more.
 
 Chats with the AI are organized into threads. Each thread has a unique ID that is used to identify the thread. The thread ID is used to get the chat messages in the thread, and to send messages to the thread.

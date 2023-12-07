@@ -74,6 +74,17 @@ class User(
         return name
 
     @property
+    def profile_picture(self):
+        """get the user's profile picture"""
+        # hash the user's email to get a gravatar
+        from hashlib import sha256
+
+        return (
+            "https://www.gravatar.com/avatar/"
+            + sha256(self.email.encode()).hexdigest()
+        )
+
+    @property
     def type(self) -> UserType:  # pragma: no cover
         """
         get the user's type
@@ -129,6 +140,7 @@ class User(
         ):
             raise self.UpdateError("email is taken")
         if "password" in kwargs:
+            # if password is being updated, hash it
             kwargs["password"] = bcrypt.generate_password_hash(
                 kwargs["password"]
             )

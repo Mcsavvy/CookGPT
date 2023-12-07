@@ -1,6 +1,6 @@
 """schema and fields examples"""
 
-UserType = "cook"
+UserType = "COOK"
 FirstName = "John"
 LastName = "Doe"
 Username = "johndoe"
@@ -13,14 +13,17 @@ Uuid = "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
 DateTime = "2021-01-01 00:00:00"
 MaxChatCost = 4000
 TotalChatCost = 1000
+ProfilePicture = "https://example.com/profile.jpg"
 
 
-User = {
+UserInfo = {
     "id": Uuid,
     "user_type": UserType,
     "first_name": FirstName,
     "last_name": LastName,
     "username": Username,
+    "email": Email,
+    "profile_picture": ProfilePicture,
     "max_chat_cost": MaxChatCost,
     "total_chat_cost": TotalChatCost,
 }
@@ -50,7 +53,7 @@ class Auth:
         }
         Response = {
             "message": "Successfully signed up",
-            "user": User,
+            "user": UserInfo,
         }
         Error = {"message": "email is taken"}
 
@@ -78,6 +81,30 @@ class Auth:
             "message": "Refreshed access token",
             "auth_info": AuthInfo,
         }
+
+
+class User:
+    """User data examples"""
+
+    class Info:
+        Response = UserInfo
+
+    class Update:
+        Body = {
+            "first_name": FirstName,
+            "last_name": LastName,
+            "username": Username,
+            "email": Email,
+            "password": Password,
+        }
+        Response = {
+            "message": "Successfully updated user",
+        }
+        Error = {"message": "email is taken"}
+
+    class Delete:
+        Response = {"message": "Successfully deleted"}
+        Error = {"message": "Cannot delete user"}
 
 
 class UserUpdate:
