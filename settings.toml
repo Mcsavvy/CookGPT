@@ -44,7 +44,8 @@ LOG_SHOW_TIME = false
 LOG_HANDLER_CLASS = "rich.logging.RichHandler"
 
 
-SQLALCHEMY_ENGINE_OPTIONS = {"isolation_level" = "READ UNCOMMITTED"}
+SQLALCHEMY_ENGINE_OPTIONS.isolation_level = "READ UNCOMMITTED"
+
 
 BLUEPRINTS = [
     "cookgpt.auth:app",
@@ -101,6 +102,7 @@ JWT_ACCESS_TOKEN_EXPIRES = {days = 1}
 JWT_ACCESS_TOKEN_LEEWAY = {hours = 12}
 JWT_REFRESH_TOKEN_EXPIRES = {days = 5}
 JWT_REFRESH_TOKEN_LEEWAY = {minutes = 15}
+SQLALCHEMY_ENGINE_OPTIONS.connect_args.connect_timeout = 60
 
 EXTENSIONS = [
     "dynaconf_merge",
@@ -124,7 +126,7 @@ JWT_ACCESS_TOKEN_EXPIRES = {days = 7}
 JWT_ACCESS_TOKEN_LEEWAY = {days = 5}
 JWT_REFRESH_TOKEN_EXPIRES = {days = 30}
 JWT_REFRESH_TOKEN_LEEWAY = {minutes = 30}
-
+SQLALCHEMY_ENGINE_OPTIONS.connect_args.connect_timeout = 60
 EXTENSIONS = [
     "dynaconf_merge",
     "cookgpt.ext.cors:init_app"
