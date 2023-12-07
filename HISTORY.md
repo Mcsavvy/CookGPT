@@ -2,6 +2,26 @@ Changelog
 =========
 
 
+0.8.0 (2023-12-07)
+------------------
+
+New
+~~~
+- Feat(user): Add user information endpoint. [mcsavvy]
+
+Changes
+~~~~~~~
+- Chore(settings): Enabled CORS for dev mode. [mcsavvy]
+- Chore: exclude whatsapp.py from code coverage. [mcsavvy]
+- Chore(coverage): Added coverage. [mcsavvy]
+- Refactor(user): remove get_type() method and use user.type instead.
+  [mcsavvy]
+
+Tests
+~~~~~
+- Test: add user view tests. [mcsavvy]
+
+
 0.7.41 (2023-12-07)
 -------------------
 

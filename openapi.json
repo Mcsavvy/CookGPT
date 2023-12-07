@@ -2,7 +2,7 @@
   "info": {
     "description": "Welcome to the Cookgpt API documentation! This documentation provides detailed information on how to integrate with the Cookgpt API, which powers an AI-powered cooking assistance.\n\nThe API allows you to perform various actions such as user authentication, managing user information, and interacting with the AI chat functionality.\n\nThe API is organized around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.",
     "title": "CookGPT",
-    "version": "0.7.42"
+    "version": "0.8.0"
   },
   "tags": [
     {
@@ -292,6 +292,182 @@
         ]
       }
     },
+    "/auth/user": {
+      "get": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User:Info:Response"
+                },
+                "example": {
+                  "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
+                  "user_type": "COOK",
+                  "first_name": "John",
+                  "last_name": "Doe",
+                  "username": "johndoe",
+                  "email": "johndoe@example.com",
+                  "profile_picture": "https://example.com/profile.jpg",
+                  "max_chat_cost": 4000,
+                  "total_chat_cost": 1000
+                }
+              }
+            },
+            "description": "User information"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          }
+        },
+        "tags": [
+          "user"
+        ],
+        "summary": "Get user's information",
+        "description": "Get all information about a user.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "patch": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User:Update:Response"
+                },
+                "example": {
+                  "message": "Successfully updated user"
+                }
+              }
+            },
+            "description": "Success message after modifying user info"
+          },
+          "406": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            },
+            "description": "could not validate input data"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User:Update:Error"
+                },
+                "example": {
+                  "message": "email is taken"
+                }
+              }
+            },
+            "description": "Error while updating user"
+          }
+        },
+        "tags": [
+          "user"
+        ],
+        "summary": "Update user's information",
+        "description": "Update a user's information. Each of the fields in the request body is optional. Only the fields that are specified will be updated.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User:Update:Body"
+              },
+              "example": {
+                "first_name": "John",
+                "last_name": "Doe",
+                "username": "johndoe",
+                "email": "johndoe@example.com",
+                "password": "Password123!"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User:Delete:Response"
+                },
+                "example": {
+                  "message": "Successfully deleted"
+                }
+              }
+            },
+            "description": "Success message after deletion of user"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPError"
+                }
+              }
+            },
+            "description": "insufficient permissions"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User:Delete:Error"
+                },
+                "example": {
+                  "message": "Cannot delete user"
+                }
+              }
+            },
+            "description": "Error while deleting user"
+          }
+        },
+        "tags": [
+          "user"
+        ],
+        "summary": "Delete a user",
+        "description": "Delete a user's account. **This action cannot be undone**.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
     "/auth/login": {
       "post": {
         "parameters": [],
@@ -311,7 +487,7 @@
                     "atoken_expiry": "2021-01-01 00:00:00",
                     "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
                     "rtoken_expiry": "2021-01-01 00:00:00",
-                    "user_type": "cook",
+                    "user_type": "COOK",
                     "auth_type": "Bearer"
                   }
                 }
@@ -430,10 +606,12 @@
                   "message": "Successfully signed up",
                   "user": {
                     "id": "36b51f8a-c9fa-43f8-92fa-ff6927736c10",
-                    "user_type": "cook",
+                    "user_type": "COOK",
                     "first_name": "John",
                     "last_name": "Doe",
                     "username": "johndoe",
+                    "email": "johndoe@example.com",
+                    "profile_picture": "https://example.com/profile.jpg",
                     "max_chat_cost": 4000,
                     "total_chat_cost": 1000
                   }
@@ -575,7 +753,7 @@
                     "atoken_expiry": "2021-01-01 00:00:00",
                     "rtoken": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
                     "rtoken_expiry": "2021-01-01 00:00:00",
-                    "user_type": "cook",
+                    "user_type": "COOK",
                     "auth_type": "Bearer"
                   }
                 }
@@ -1241,6 +1419,132 @@
           }
         }
       },
+      "User:Info:Response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "user's id",
+            "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "first_name": {
+            "type": "string",
+            "description": "user's first name",
+            "example": "John"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "user's last name",
+            "example": "Doe"
+          },
+          "username": {
+            "type": "string",
+            "description": "user's username",
+            "example": "johndoe"
+          },
+          "email": {
+            "type": "string",
+            "description": "user's email address",
+            "example": "johndoe@example.com"
+          },
+          "user_type": {
+            "description": "the type of user",
+            "example": "COOK",
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "COOK"
+            ]
+          },
+          "profile_picture": {
+            "type": "string",
+            "format": "url",
+            "description": "the url of the user's profile picture",
+            "example": "https://example.com/profile.jpg"
+          },
+          "max_chat_cost": {
+            "type": "integer",
+            "description": "the maximum allowed cost of a user's chat",
+            "example": 4000
+          },
+          "total_chat_cost": {
+            "type": "integer",
+            "description": "the total cost of a user's chat",
+            "example": 1000
+          }
+        }
+      },
+      "User:Update:Body": {
+        "type": "object",
+        "properties": {
+          "first_name": {
+            "type": "string",
+            "description": "user's first name",
+            "example": "John"
+          },
+          "last_name": {
+            "type": "string",
+            "description": "user's last name",
+            "example": "Doe"
+          },
+          "email": {
+            "type": "string",
+            "description": "user's email address",
+            "example": "johndoe@example.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "user's password",
+            "example": "Password123!"
+          },
+          "username": {
+            "type": "string",
+            "description": "user's username",
+            "example": "johndoe"
+          }
+        }
+      },
+      "User:Update:Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "success message",
+            "example": "Successfully updated user"
+          }
+        }
+      },
+      "User:Update:Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "error message",
+            "example": "email is taken"
+          }
+        }
+      },
+      "User:Delete:Response": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "success message",
+            "example": "Successfully deleted"
+          }
+        }
+      },
+      "User:Delete:Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "error message",
+            "example": "Cannot delete user"
+          }
+        }
+      },
       "Auth:Login:Body": {
         "type": "object",
         "properties": {
@@ -1297,9 +1601,13 @@
             "example": "2021-01-01 00:00:00"
           },
           "user_type": {
-            "type": "string",
             "description": "the type of user",
-            "example": "cook"
+            "example": "COOK",
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "COOK"
+            ]
           },
           "auth_type": {
             "type": "string",
