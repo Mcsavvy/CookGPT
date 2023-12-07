@@ -56,9 +56,8 @@ def user(app: "App") -> Generator[User, None, None]:
     user.delete()
 
 
-@pytest.fixture(scope="session")
-@pytest.mark.usefixtures("app")
-def random_user():
+@pytest.fixture(scope="function")
+def random_user(app: "App", database):
     """A random user"""
     user = Random.user()
     yield user
