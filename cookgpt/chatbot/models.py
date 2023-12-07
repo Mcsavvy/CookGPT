@@ -1,9 +1,12 @@
 """Chatbot models."""
-from typing import Optional, Sequence, cast
+from datetime import datetime
+from typing import TYPE_CHECKING, List, Optional, Sequence, cast
 from uuid import UUID, uuid4
 
+from sqlalchemy import Enum, ForeignKey, Text
+from sqlalchemy.orm import Mapped, mapped_column
+
 from cookgpt import logging
-from cookgpt.base import BaseModelMixin
 from cookgpt.ext import cache, db
 from cookgpt.ext.cache import (
     chat_cache_key,
@@ -15,30 +18,40 @@ from cookgpt.utils import utcnow
 
 from .data.enums import MessageType
 
+if TYPE_CHECKING:
+    from cookgpt.auth.models.user import User  # noqa: F401
 
-class Chat(BaseModelMixin, db.Model):  # type: ignore
+
+class Chat(db.Model):  # type: ignore
     """A single chat in a thread"""
 
     serialize_rules = "-thread"
 
-    id = db.Column(db.Uuid, primary_key=True, default=uuid4)
-    content = db.Column(db.Text, nullable=False)
-    cost = db.Column(db.Integer, nullable=False, default=0)
-    chat_type = db.Column(db.Enum(MessageType), nullable=False)
-    thread_id = db.Column(db.Uuid, db.ForeignKey("thread.id"), nullable=False)
-    previous_chat_id = db.Column(
-        db.Uuid, db.ForeignKey("chat.id"), nullable=True
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    content: Mapped[str] = mapped_column(Text)
+    cost: Mapped[int] = mapped_column(default=0)
+    chat_type: Mapped[MessageType] = mapped_column(Enum(MessageType))
+    thread_id: Mapped[UUID] = mapped_column(db.ForeignKey("thread.id"))
+    previous_chat_id: Mapped[Optional[UUID]] = mapped_column(
+        db.ForeignKey("chat.id")
     )
-    previous_chat = db.relationship(
-        "Chat",
+    previous_chat: Mapped[
+        Optional["Chat"]
+    ] = db.relationship(  # type: ignore[assignment]
         remote_side=[id],
         backref=db.backref("next_chat", uselist=False, cascade="all, delete"),
         uselist=False,
         single_parent=True,
         foreign_keys=[previous_chat_id],
     )
-    sent_time = db.Column(db.DateTime, nullable=False, default=utcnow)
-    order = db.Column(db.Integer, nullable=False, default=0)
+    sent_time: Mapped[datetime] = mapped_column(default=utcnow)
+    order: Mapped[int] = mapped_column(default=0)
+    thread: Mapped["Thread"] = db.relationship(  # type: ignore[assignment]
+        back_populates="chats",
+        lazy=True,
+        single_parent=True,
+        foreign_keys=[thread_id],
+    )
 
     __table_args__ = (
         db.UniqueConstraint(
@@ -95,21 +108,25 @@ class Chat(BaseModelMixin, db.Model):  # type: ignore
                 cache.delete(chat_cache_key(chat_id=self.previous_chat.pk))
 
 
-class Thread(BaseModelMixin, db.Model):  # type: ignore
+class Thread(db.Model):  # type: ignore
     """A conversation thread"""
 
     serialize_rules = ("-user",)
 
-    title = db.Column(db.String(80), nullable=False)
-    chats = db.relationship(
-        "Chat",
-        backref=db.backref("thread"),
+    title: Mapped[str] = mapped_column(db.String(80))
+    chats: Mapped[List["Chat"]] = db.relationship(  # type: ignore[assignment]
+        back_populates="thread",
         cascade="all, delete-orphan",
         order_by="Chat.order",
     )
-    user_id = db.Column(db.Uuid, db.ForeignKey("user.id"), nullable=False)
-    # last_chat_id = db.Column(db.Uuid, db.ForeignKey("chat.id"))
-    closed = db.Column(db.Boolean, nullable=False, default=False)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
+    user: Mapped["User"] = db.relationship(  # type: ignore[assignment]
+        back_populates="threads",
+        lazy=True,
+        single_parent=True,
+        foreign_keys=[user_id],
+    )
+    closed: Mapped[bool] = mapped_column(default=False)
 
     def __repr__(self):
         num_chats = len(self.chats)  # type: ignore
@@ -287,8 +304,9 @@ class ThreadMixin:
             else:
                 raise RuntimeError("thread_id or previous_chat must be given")
         else:
-            thread = db.session.get(Thread, thread_id)
-            if thread is None:
+            try:
+                thread = Thread.query.get(thread_id)
+            except Thread.DoesNotExist:
                 raise ValueError("thread_id is invalid")
             if thread.user != self:
                 raise ValueError("thread not owned by user")

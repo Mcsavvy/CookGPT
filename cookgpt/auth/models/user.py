@@ -1,13 +1,19 @@
 """User Database Models"""
 
-from typing import cast
+from typing import TYPE_CHECKING, List, Optional, cast
+
+from sqlalchemy import Enum
+from sqlalchemy.orm import Mapped, mapped_column
 
 from cookgpt.auth.data.enums import UserType
 from cookgpt.auth.models.tokens import TokenMixin
-from cookgpt.base import BaseModelMixin
 from cookgpt.chatbot.models import ThreadMixin
 from cookgpt.ext.auth import bcrypt
 from cookgpt.ext.database import db
+
+if TYPE_CHECKING:
+    from cookgpt.auth.models.tokens import Token  # noqa: F401
+    from cookgpt.chatbot.models import Thread  # noqa: F401
 
 
 def get_max_chat_cost() -> int:
@@ -18,7 +24,6 @@ def get_max_chat_cost() -> int:
 
 
 class User(
-    BaseModelMixin,
     db.Model,  # type: ignore
     TokenMixin,
     ThreadMixin,
@@ -27,38 +32,33 @@ class User(
 
     serialize_rules = ("-password",)
 
-    first_name = db.Column(db.String(30), nullable=False)
-    last_name = db.Column(db.String(30), nullable=True)
-    user_type = db.Column(
-        db.Enum(UserType), nullable=False, default=UserType.COOK
+    first_name: Mapped[str] = mapped_column(db.String(30))
+    last_name: Mapped[Optional[str]] = mapped_column(db.String(30))
+    user_type: Mapped[UserType] = mapped_column(
+        Enum(UserType), default=UserType.COOK
     )
-    username = db.Column(db.String(80), unique=True, nullable=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
-    tokens = db.relationship(  # type: ignore
-        "Token",
-        backref=db.backref("user"),
+    username: Mapped[Optional[str]] = mapped_column(db.String(80), unique=True)
+    email: Mapped[str] = mapped_column(db.String(120), unique=True)
+    password: Mapped[str] = mapped_column(db.String(120))
+    tokens: Mapped[List["Token"]] = db.relationship(  # type: ignore
+        back_populates="user",
         lazy=True,
         cascade="all, delete-orphan",
     )
 
-    max_chat_cost = db.Column(
-        db.Integer, nullable=False, default=get_max_chat_cost
-    )
-    threads = db.relationship(
-        "Thread",
-        backref=db.backref("user"),
+    max_chat_cost: Mapped[int] = mapped_column(default=get_max_chat_cost)
+    threads: Mapped[
+        List["Thread"]
+    ] = db.relationship(  # type: ignore[assignment]
+        back_populates="user",
+        lazy=True,
         cascade="all, delete-orphan",
     )
 
     def __repr__(self):
-        "Admin[45g56](name=Dave, email=dave@ex.com, threads=9, token=5)"
-        (self.username or self.first_name).title()
-        self.get_type().title()
-        self.id.hex[:6]
         return "{}[{}](name={}, email={}, threads={}, tokens={})".format(
             self.get_type().title(),
-            self.id.hex[:6],
+            self.sid,
             self.name,
             self.email,
             len(self.threads),  # type: ignore
@@ -126,7 +126,9 @@ class User(
         NOTE: this is a workaound for a bug where user_type was returned as
               a string instead of an enum
         """
-        try:
-            return self.user_type.value
-        except AttributeError:
-            return self.user_type or "cook"
+        if self.user_type is None:
+            return "COOK"
+        elif isinstance(self.user_type, str):
+            return self.user_type.upper()
+        else:
+            return self.user_type.name.upper()

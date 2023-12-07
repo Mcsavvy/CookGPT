@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Iterable, cast
+from typing import TYPE_CHECKING, Iterable, List, cast
 from uuid import UUID, uuid4
 
 from flask_jwt_extended import (
@@ -7,29 +7,35 @@ from flask_jwt_extended import (
     create_refresh_token,
     decode_token,
 )
-from sqlalchemy.orm.dynamic import AppenderQuery
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column
 
-from cookgpt.base import BaseModelMixin
-from cookgpt.ext import cache
+from cookgpt.ext.cache import cache
 from cookgpt.ext.database import db
 from cookgpt.globals import current_app as app
 from cookgpt.utils import utcnow, utcnow_from__ts
 
+if TYPE_CHECKING:
+    from cookgpt.auth.models.user import User  # noqa: F401
 
-class Token(db.Model, BaseModelMixin):  # type: ignore
+
+class Token(db.Model):  # type: ignore
     """Json Web Token model"""
 
     serialize_rules = ("-user",)
 
-    access_token = db.Column(db.String(500), nullable=False, unique=True)
-    refresh_token = db.Column(db.String(500), nullable=False, unique=True)
-    revoked = db.Column(db.Boolean, nullable=False, default=False)
-    active = db.Column(db.Boolean, nullable=False, default=True)
-    user_id = db.Column(db.Uuid, db.ForeignKey("user.id"), nullable=False)
+    access_token: Mapped[str] = mapped_column(String(500), unique=True)
+    refresh_token: Mapped[str] = mapped_column(String(500), unique=True)
+    revoked: Mapped[bool] = mapped_column(default=False)
+    active: Mapped[bool] = mapped_column(default=True)
+    user_id: Mapped[UUID] = mapped_column(ForeignKey("user.id"))
+    user: Mapped["User"] = db.relationship(  # type: ignore[assignment]
+        back_populates="tokens"
+    )
 
     def __repr__(self):
         return "Token[{}](user={}, active={}, revoked={})".format(
-            self.id.hex[:6],
+            self.sid,
             self.user.name,
             "✔" if self.active else "✗",
             "✔" if self.revoked else "✗",
@@ -95,8 +101,8 @@ class Token(db.Model, BaseModelMixin):  # type: ignore
 class TokenMixin:
     """TokenMixin"""
 
-    tokens: "AppenderQuery[Token]"
     id: "UUID"
+    tokens: "List[Token]"
 
     def revoke_all_tokens(self):
         """Revokes all jwt tokens"""
