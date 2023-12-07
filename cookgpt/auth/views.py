@@ -66,7 +66,7 @@ def login(json_data: dict) -> Any:
             "atoken_expiry": token.atoken_expiry,
             "rtoken": token.refresh_token,
             "rtoken_expiry": token.rtoken_expiry,
-            "user_type": user.get_type(),
+            "user_type": user.type,
             "auth_type": "Bearer",
         },
     }
@@ -154,7 +154,7 @@ def refresh() -> Any:
             "atoken_expiry": token.atoken_expiry,
             "rtoken": token.refresh_token,
             "rtoken_expiry": token.rtoken_expiry,
-            "user_type": token.user.get_type(),
+            "user_type": token.user.type,
             "auth_type": "Bearer",
         },
     }

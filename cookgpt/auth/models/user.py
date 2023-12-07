@@ -57,7 +57,7 @@ class User(
 
     def __repr__(self):
         return "{}[{}](name={}, email={}, threads={}, tokens={})".format(
-            self.get_type().title(),
+            self.type.name,
             self.sid,
             self.name,
             self.email,
@@ -72,6 +72,21 @@ class User(
         if self.last_name:
             name += " " + self.last_name
         return name
+
+    @property
+    def type(self) -> UserType:  # pragma: no cover
+        """
+        get the user's type
+
+        BUG: this is a workaround for a bug where user_type was returned as
+             a string instead of an enum
+        """
+        if not self.user_type:
+            return UserType.COOK
+        elif isinstance(self.user_type, str):
+            return UserType[self.user_type.upper()]
+        else:
+            return self.user_type
 
     def validate_password(self, password):
         """verify that a password can be used to authenticate as this user"""
@@ -118,17 +133,3 @@ class User(
                 kwargs["password"]
             )
         return super().update(commit, **kwargs)
-
-    def get_type(self) -> str:  # pragma: no cover
-        """
-        get the user's type
-
-        NOTE: this is a workaound for a bug where user_type was returned as
-              a string instead of an enum
-        """
-        if self.user_type is None:
-            return "COOK"
-        elif isinstance(self.user_type, str):
-            return self.user_type.upper()
-        else:
-            return self.user_type.name.upper()

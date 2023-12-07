@@ -277,7 +277,7 @@ class ThreadMixin:
         logging.debug(
             "creating thread: %r for %s %s",
             title,
-            self.get_type().lower(),  # type: ignore
+            self.type.value,  # type: ignore
             self.name,  # type: ignore
         )
         return Thread.create(
@@ -364,7 +364,7 @@ class ThreadMixin:
         logging.debug(
             "clearing %d threads for %s %r",
             len(threads),
-            self.get_type().lower(),  # type: ignore
+            self.type.value,  # type: ignore
             self.name,  # type: ignore
         )
         for thread in threads:

@@ -51,23 +51,17 @@ def create_user(
         if email == user.email and (username and user.username == username):
             click.echo(
                 (
-                    f"{user.get_type().title()} user "
+                    f"{user.type.name} user "
                     "with that username and email already exists"
                 )
             )
         elif email == user.email:
             click.echo(
-                (
-                    f"{user.get_type().title()} user "
-                    "with that email already exists"
-                )
+                (f"{user.type.name} user " "with that email already exists")
             )
         else:
             click.echo(
-                (
-                    f"{user.get_type().title()} user "
-                    "with that username already exists"
-                )
+                (f"{user.type.name} user " "with that username already exists")
             )
         if allow_existing:
             return
