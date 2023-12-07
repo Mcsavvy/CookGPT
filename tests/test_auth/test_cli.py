@@ -1,3 +1,5 @@
+from typing import cast
+
 import pytest
 from marshmallow import ValidationError
 
@@ -301,7 +303,8 @@ class TestGetAccessToken:
         assert token.access_token in result.output
 
         # test with username
-        result = runner.invoke(app.cli, ["get-access-token", user.username])
+        username = cast(str, user.username)
+        result = runner.invoke(app.cli, ["get-access-token", username])
         assert result.exit_code == 0
         assert token.access_token in result.output
 
@@ -323,9 +326,8 @@ class TestGetAccessToken:
         assert token1.access_token in result.output
 
         # test with username
-        result = runner.invoke(
-            app.cli, ["get-access-token", user.username, "-n"]
-        )
+        username = cast(str, user.username)
+        result = runner.invoke(app.cli, ["get-access-token", username, "-n"])
         assert result.exit_code == 0
         assert len(user.tokens) == 2  # type: ignore
 
