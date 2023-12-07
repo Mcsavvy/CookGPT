@@ -2,6 +2,20 @@ Changelog
 =========
 
 
+0.7.4 (2023-12-07)
+------------------
+
+New
+~~~
+- Feat: update SQLALCHEMY_ENGINE_OPTIONS isolation_level and
+  connect_timeout. [mcsavvy]
+- Feat(sqlalchemy): Updated version & model syntax. [mcsavvy]
+
+Changes
+~~~~~~~
+- Refactor: Simplify code by using type casting. [mcsavvy]
+
+
 0.7.3 (2023-11-15)
 ------------------
 
