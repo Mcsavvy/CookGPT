@@ -56,4 +56,5 @@ omit = [
     "cookgpt/ext/database.py",
     "cookgpt/logging.py",
     "cookgpt/sentry.py",
+    "cookgpt/auth/models/whatsapp.py",
 ]
