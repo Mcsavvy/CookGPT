@@ -28,6 +28,7 @@ APP_ESSENTIALS = Validator(
     "APP_NAME",
     "SECRET_KEY",
     "SQLALCHEMY_DATABASE_URI",
+    "GOOGLE_API_KEY",
     must_exist=True,
 )
 
@@ -41,9 +42,7 @@ SENTRY = Validator(
 def export_to_env(config: Dynaconf):
     """export specific config vars to the environment"""
     import os
-
-    if "OPENAI_API_KEY" in config:
-        os.environ["OPENAI_API_KEY"] = config.OPENAI_API_KEY
+    os.environ["GOOGLE_API_KEY"] = config.GOOGLE_API_KEY
 
 
 def set_langchain_verbosity(config: Dynaconf):

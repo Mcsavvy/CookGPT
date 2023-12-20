@@ -2,6 +2,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Literal, Optional, Sequence, cast
 from uuid import UUID, uuid4
+from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 
 import tiktoken
 from langchain.adapters import openai
@@ -14,6 +15,8 @@ from cookgpt.ext.cache import cache
 from cookgpt.ext.database import db
 from cookgpt.globals import getvar
 from cookgpt.utils import abort
+from langchain_google_genai.chat_models import _messages_to_genai_contents
+from langchain_core.messages import HumanMessage
 
 if TYPE_CHECKING:
     from cookgpt.auth.models import User

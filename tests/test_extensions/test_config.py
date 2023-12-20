@@ -22,9 +22,9 @@ def config(monkeypatch):
 
 
 def test_export_to_env_hook(config: Dynaconf):
-    config.OPENAI_API_KEY = "myapikey"
+    config.GEMINI_API_KEY = "myapikey"
     export_to_env(config)
-    assert os.environ["OPENAI_API_KEY"] == "myapikey"
+    assert os.environ["GEMINI_API_KEY"] == "myapikey"
 
 
 def test_langchain_verbosity_hook(config: Dynaconf):

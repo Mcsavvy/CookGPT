@@ -3,10 +3,11 @@ from typing import Any, Dict, Iterator, List, Optional, Type, Union
 from langchain.callbacks.base import Callbacks
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.chains import ConversationChain
-from langchain.chat_models import ChatOpenAI, FakeListChatModel
+from langchain.chat_models import FakeListChatModel
 from langchain.chat_models.base import BaseChatModel, BaseMessage
 from langchain.schema.output import ChatGenerationChunk, ChatResult
 from langchain.schema.prompt_template import BasePromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import Field, root_validator
 
 from cookgpt import logging
@@ -20,11 +21,11 @@ from cookgpt.globals import getvar, setvar
 def get_llm() -> BaseChatModel:  # pragma: no cover
     """returns the language model"""
     llm_cls: Type[LLM | FakeLLM]
-    if config.USE_OPENAI:
+    if config.USE_GEMINI:
         llm_cls = LLM
     else:
         llm_cls = FakeLLM
-    return llm_cls(streaming=config.OPENAI_STREAMING)
+    return llm_cls(streaming=config.LLM_STREAMING)  # type: ignore[return-value]
 
 
 def get_chain_input_key() -> str:
@@ -73,7 +74,7 @@ class FakeLLM(FakeListChatModel):
             return super()._generate(messages, stop, run_manager, **kwargs)
 
 
-class LLM(ChatOpenAI):
+class LLM(ChatGoogleGenerativeAI):
     """language model for the chatbot"""
 
     ...
