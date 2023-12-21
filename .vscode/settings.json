@@ -27,4 +27,5 @@
     "python.analysis.typeCheckingMode": "off",
     "python.analysis.inlayHints.variableTypes": false,
     "python.analysis.inlayHints.pytestParameters": true,
+    "python.analysis.autoImportCompletions": true,
 }

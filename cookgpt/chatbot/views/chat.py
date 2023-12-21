@@ -145,7 +145,10 @@ class ChatView(MethodView):
     )
     @app.doc(description=docs.CHAT_POST_CHAT)
     def post(self, json_data: dict, query_data: dict) -> Any:
-        """Send a message to the chatbot."""
+        """ To be modified"""
+        """Send a message to the chatbot.
+        
+        """
         from cookgpt.chatbot.tasks import send_query
         from cookgpt.chatbot.utils import get_stream_name
         from cookgpt.globals import current_app as app
