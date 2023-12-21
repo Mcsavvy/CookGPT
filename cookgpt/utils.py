@@ -1,8 +1,9 @@
 """Utilities"""
 from datetime import datetime, timezone
-from typing import Any, Callable, NoReturn, Optional, ParamSpec, TypeVar
+from typing import Any, Callable, NoReturn, Optional, ParamSpec, TypeVar, Union
 
 from apiflask import HTTPError
+from apiflask.schemas import EmptySchema, FileSchema
 from apiflask.types import SchemaType
 from flask import jsonify as flask_jsonify
 from flask import make_response
@@ -35,6 +36,48 @@ def utcnow_from__ts(timestamp) -> datetime:
     return no_ms(datetime.fromtimestamp(timestamp, tz=timezone.utc))
 
 
+def add_response(
+    operation: dict,
+    status_code: str,
+    schema: Union[SchemaType, dict],
+    description: str,
+    example: Optional[Any] = None,
+    examples: Optional[dict[str, Any]] = None,
+    links: Optional[dict[str, Any]] = None,
+    content_type: Optional[str] = "application/json",
+) -> None:
+    """Add response to operation.
+
+    *Version changed: 1.3.0*
+
+    - Add parameter `content_type`.
+
+    *Version changed: 0.10.0*
+
+    - Add `links` parameter.
+    """
+    operation["responses"][status_code] = {}
+    if status_code != "204":
+        if isinstance(schema, FileSchema):
+            schema = {"type": schema.type, "format": schema.format}
+        elif isinstance(schema, EmptySchema):
+            schema = {}
+        operation["responses"][status_code]["content"] = {
+            content_type: {"schema": schema}
+        }
+    operation["responses"][status_code]["description"] = description
+    if example is not None:
+        operation["responses"][status_code]["content"][content_type][
+            "example"
+        ] = example
+    if examples is not None:
+        operation["responses"][status_code]["content"][content_type][
+            "examples"
+        ] = examples
+    if links is not None:
+        operation["responses"][status_code]["links"] = links
+
+
 def api_output(
     schema: SchemaType,
     status_code: int,
@@ -45,7 +88,6 @@ def api_output(
     content_type: str = "application/json",
 ):
     """Add a response to the Openapi spec"""
-    from apiflask.openapi import add_response
 
     if isinstance(schema, type):
         schema = schema()

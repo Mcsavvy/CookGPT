@@ -65,6 +65,7 @@ class Thread:
         Response = {"message": "thread updated", "thread": ThreadExample}
 
     NotFound = {"message": "thread not found"}
+    MaximumChatCost = {"message": "maximum chat cost exceeded"}
 
 
 class Threads:

@@ -29,6 +29,7 @@ APP_ESSENTIALS = Validator(
     "SECRET_KEY",
     "SQLALCHEMY_DATABASE_URI",
     "GOOGLE_API_KEY",
+    "SERPER_API_KEY",
     must_exist=True,
 )
 
@@ -42,6 +43,7 @@ SENTRY = Validator(
 def export_to_env(config: Dynaconf):
     """export specific config vars to the environment"""
     import os
+
     os.environ["GOOGLE_API_KEY"] = config.GOOGLE_API_KEY
 
 

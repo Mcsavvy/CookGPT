@@ -28,8 +28,9 @@ class ChatMedia(db.Model):  # type: ignore
     serialize_rules = ("-chat", "-secret")
 
     secret: Mapped[str] = mapped_column(String(36))
-    url: Mapped[UUID] = mapped_column(unique=True)
+    url: Mapped[str] = mapped_column(String(255))
     type: Mapped[MediaType] = mapped_column(Enum(MediaType))
+    description: Mapped[str] = mapped_column(Text)
     chat_id: Mapped[UUID] = mapped_column(db.ForeignKey("chat.id"))
     chat: Mapped["Chat"] = db.relationship(  # type: ignore[assignment]
         back_populates="media",
@@ -106,6 +107,26 @@ class Chat(db.Model):  # type: ignore
         if self.next_chat:
             return self.next_chat.id
         return None
+
+    @property
+    def is_query(self) -> bool:
+        """check if the chat is a query"""
+        return self.chat_type == MessageType.QUERY
+
+    def reply(
+        self, content: str, cost: int = 0, commit=True, **attrs
+    ) -> "Chat":
+        """Reply to the chat"""
+        return self.thread.add_chat(
+            content=content,
+            chat_type=(
+                MessageType.RESPONSE if self.is_query else MessageType.QUERY
+            ),
+            cost=cost,
+            previous_chat=self,
+            commit=commit,
+            **attrs,
+        )
 
     @classmethod
     def create(self, commit=True, **attrs):
