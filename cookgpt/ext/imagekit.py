@@ -22,14 +22,11 @@ imagekit = init_app(app) # All I needed was to access the app and nothing more
 
 def delete_image(chat):
     """Utility function to delete the user's profile picture from ImageKit"""
-    val = chat.file.copy()
-    if len(val) == 2:
-        fId = val[-1]
+    fId = chat.media.secret or ""
+    if fId != ""
         try:
             val = imagekit.delete_file(fId)
-            # These next two lines are for deleting the image
-            chat_media = ChatMedia.get(chat_id=chat.id)
-            chat_media.delete() # ? Not sure if this is how it works
+            chat.media.delete() # ? Not sure if this is how it works
             print(val.response_metadata.raw)
             return True
         except Exception as e:
@@ -51,8 +48,6 @@ def upload_image(chat, file):
         url = val.response_metadata.raw["url"]
         secret = val.response_metadata.raw["fileId"]
         file_data = json.dumps([url, secret])
-
-
         # The next two lines are for creating a file object or anything
         chat_media = ChatMedia(chat=chat, chat_id=chat.id, secret=secret, url=url type="image")
         chat_media.save() # ? Not sure if this is how it works
