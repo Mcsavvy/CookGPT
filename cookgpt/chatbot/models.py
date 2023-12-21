@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, List, Optional, Sequence, cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import Enum, ForeignKey, Text
+from sqlalchemy import Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from cookgpt import logging
@@ -16,10 +16,27 @@ from cookgpt.ext.cache import (
 )
 from cookgpt.utils import utcnow
 
-from .data.enums import MessageType
+from .data.enums import MediaType, MessageType
 
 if TYPE_CHECKING:
     from cookgpt.auth.models.user import User  # noqa: F401
+
+
+class ChatMedia(db.Model):  # type: ignore
+    """A media file"""
+
+    serialize_rules = ("-chat", "-secret")
+
+    secret: Mapped[str] = mapped_column(String(36))
+    url: Mapped[UUID] = mapped_column(unique=True)
+    type: Mapped[MediaType] = mapped_column(Enum(MediaType))
+    chat_id: Mapped[UUID] = mapped_column(db.ForeignKey("chat.id"))
+    chat: Mapped["Chat"] = db.relationship(  # type: ignore[assignment]
+        back_populates="media",
+        lazy=True,
+        single_parent=True,
+        foreign_keys=[chat_id],
+    )
 
 
 class Chat(db.Model):  # type: ignore
@@ -51,6 +68,13 @@ class Chat(db.Model):  # type: ignore
         lazy=True,
         single_parent=True,
         foreign_keys=[thread_id],
+    )
+    media: Mapped[
+        List["ChatMedia"]
+    ] = db.relationship(  # type: ignore[assignment]
+        back_populates="chat",
+        lazy=True,
+        cascade="all, delete-orphan",
     )
 
     __table_args__ = (
