@@ -2,7 +2,9 @@
 from typing import TYPE_CHECKING, Any
 
 from apiflask import Schema, fields
+from apiflask.validators import FileSize, FileType
 
+from cookgpt.chatbot.data.enums import MediaType
 from cookgpt.utils import make_field
 
 from . import examples as ex
@@ -13,6 +15,14 @@ if TYPE_CHECKING:
 
 ChatType = make_field(
     fields.Enum, "chat type", MessageType.QUERY.value, enum=MessageType
+)
+ChatImage = make_field(
+    fields.File,
+    "chat image",
+    validate=[
+        FileType([".png", ".jpg", ".jpeg", ".gif"]),
+        FileSize(min="1KB", max="8MB"),
+    ],
 )
 ChatContent = make_field(fields.String, "chat content", ex.Query)
 ChatCost = make_field(fields.Integer, "cost of this chat", 100)
@@ -50,6 +60,24 @@ def parse_chat(chat: "ChatModel") -> dict[str, Any]:
     }
 
 
+class ChatMedia(Schema):
+    """Chat media schema."""
+
+    type = fields.Enum(
+        MediaType,
+        metadata={
+            "description": "type of media",
+            "example": MediaType.IMAGE.value,
+        },
+    )
+    url = fields.URL(
+        metadata={
+            "description": "url of media",
+            "example": "https://example.com/image.png",
+        }
+    )
+
+
 class ChatSchema(Schema):
     """Chat schema."""
 
@@ -61,6 +89,13 @@ class ChatSchema(Schema):
     next_chat_id = NextChatId(allow_none=True)
     sent_time = ChatSentTime()
     thread_id = ThreadId()
+    media = fields.List(
+        fields.Nested(ChatMedia),
+        metadata={
+            "description": "list of media",
+            "example": [],
+        },
+    )
 
 
 class ThreadSchema(Schema):
@@ -77,6 +112,12 @@ class Chat:
 
     class Post:
         class Body(Schema):
+            image = ChatImage(
+                allow_none=True,
+                required=False,
+                load_default=None,
+                load_only=True,
+            )
             query = ChatContent(required=True)
             thread_id = ThreadId(
                 metadata={

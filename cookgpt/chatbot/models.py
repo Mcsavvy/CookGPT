@@ -38,6 +38,12 @@ class ChatMedia(db.Model):  # type: ignore
         foreign_keys=[chat_id],
     )
 
+    def delete(self, commit=True):
+        from cookgpt.ext.imagekit import delete_image
+
+        delete_image(self)
+        super().delete(commit)
+
 
 class Chat(db.Model):  # type: ignore
     """A single chat in a thread"""
@@ -130,6 +136,8 @@ class Chat(db.Model):  # type: ignore
             # Delete the previous chat's cache
             if self.previous_chat:  # pragma: no cover
                 cache.delete(chat_cache_key(chat_id=self.previous_chat.pk))
+        for media in self.media:
+            media.delete(commit)
 
 
 class Thread(db.Model):  # type: ignore
