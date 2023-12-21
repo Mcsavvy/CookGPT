@@ -7,7 +7,9 @@ EXTENSIONS = [
     "cookgpt.ext.database:init_app",
     "cookgpt.ext.auth:init_app",
     # "cookgpt.ext.admin:init_app",
-    "cookgpt.ext.redisflow:init_app"
+    "cookgpt.ext.redisflow:init_app",
+    "cookgpt.ext.genai:init_app",
+    "cookgpt.ext.imagekit:init_app",
 ]
 
 # SENTRY
@@ -39,7 +41,7 @@ CELERY_TASKS = [
 ]
 
 # Logging
-LOG_LEVEL = "INFO"
+LOG_LEVEL = "DEBUG"
 LOG_SHOW_TIME = false
 LOG_HANDLER_CLASS = "rich.logging.RichHandler"
 
@@ -79,6 +81,7 @@ USE_GEMINI = true
 LANGCHAIN_VERBOSE = false
 LLM_STREAMING = true
 OPENAI_CALLBACK_RAISE_ERROR = true
+GENAI_TRANSPORT = "grpc"
 
 # Flask
 FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"

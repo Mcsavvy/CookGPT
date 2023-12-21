@@ -1,10 +1,12 @@
+from typing import Any, Dict
+
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
-from langchain_core.messages import HumanMessage
 from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
+    SystemMessagePromptTemplate,
 )
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -22,22 +24,31 @@ class Memory(ConversationBufferMemory):
         """
         return [self.memory_key, "name"]
 
+    def load_memory_variables(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        return {
+            self.memory_key: self.buffer_as_messages,
+        }
+
 
 prompt = ChatPromptTemplate.from_messages(
     [
-        HumanMessagePromptTemplate.from_template("You are an AI named {name}"),
+        SystemMessagePromptTemplate.from_template(
+            "You are an AI named {name}"
+        ),
         MessagesPlaceholder(variable_name="history"),
-        HumanMessagePromptTemplate.from_template("{input}"),
+        HumanMessagePromptTemplate.from_template("Hi {input}"),
     ]
 )
 memory = Memory(input_key="input", output_key="response")
-llm = ChatGoogleGenerativeAI(model="gemini-pro")  # type: ignore[call-arg]
-chain = ConversationChain(llm=llm, prompt=prompt, memory=memory)
-result = chain.predict(
-    input="Hello, my name is Bob",
-    name="Bard",
-    history=[HumanMessage(content="Hello, my name is Bob")],
+llm = ChatGoogleGenerativeAI(  # type: ignore[call-arg]
+    model="gemini-pro", convert_system_message_to_human=True
 )
+chain = ConversationChain(llm=llm, prompt=prompt, memory=memory)
+result = chain.invoke(
+    dict(name="Bard", input="I'm doing well, how are you?"),
+)
+print(result)
+chain.__call__
 # contents = content_types.to_contents(content)
 # print(f"content: {contents}")
 # model: GenerativeModel = llm._generative_model

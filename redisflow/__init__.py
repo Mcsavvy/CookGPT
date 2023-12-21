@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Type, cast
 
-from celery.app.base import Celery as CeleryBase
+import celery.app.base as celerybase
 
 from cookgpt import logging
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from cookgpt.app import App as WebApp
 
 
-class Celery(CeleryBase):
+class Celery(celerybase.Celery):
     """Celery app"""
 
     webapp: "WebApp"

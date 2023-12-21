@@ -27,6 +27,10 @@ requirements:     ## Generate requirements.txt.
 run:              ## Run the project.	
 	$(ENV_PREFIX)/gunicorn -c gunicorn.conf.py
 
+.PHONY: worker
+worker:           ## Run the celery worker.
+	celery -A redisflow.app worker -P $$CELERY_POOL -c $$CELERY_CONCURRENCY -l $$CELERY_LOGLEVEL
+
 .PHONY: fmt
 fmt:              ## Format code using black & isort.
 	$(ENV_PREFIX)/ruff check --fix $(FILES)

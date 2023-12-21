@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Any
 
 from apiflask import Schema, fields
 from apiflask.validators import FileSize, FileType
+from marshmallow import ValidationError, validates_schema
 
 from cookgpt.chatbot.data.enums import MediaType
 from cookgpt.utils import make_field
@@ -57,6 +58,14 @@ def parse_chat(chat: "ChatModel") -> dict[str, Any]:
         "next_chat_id": chat.next_chat_id,
         "sent_time": chat.sent_time,
         "thread_id": chat.thread_id,
+        "media": [
+            {
+                "type": media.type,
+                "url": media.url,
+                "description": media.description,
+            }
+            for media in chat.media
+        ],
     }
 
 
@@ -74,6 +83,12 @@ class ChatMedia(Schema):
         metadata={
             "description": "url of media",
             "example": "https://example.com/image.png",
+        }
+    )
+    description = fields.String(
+        metadata={
+            "description": "description of media",
+            "example": "A bowl of jollof rice",
         }
     )
 
@@ -112,13 +127,8 @@ class Chat:
 
     class Post:
         class Body(Schema):
-            image = ChatImage(
-                allow_none=True,
-                required=False,
-                load_default=None,
-                load_only=True,
-            )
-            query = ChatContent(required=True)
+            image = ChatImage(required=False)
+            query = ChatContent(required=False)
             thread_id = ThreadId(
                 metadata={
                     "description": (
@@ -127,6 +137,12 @@ class Chat:
                     ),
                 },
             )
+
+            @validates_schema
+            def validate_query(self, data, **kwargs):
+                """validate query"""
+                if not data.get("image") and not data.get("query"):
+                    raise ValidationError("query or image is required")
 
         class QueryParams(Schema):
             stream = fields.Boolean(
@@ -253,6 +269,15 @@ class Thread:
         message = ErrorMessage(
             metadata={
                 "example": "thread not found",
+            }
+        )
+
+    class MaximumChatCost(Schema):
+        """Maximum cost reached error."""
+
+        message = ErrorMessage(
+            metadata={
+                "example": "maximum cost reached",
             }
         )
 

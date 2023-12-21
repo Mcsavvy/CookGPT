@@ -44,7 +44,6 @@ class User(
         back_populates="user",
         lazy=True,
         cascade="all, delete-orphan",
-        order_by="Thread.created_at.desc()",
     )
 
     max_chat_cost: Mapped[int] = mapped_column(default=get_max_chat_cost)
@@ -54,6 +53,7 @@ class User(
         back_populates="user",
         lazy=True,
         cascade="all, delete-orphan",
+        order_by="Thread.created_at.desc()",
     )
 
     def __repr__(self):

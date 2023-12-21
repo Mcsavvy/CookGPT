@@ -128,7 +128,7 @@
         "description": "Use this endpoint to send a message to the AI assistant. The message will be sent to the AI assistant and the response will be returned in the response body. The response will also be saved in the database.\n\nThe `stream` query parameter can be used to force the AI assistant to respond with a stream of messages. The `stream` query parameter can be set to `true` or `false`. If the `stream` query parameter is set to `true`, the AI assistant would respond send it's response bit by bit. If the `stream` query parameter is set to `false`, the AI assistant would send it's response all at once. If the `stream` query parameter is not specified, the AI assistant would not stream it's response.\n\nThe `streaming` field in the response body is used to determine if the AI assistant is streaming it's response. If the `streaming` field is `true`, the AI assistant is streaming it's response. If the `streaming` field is `false`, the AI assistant is not streaming it's response.\n\n> INFO: When the AI is streaming, you can read the response bit by bit as it is sent from the `/chat/stream` endpoint.\n\nIf the user does not have enough tokens to send the message, a dummy response will be returned in the response body. Neither the query nor the dummy response will not be saved in the database.\n\n> INFO: To identify a dummy response, check if the `chat.cost` field is `0`.",
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
                 "$ref": "#/components/schemas/Chat:Post:Body"
               },
@@ -1266,6 +1266,17 @@
       "Chat:Post:Body": {
         "type": "object",
         "properties": {
+          "image": {
+            "default": null,
+            "writeOnly": true,
+            "nullable": true,
+            "x-minimum": "1KB",
+            "x-maximum": "8MB",
+            "description": "chat image",
+            "example": null,
+            "type": "string",
+            "format": "binary"
+          },
           "query": {
             "type": "string",
             "description": "chat content",
@@ -1281,6 +1292,28 @@
         "required": [
           "query"
         ]
+      },
+      "ChatMedia": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "type of media",
+            "example": "image",
+            "type": "string",
+            "enum": [
+              "IMAGE",
+              "VIDEO",
+              "AUDIO",
+              "DOCUMENT"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "url",
+            "description": "url of media",
+            "example": "https://example.com/image.png"
+          }
+        }
       },
       "Chat": {
         "type": "object",
@@ -1335,6 +1368,14 @@
             "format": "uuid",
             "description": "chat's thread id",
             "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "media": {
+            "type": "array",
+            "description": "list of media",
+            "example": [],
+            "items": {
+              "$ref": "#/components/schemas/ChatMedia"
+            }
           }
         }
       },
@@ -1861,6 +1902,14 @@
             "format": "uuid",
             "description": "chat's thread id",
             "example": "36b51f8a-c9fa-43f8-92fa-ff6927736c10"
+          },
+          "media": {
+            "type": "array",
+            "description": "list of media",
+            "example": [],
+            "items": {
+              "$ref": "#/components/schemas/ChatMedia"
+            }
           }
         }
       },
