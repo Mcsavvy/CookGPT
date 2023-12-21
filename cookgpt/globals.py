@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Optional, Type, TypeVar, cast, overload
 
 from flask.globals import _no_app_msg
 from flask.globals import current_app as _current_app
+from imagekitio import ImageKit
 from werkzeug.local import LocalProxy
 
 from cookgpt import logging
@@ -44,6 +45,7 @@ _response_time_var: ContextVar["Optional[datetime]"] = ContextVar(
 _query_var: ContextVar["Chat"] = ContextVar("query")
 _response_var: ContextVar["Chat"] = ContextVar("response")
 _redis_var: "ContextVar[Redis]" = ContextVar("redis")
+_imagekit_var: "ContextVar[ImageKit]" = ContextVar("imagekit")
 
 current_app = cast("App", _current_app)
 chain: "ThreadChain" = LocalProxy(_chain_var)  # type: ignore[assignment]
@@ -67,6 +69,7 @@ response: "Chat" = LocalProxy(_response_var)  # type: ignore[assignment]
 chat_cost: "tuple[int, int]" = LocalProxy(  # type: ignore[assignment]
     _chat_cost_var
 )
+imagekit: "ImageKit" = LocalProxy(_imagekit_var)  # type: ignore[assignment]
 
 
 def setvar(var: "ContextVar[T] | str", value: "T") -> None:
@@ -150,4 +153,5 @@ __all__ = [
     "query",
     "response",
     "chat_cost",
+    "imagekit",
 ]

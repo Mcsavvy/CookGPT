@@ -1,24 +1,24 @@
 import json
-from apiflask.fields import File
-from apiflask import Schema
-from marshmallow import ValidationError
-from imagekitio import ImageKit
-from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
-from api import app
-from cookgpt.auth.models import ChatMedia
+from io import BufferedReader, RawIOBase
 
-# import os
-from io import BufferedReader
-# from models import store
-def init_app(app): # pragma: no cover
+from apiflask import Schema
+from apiflask.fields import File
+from imagekitio.client import ImageKit
+from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
+from marshmallow import ValidationError
+
+from cookgpt.chatbot.models import Chat, ChatMedia, MediaType
+from cookgpt.globals import imagekit, setvar
+
+
+def init_app(app):  # pragma: no cover
     """Initializes extension"""
     instance = ImageKit(
-        private_key=app.config["IMAGE_KIT"]["PRIVATE_KEY"],
-        public_key=app.config["IMAGE_KIT"]["PUBLIC_KEY"],
-        url_endpoint=app.config["IMAGE_KIT"]["URL_ENDPOINT"],
+        private_key=app.config.IMAGEKIT_PRIVATE_KEY,
+        public_key=app.config.IMAGEKIT_PUBLIC_KEY,
+        url_endpoint=app.config.IMAGEKIT_ENDPOINT,
     )
-    return instance
-imagekit = init_app(app) # All I needed was to access the app and nothing more
+    setvar("imagekit", instance)
 
 
 def validate_file_size(file):
@@ -45,7 +45,7 @@ class UploadImage(Schema):
     )
 
 
-def delete_image(chat):
+def delete_image(chat: Chat):
     """Utility function to delete the user's profile picture from ImageKit"""
     val = chat.file.copy()
     if len(val) == 2:
@@ -53,8 +53,11 @@ def delete_image(chat):
         try:
             val = imagekit.delete_file(fId)
             # These next two lines are for deleting the image
-            chat_media = ChatMedia(chat_id=chat.id, secret=secret,)
-            chat_media.delete() # ? Not sure if this is how it works
+            chat_media = ChatMedia(
+                chat_id=chat.id,
+                secret=secret,
+            )
+            chat_media.delete()  # ? Not sure if this is how it works
             print(val.response_metadata.raw)
             return True
         except Exception as e:
@@ -62,7 +65,7 @@ def delete_image(chat):
             return False
 
 
-def upload_image(chat, file):
+def upload_image(chat: Chat, file: RawIOBase):
     """Utility function to upload the file"""
     buffer = BufferedReader(file)
     try:
@@ -75,13 +78,12 @@ def upload_image(chat, file):
         print(val.response_metadata.raw)
         url = val.response_metadata.raw["url"]
         secret = val.response_metadata.raw["fileId"]
-        file_data = json.dumps([url, secret])
-
+        json.dumps([url, secret])
 
         # The next two lines are for creating a file object or anything
-        chat_media = ChatMedia(chat=chat, chat_id=chat.id, secret=secret, url=url type="image")
-        chat_media.save() # ? Not sure if this is how it works
-        # store.save()
+        ChatMedia.create(
+            chat=chat, secret=secret, url=url, type=MediaType.IMAGE
+        )
         return True
     except Exception as e:
         print(e)
