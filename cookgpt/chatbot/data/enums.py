@@ -7,3 +7,12 @@ class MessageType(Enum):
 
     QUERY = "query"
     RESPONSE = "response"
+
+
+class MediaType(Enum):
+    """Different types of media."""
+
+    IMAGE = "image"
+    VIDEO = "video"
+    AUDIO = "audio"
+    DOCUMENT = "document"
