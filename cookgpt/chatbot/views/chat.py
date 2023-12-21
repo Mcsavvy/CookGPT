@@ -119,6 +119,7 @@ class ChatView(MethodView):
     @app.input(
         sc.Chat.Post.Body,
         example=ex.Chat.Post.Body,
+        location="form_and_files"
     )
     @app.input(
         sc.Chat.Post.QueryParams,
@@ -144,7 +145,7 @@ class ChatView(MethodView):
         description="An error when the specified thread is not found",
     )
     @app.doc(description=docs.CHAT_POST_CHAT)
-    def post(self, json_data: dict, query_data: dict) -> Any:
+    def post(self, form_and_files_data: dict, query_data: dict) -> Any:
         """ To be modified"""
         """Send a message to the chatbot.
         
@@ -153,13 +154,15 @@ class ChatView(MethodView):
         from cookgpt.chatbot.utils import get_stream_name
         from cookgpt.globals import current_app as app
         from redisflow import celeryapp
-
+ 
         input_key = get_memory_input_key()
-        query: str = json_data["query"]
+        query: str = form_and_files_data["query"]
+        media = form_and_files_data["media"]
+
         user: "User" = get_current_user()
 
-        if "thread_id" in json_data:
-            thread = get_thread(json_data["thread_id"])
+        if "thread_id" in form_and_files_data:
+            thread = get_thread(form_and_files_data["thread_id"])
         else:
             thread = user.create_thread(title="New Thread")
             cache.delete(threads_cache_key(user_id=user.pk))
@@ -185,6 +188,7 @@ class ChatView(MethodView):
             )
         q = thread.add_query("")
         r = thread.add_response("", previous_chat=q)
+        uploadImage(r, media) # Upload the file and edit the chat at once It creates an image in the background
         stream = get_stream_name(user, r)
         if stream_response:
             # Run the task in the background

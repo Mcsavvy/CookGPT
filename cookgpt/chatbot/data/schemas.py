@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 ChatType = make_field(
     fields.Enum, "chat type", MessageType.QUERY.value, enum=MessageType
 )
+ChatMedia = make_field(fields.File, "chat image") # Recently added I don't know how this works
 ChatContent = make_field(fields.String, "chat content", ex.Query)
 ChatCost = make_field(fields.Integer, "cost of this chat", 100)
 PrevChatId = make_field(fields.UUID, "previous chat id", ex.Uuid)
@@ -49,6 +50,19 @@ def parse_chat(chat: "ChatModel") -> dict[str, Any]:
         "thread_id": chat.thread_id,
     }
 
+def validate_file_size(file):
+    """Validates the file size making sure it's at most 8mb"""
+    max_size_in_bytes = 8 * 1024 * 1024  # 8MB in bytes
+    if file and len(file.read()) > max_size_in_bytes:
+        raise ValidationError("File size must be at most 8MB.")
+    file.seek(0)
+
+
+def validate_file_type(file):
+    """Validates the file type"""
+    if file and file.mimetype not in ["image/jpeg", "image/png", "image/gif"]:
+        raise ValidationError("File must either be a jpeg, gif or png")
+
 
 class ChatSchema(Schema):
     """Chat schema."""
@@ -61,6 +75,8 @@ class ChatSchema(Schema):
     next_chat_id = NextChatId(allow_none=True)
     sent_time = ChatSentTime()
     thread_id = ThreadId()
+    media = ChatMedia()
+
 
 
 class ThreadSchema(Schema):
@@ -77,6 +93,13 @@ class Chat:
 
     class Post:
         class Body(Schema):
+            media = fields.File(
+                        required=False,
+                        metadata={
+                            "description": "A visual description of your query. It must be a picture below 8mb"
+                        },
+                        validate=[validate_file_type, validate_file_size],
+                    )
             query = ChatContent(required=True)
             thread_id = ThreadId(
                 metadata={

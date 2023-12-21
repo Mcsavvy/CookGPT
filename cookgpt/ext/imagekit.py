@@ -1,7 +1,4 @@
 import json
-from apiflask.fields import File
-from apiflask import Schema
-from marshmallow import ValidationError
 from imagekitio import ImageKit
 from imagekitio.models.UploadFileRequestOptions import UploadFileRequestOptions
 from api import app
@@ -21,28 +18,6 @@ def init_app(app): # pragma: no cover
 imagekit = init_app(app) # All I needed was to access the app and nothing more
 
 
-def validate_file_size(file):
-    """Validates the file size making sure it's at most 8mb"""
-    max_size_in_bytes = 8 * 1024 * 1024  # 8MB in bytes
-    if file and len(file.read()) > max_size_in_bytes:
-        raise ValidationError("File size must be at most 8MB.")
-    file.seek(0)
-
-
-def validate_file_type(file):
-    """Validates the file type"""
-    if file and file.mimetype not in ["image/jpeg", "image/png", "image/gif"]:
-        raise ValidationError("File must either be a jpeg, gif or png")
-
-
-class UploadImage(Schema):
-    profile_picture = File(
-        required=True,
-        metadata={
-            "description": "The file you want to use. It must be a picture below 8mb"
-        },
-        validate=[validate_file_type, validate_file_size],
-    )
 
 
 def delete_image(chat):
@@ -53,7 +28,7 @@ def delete_image(chat):
         try:
             val = imagekit.delete_file(fId)
             # These next two lines are for deleting the image
-            chat_media = ChatMedia(chat_id=chat.id, secret=secret,)
+            chat_media = ChatMedia.get(chat_id=chat.id)
             chat_media.delete() # ? Not sure if this is how it works
             print(val.response_metadata.raw)
             return True
