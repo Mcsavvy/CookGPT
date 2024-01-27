@@ -58,7 +58,7 @@ class User(
     def __repr__(self):
         return "{}[{}](name={}, email={}, threads={}, tokens={})".format(
             self.type.name,
-            self.sid,
+            self.uid,
             self.name,
             self.email,
             len(self.threads),  # type: ignore

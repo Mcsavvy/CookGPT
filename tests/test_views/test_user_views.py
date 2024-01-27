@@ -22,7 +22,7 @@ class TestUserView:
 
         data = cast(dict[str, Any], response.json)
 
-        assert data["id"] == random_user.sid
+        assert data["id"] == random_user.uid
         assert data["email"] == random_user.email
         assert data["first_name"] == random_user.first_name
         assert data["last_name"] == random_user.last_name

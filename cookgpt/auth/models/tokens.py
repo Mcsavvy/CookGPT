@@ -35,7 +35,7 @@ class Token(db.Model):  # type: ignore
 
     def __repr__(self):
         return "Token[{}](user={}, active={}, revoked={})".format(
-            self.sid,
+            self.uid,
             self.user.name,
             "✔" if self.active else "✗",
             "✔" if self.revoked else "✗",

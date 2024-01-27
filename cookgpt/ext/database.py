@@ -127,13 +127,13 @@ class BaseModel(ModelErrorMixin, Model, SerializerMixin):
         return f"<{self.__class__.__name__} {self.id}>"  # pragma: no cover
 
     @property
-    @deprecated("Use .sid instead")
+    @deprecated("Use .uid instead")
     def pk(self):
         """Returns primary key"""
         return str(self.id)
 
     @property
-    def sid(self):
+    def uid(self):
         """Returns string id"""
         return str(self.id)
 
