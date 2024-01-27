@@ -1,6 +1,7 @@
-"""Utilities"""
+"""Utilities for cookgpt."""
+from collections.abc import Callable
 from datetime import datetime, timezone
-from typing import Any, Callable, NoReturn, Optional, ParamSpec, TypeVar
+from typing import Any, NoReturn, ParamSpec, TypeVar
 
 from apiflask import HTTPError
 from apiflask.types import SchemaType
@@ -8,30 +9,42 @@ from flask import jsonify as flask_jsonify
 from flask import make_response
 
 
-def jsonify(data, status=200):  # pragma: no cover
-    """jsonify with status code"""
+def jsonify(data, status=200):
+    """Convert the given data into a JSON response.
+
+    Args:
+        data: The data to be converted to JSON.
+        status: The HTTP status code (default is 200).
+
+    Returns:
+        A JSON response containing the converted data.
+
+    """
     return make_response(flask_jsonify(data), status)
 
 
 def abort(status_code: int, message: str) -> NoReturn:
-    """abort with status code and message"""
+    """Raise an HTTPError with the given status code and message.
+
+    Args:
+        status_code: The HTTP status code.
+        message: The error message.
+    """
     raise HTTPError(status_code, message)
 
 
 def no_ms(dt: datetime) -> datetime:
-    """removes the micro seconds on a datetime"""
+    """Return datetime without ms."""
     return dt.replace(microsecond=0)
 
 
 def utcnow() -> datetime:
-    """return current datetime in utc timezone without ms"""
+    """Return utcnow without ms."""
     return no_ms(datetime.now(tz=timezone.utc))
 
 
 def utcnow_from__ts(timestamp) -> datetime:
-    """
-    convert a timestamp into a datetime with utc timezone without ms
-    """
+    """Return datetime from timestamp without ms."""
     return no_ms(datetime.fromtimestamp(timestamp, tz=timezone.utc))
 
 
@@ -39,12 +52,25 @@ def api_output(
     schema: SchemaType,
     status_code: int,
     description: str,
-    example: Optional[Any] = None,
-    examples: Optional[dict[str, Any]] = None,
-    links: Optional[dict[str, Any]] = None,
+    example: Any | None = None,
+    examples: dict[str, Any] | None = None,
+    links: dict[str, Any] | None = None,
     content_type: str = "application/json",
 ):
-    """Add a response to the Openapi spec"""
+    """Add an API output to the decorated function.
+
+    Args:
+        schema: The schema of the output.
+        status_code: The HTTP status code.
+        description: The description of the output.
+        example: An example of the output.
+        examples: Examples of the output.
+        links: Links of the output.
+        content_type: The content type of the output.
+
+    Returns:
+        The decorated function.
+    """
     from apiflask.openapi import add_response
 
     if isinstance(schema, type):
@@ -76,8 +102,8 @@ R = TypeVar("R")
 
 def make_field(
     field: Callable[P, R],
-    description: Optional[str] = None,
-    example: Optional[Any] = None,
+    description: str | None = None,
+    example: Any | None = None,
     *args,
     **kwargs,
 ) -> Callable[P, R]:
@@ -99,7 +125,7 @@ def make_field(
 
 
 def cast_func_to(type: Callable[P, R]):
-    """cast function"""
+    """Copy the signature of a function."""
 
     def cast(func: Callable) -> Callable[P, R]:
         return func  # type: ignore
