@@ -52,6 +52,7 @@ flask-shell-ipython = "^0.5.1"
 gitchangelog = "^3.0.4"
 ruff = "^0.1.14"
 pre-commit = "^3.6.0"
+pystache = "^0.6.5"
 
 [build-system]
 requires = ["poetry-core"]

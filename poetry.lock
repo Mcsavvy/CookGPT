@@ -2236,6 +2236,22 @@ docs = ["sphinx (>=4.5.0,<5.0.0)", "sphinx-rtd-theme", "zope.interface"]
 tests = ["coverage[toml] (==5.0.4)", "pytest (>=6.0.0,<7.0.0)"]
 
 [[package]]
+name = "pystache"
+version = "0.6.5"
+description = "Mustache for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pystache-0.6.5-py3-none-any.whl", hash = "sha256:84546278219431f1a2ecc86a627cc1b0fe3c83b5612f8a7d9c81ea0119ac8f49"},
+    {file = "pystache-0.6.5.tar.gz", hash = "sha256:9f238d5a06f18843e0d491d8e4e292dc03fed6a54cb0a5c34be37a3faa973174"},
+]
+
+[package.extras]
+cov = ["coverage", "coverage-python-version"]
+doc = ["recommonmark", "sphinx", "sphinx-git", "sphinx-rtd-theme", "sphinxcontrib-apidoc"]
+test = ["pytest", "pytest-cov"]
+
+[[package]]
 name = "pytest"
 version = "7.4.4"
 description = "pytest: simple powerful testing with Python"
@@ -3108,4 +3124,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "24a5af27c934086c10be7cdb9fedd6ab39ec61efe034b04c5bb2b7d612f092b7"
+content-hash = "159511a0acaf46b820cb18f7dcc5db1adf731add2b8f431c8e71fb3f4a00208a"

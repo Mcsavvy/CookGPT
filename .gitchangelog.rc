@@ -152,7 +152,7 @@ body_split_regexp = r"\n(?=\w+\s*:)"
 ##
 ## Tags that will be used for the changelog must match this regexp.
 ##
-tag_filter_regexp = r"^[0-9]+\.[0-9]+(\.[0-9]+)?$"
+tag_filter_regexp = r"^[0-9]+\.[0-9]+(\.[0-9]+)?(\-[\w\-_\d]+)?"
 
 
 ## ``unreleased_version_label`` is a string
@@ -161,36 +161,5 @@ tag_filter_regexp = r"^[0-9]+\.[0-9]+(\.[0-9]+)?$"
 ## between last valid tag and HEAD if any.
 unreleased_version_label = "%%version%% (unreleased)"
 
-
-## ``output_engine`` is a callable
-##
-## This will change the output format of the generated changelog file
-##
-## Available choices are:
-##
-##   - rest_py
-##
-##        Legacy pure python engine, outputs ReSTructured text.
-##        This is the default.
-##
-##   - mustache(<template_name>)
-##
-##        Template name could be any of the available templates in
-##        ``templates/mustache/*.tpl``.
-##        Requires python package ``pystache``.
-##        Examples:
-##           - mustache("markdown")
-##           - mustache("restructuredtext")
-##
-##   - makotemplate(<template_name>)
-##
-##        Template name could be any of the available templates in
-##        ``templates/mako/*.tpl``.
-##        Requires python package ``mako``.
-##        Examples:
-##           - makotemplate("restructuredtext")
-##
-output_engine = rest_py
-# output_engine = mustache("restructuredtext")
-# output_engine = mustache("markdown")
+output_engine = mustache("markdown")
 # output_engine = makotemplate("restructuredtext")

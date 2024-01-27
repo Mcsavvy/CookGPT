@@ -1,78 +1,69 @@
-Changelog
-=========
+## 0.8.0 (2023-12-07)
+
+### New
+
+* Feat(user): Add user information endpoint. [mcsavvy]
+
+### Changes
+
+* Chore(settings): Enabled CORS for dev mode. [mcsavvy]
+
+* Chore: exclude whatsapp.py from code coverage. [mcsavvy]
+
+* Chore(coverage): Added coverage. [mcsavvy]
+
+* Refactor(user): remove get_type() method and use user.type instead. [mcsavvy]
+
+### Tests
+
+* Test: add user view tests. [mcsavvy]
 
 
-0.8.0 (2023-12-07)
-------------------
+## 0.7.41 (2023-12-07)
 
-New
-~~~
-- Feat(user): Add user information endpoint. [mcsavvy]
+### Changes
 
-Changes
-~~~~~~~
-- Chore(settings): Enabled CORS for dev mode. [mcsavvy]
-- Chore: exclude whatsapp.py from code coverage. [mcsavvy]
-- Chore(coverage): Added coverage. [mcsavvy]
-- Refactor(user): remove get_type() method and use user.type instead.
-  [mcsavvy]
-
-Tests
-~~~~~
-- Test: add user view tests. [mcsavvy]
+* Chore(deps): Locked dependecies. [mcsavvy]
 
 
-0.7.41 (2023-12-07)
--------------------
+## 0.7.4 (2023-12-07)
 
-Changes
-~~~~~~~
-- Chore(deps): Locked dependecies. [mcsavvy]
+### New
 
+* Feat: update SQLALCHEMY_ENGINE_OPTIONS isolation_level and connect_timeout. [mcsavvy]
 
-0.7.4 (2023-12-07)
-------------------
+* Feat(sqlalchemy): Updated version & model syntax. [mcsavvy]
 
-New
-~~~
-- Feat: update SQLALCHEMY_ENGINE_OPTIONS isolation_level and
-  connect_timeout. [mcsavvy]
-- Feat(sqlalchemy): Updated version & model syntax. [mcsavvy]
+### Changes
 
-Changes
-~~~~~~~
-- Refactor: Simplify code by using type casting. [mcsavvy]
+* Refactor: Simplify code by using type casting. [mcsavvy]
 
 
-0.7.3 (2023-11-15)
-------------------
+## 0.7.3 (2023-11-15)
 
-New
-~~~
-- Feat(cache): add cache command to clear cache. [Isaac Olumide
-  Ogunfolaju]
+### New
+
+* Feat(cache): add cache command to clear cache. [Isaac Olumide Ogunfolaju]
 
 
-0.7.21 (2023-11-15)
--------------------
+## 0.7.21 (2023-11-15)
 
-Changes
-~~~~~~~
-- Chore: Added coverage. [Isaac Olumide Ogunfolaju]
-- Refactor: improve chat retrieval and parsing. [Isaac Olumide
-  Ogunfolaju]
+### Changes
 
-Fix
-~~~
-- Fix(coverage): Fixed coverage issues. [Isaac Olumide Ogunfolaju]
+* Chore: Added coverage. [Isaac Olumide Ogunfolaju]
+
+* Refactor: improve chat retrieval and parsing. [Isaac Olumide Ogunfolaju]
+
+### Fix
+
+* Fix(coverage): Fixed coverage issues. [Isaac Olumide Ogunfolaju]
 
 
-0.7.2 (2023-11-15)
-------------------
+## 0.7.2 (2023-11-15)
 
-New
-~~~
-- Feat: Improve caching for messages cost. [Isaac Olumide Ogunfolaju]
+### New
+
+* Feat: Improve caching for messages cost. [Isaac Olumide Ogunfolaju]
 
   This is done by including the id of the chat when computing the cost of
   a message. This way, the cost of a message is cached for each chat using
@@ -80,92 +71,88 @@ New
 
   System messages are cached for each user, using the user id as a key.
 
-Changes
-~~~~~~~
-- Refactor(callback): remove unused code and logs. [Isaac Olumide
-  Ogunfolaju]
-- Chore: Improved annotations and logging. [Isaac Olumide Ogunfolaju]
-- Refactor(logging): add default stacklevel to log functions. [Isaac
-  Olumide Ogunfolaju]
+### Changes
 
-Fix
-~~~
-- Fix(caching): Corrected cached values, fixes #45. [Isaac Olumide
-  Ogunfolaju]
+* Refactor(callback): remove unused code and logs. [Isaac Olumide Ogunfolaju]
+
+* Chore: Improved annotations and logging. [Isaac Olumide Ogunfolaju]
+
+* Refactor(logging): add default stacklevel to log functions. [Isaac Olumide Ogunfolaju]
+
+### Fix
+
+* Fix(caching): Corrected cached values, fixes #45. [Isaac Olumide Ogunfolaju]
 
   Fixes #4
-- Fix(make): Disallow cleaning of coverage. [Isaac Olumide Ogunfolaju]
+
+* Fix(make): Disallow cleaning of coverage. [Isaac Olumide Ogunfolaju]
 
 
-0.7.1 (2023-11-14)
-------------------
+## 0.7.1 (2023-11-14)
 
-New
-~~~
-- Feat: Add pk property to BaseModelMixin. [Isaac Olumide Ogunfolaju]
-- Feat(cache): add cache functionality to the application. [Isaac
-  Olumide Ogunfolaju]
+### New
 
-Changes
-~~~~~~~
-- Refactor(settings): rearrange extensions in settings.toml. [Isaac
-  Olumide Ogunfolaju]
-- Refactor: reformat code and import statements. [Isaac Olumide
-  Ogunfolaju]
-- Chore: Implemented caching to speedup code ⚡ [Isaac Olumide
-  Ogunfolaju]
-- Chore: Generated coverage report. [Isaac Olumide Ogunfolaju]
-- Refactor(logging): cast functions to specified type. [Isaac Olumide
-  Ogunfolaju]
-- Refactor(thread): Removed default threads. [Isaac Olumide Ogunfolaju]
+* Feat: Add pk property to BaseModelMixin. [Isaac Olumide Ogunfolaju]
 
-Fix
-~~~
-- Fix(validators): Fix coverage issue with else statement. [Isaac
-  Olumide Ogunfolaju]
+* Feat(cache): add cache functionality to the application. [Isaac Olumide Ogunfolaju]
 
-Tests
-~~~~~
-- Test: Add test for sending a query with existing chats. [Isaac Olumide
-  Ogunfolaju]
+### Changes
 
-Other
-~~~~~
-- Merge pull request #43 from Mcsavvy/app-caching. [mcsavvy]
+* Refactor(settings): rearrange extensions in settings.toml. [Isaac Olumide Ogunfolaju]
+
+* Refactor: reformat code and import statements. [Isaac Olumide Ogunfolaju]
+
+* Chore: Implemented caching to speedup code ⚡ [Isaac Olumide Ogunfolaju]
+
+* Chore: Generated coverage report. [Isaac Olumide Ogunfolaju]
+
+* Refactor(logging): cast functions to specified type. [Isaac Olumide Ogunfolaju]
+
+* Refactor(thread): Removed default threads. [Isaac Olumide Ogunfolaju]
+
+### Fix
+
+* Fix(validators): Fix coverage issue with else statement. [Isaac Olumide Ogunfolaju]
+
+### Tests
+
+* Test: Add test for sending a query with existing chats. [Isaac Olumide Ogunfolaju]
+
+### Other
+
+* Merge pull request #43 from Mcsavvy/app-caching. [mcsavvy]
 
   Add caching functionality
 
 
-0.6.3 (2023-11-09)
-------------------
+## 0.6.3 (2023-11-09)
 
-Changes
-~~~~~~~
-- Refactor(auth): Update validation for user's name. [mcsavvy]
-- Chore(chatbot): Modified chatbot system command. [mcsavvy]
+### Changes
+
+* Refactor(auth): Update validation for user's name. [mcsavvy]
+
+* Chore(chatbot): Modified chatbot system command. [mcsavvy]
 
   - Instructed AI to refer to user by name
   - Include Nutrition Information in recipes
 
 
-0.6.21 (2023-11-08)
--------------------
+## 0.6.21 (2023-11-08)
 
-New
-~~~
-- Feat(ci): Add sentry release step to deployment. [mcsavvy]
+### New
 
-Changes
-~~~~~~~
-- Chore: Add step to get version for Sentry release. [mcsavvy]
+* Feat(ci): Add sentry release step to deployment. [mcsavvy]
+
+### Changes
+
+* Chore: Add step to get version for Sentry release. [mcsavvy]
 
 
-0.6.2 (2023-11-08)
-------------------
+## 0.6.2 (2023-11-08)
 
-New
-~~~
-- Feat: Add Sentry for monitoring and error tracking. [mcsavvy]
+### New
+
+* Feat: Add Sentry for monitoring and error tracking. [mcsavvy]
 
   - Add Sentry to dependencies
   - Loaded Sentry in app.py
@@ -176,224 +163,231 @@ New
   - Ignored sentry file in code coverage
   - Generated new coverage report
 
-Changes
-~~~~~~~
-- Refactor(ci): Move codecov upload to deploy.yml. [mcsavvy]
+### Changes
+
+* Refactor(ci): Move codecov upload to deploy.yml. [mcsavvy]
 
 
-0.6.1 (2023-11-06)
-------------------
+## 0.6.1 (2023-11-06)
 
-Changes
-~~~~~~~
-- Refactor(user): improve name property implementation. [mcsavvy]
+### Changes
 
-
-0.6.0 (2023-11-06)
-------------------
-
-New
-~~~
-- Feat: Add user_id and user_name to AuthInfoSchema. [mcsavvy]
+* Refactor(user): improve name property implementation. [mcsavvy]
 
 
-0.5.5 (2023-11-01)
-------------------
+## 0.6.0 (2023-11-06)
 
-Changes
-~~~~~~~
-- Refactor: generate OpenAPI spec. [mcsavvy]
+### New
 
-
-0.5.4 (2023-11-01)
-------------------
-
-New
-~~~
-- Feat: Added API description. [mcsavvy]
+* Feat: Add user_id and user_name to AuthInfoSchema. [mcsavvy]
 
 
-0.5.3 (2023-11-01)
-------------------
+## 0.5.5 (2023-11-01)
 
-Changes
-~~~~~~~
-- Chore: update Makefile for release command. [mcsavvy]
-- Refactor: Simplify user query in login function. [mcsavvy]
-- Refactor: Improve password hashing and authentication. [mcsavvy]
+### Changes
+
+* Refactor: generate OpenAPI spec. [mcsavvy]
 
 
-0.5.2 (2023-10-29)
-------------------
+## 0.5.4 (2023-11-01)
 
-New
-~~~
-- Feat: Add gevent to dependencies. [mcsavvy]
+### New
 
-Changes
-~~~~~~~
-- Chore: added code coverage. [mcsavvy]
-- Refactor: Remove password validators. [mcsavvy]
-- Chore: add test for creating user without last name. [mcsavvy]
-- Refactor: made lastname optional. [mcsavvy]
-- Chore: Update environment and Procfile configurations. [mcsavvy]
-
-Docs
-~~~~
-- Docs: Update Cookgpt API documentation. [mcsavvy]
+* Feat: Added API description. [mcsavvy]
 
 
-0.5.1 (2023-10-23)
-------------------
+## 0.5.3 (2023-11-01)
 
-Changes
-~~~~~~~
-- Chore: added coverage. [mcsavvy]
+### Changes
 
-Fix
-~~~
-- Chat/threads now returns user scoped threads. [mcsavvy]
+* Chore: update Makefile for release command. [mcsavvy]
+
+* Refactor: Simplify user query in login function. [mcsavvy]
+
+* Refactor: Improve password hashing and authentication. [mcsavvy]
+
+
+## 0.5.2 (2023-10-29)
+
+### New
+
+* Feat: Add gevent to dependencies. [mcsavvy]
+
+### Changes
+
+* Chore: added code coverage. [mcsavvy]
+
+* Refactor: Remove password validators. [mcsavvy]
+
+* Chore: add test for creating user without last name. [mcsavvy]
+
+* Refactor: made lastname optional. [mcsavvy]
+
+* Chore: Update environment and Procfile configurations. [mcsavvy]
+
+### Docs
+
+* Docs: Update Cookgpt API documentation. [mcsavvy]
+
+
+## 0.5.1 (2023-10-23)
+
+### Changes
+
+* Chore: added coverage. [mcsavvy]
+
+### Fix
+
+* Chat/threads now returns user scoped threads. [mcsavvy]
 
   Fixes #30
 
 
-0.5.0 (2023-10-14)
-------------------
+## 0.5.0 (2023-10-14)
 
-New
-~~~
-- Feat(chat): Implicit thread creation. [Isaac Olumide Ogunfolaju]
-- Feat(makefile): Add OpenAPI spec generation. [Isaac Olumide
-  Ogunfolaju]
+### New
 
-Changes
-~~~~~~~
-- Chore: generated coverage. [Isaac Olumide Ogunfolaju]
-- Refactor: Simplify logic for creating a new thread. [Isaac Olumide
-  Ogunfolaju]
-- Chore(openapi): generated openapi spec. [Isaac Olumide Ogunfolaju]
+* Feat(chat): Implicit thread creation. [Isaac Olumide Ogunfolaju]
 
-Fix
-~~~
-- Update default thread title to "New Thread" [Isaac Olumide Ogunfolaju]
+* Feat(makefile): Add OpenAPI spec generation. [Isaac Olumide Ogunfolaju]
 
-Docs
-~~~~
-- Docs: update docs_path to root directory. [Isaac Olumide Ogunfolaju]
+### Changes
 
-Tests
-~~~~~
-- Test: Test implicit thread creation. [Isaac Olumide Ogunfolaju]
-- Test: test add_message method with no thread_id or previous_chat.
-  [Isaac Olumide Ogunfolaju]
-- Test: Split test into multiple methods. [Isaac Olumide Ogunfolaju]
+* Chore: generated coverage. [Isaac Olumide Ogunfolaju]
 
-Other
-~~~~~
-- Implicit Thread Creation. [github-actions[bot]]
+* Refactor: Simplify logic for creating a new thread. [Isaac Olumide Ogunfolaju]
 
+* Chore(openapi): generated openapi spec. [Isaac Olumide Ogunfolaju]
 
-0.4.2 (2023-10-14)
-------------------
-- Build: Add setup-python action and generate changelog. [Isaac Olumide
-  Ogunfolaju]
+### Fix
+
+* Update default thread title to "New Thread" [Isaac Olumide Ogunfolaju]
+
+### Docs
+
+* Docs: update docs_path to root directory. [Isaac Olumide Ogunfolaju]
+
+### Tests
+
+* Test: Test implicit thread creation. [Isaac Olumide Ogunfolaju]
+
+* Test: test add_message method with no thread_id or previous_chat. [Isaac Olumide Ogunfolaju]
+
+* Test: Split test into multiple methods. [Isaac Olumide Ogunfolaju]
+
+### Other
+
+* Implicit Thread Creation. [github-actions[bot]]
 
 
-0.4.1 (2023-10-14)
-------------------
+## 0.4.2 (2023-10-14)
 
-Changes
-~~~~~~~
-- Chore: Update deploy workflow and release workflow. [Isaac Olumide
-  Ogunfolaju]
-- Chore(ci): update merge method to merge. [Isaac Olumide Ogunfolaju]
-- Refactor: improve release message script. [Isaac Olumide Ogunfolaju]
+### Other
 
-Fix
-~~~
-- Fix(workflow): installed gitchangelog in release.yml. [Isaac Olumide
-  Ogunfolaju]
-
-Other
-~~~~~
-- Bump version to 0.4.0. [github-actions[bot]]
-- Bump version to 0.3.0. [github-actions[bot]]
-- Bump version to 0.2.4. [github-actions[bot]]
+* Build: Add setup-python action and generate changelog. [Isaac Olumide Ogunfolaju]
 
 
-0.4.0 (2023-10-13)
-------------------
-- Chat Threads. [Isaac Olumide Ogunfolaju]
+## 0.4.1 (2023-10-14)
+
+### Changes
+
+* Chore: Update deploy workflow and release workflow. [Isaac Olumide Ogunfolaju]
+
+* Chore(ci): update merge method to merge. [Isaac Olumide Ogunfolaju]
+
+* Refactor: improve release message script. [Isaac Olumide Ogunfolaju]
+
+### Fix
+
+* Fix(workflow): installed gitchangelog in release.yml. [Isaac Olumide Ogunfolaju]
+
+### Other
+
+* Bump version to 0.4.0. [github-actions[bot]]
+
+* Bump version to 0.3.0. [github-actions[bot]]
+
+* Bump version to 0.2.4. [github-actions[bot]]
 
 
-0.3.0 (2023-10-02)
-------------------
-- Streaming Response 💥💫 [mcsavvy]
+## 0.4.0 (2023-10-13)
+
+### Other
+
+* Chat Threads. [Isaac Olumide Ogunfolaju]
 
 
-0.2.4 (2023-09-29)
-------------------
+## 0.3.0 (2023-10-02)
 
-Changes
-~~~~~~~
-- Chore(spec): regenerated openapi schema. [mcsavvy]
-- Refactor(workflow): change heroku app. [mcsavvy]
+### Other
 
-Fix
-~~~
-- Missing import. [mcsavvy]
-- Fix(ci): Updated bump doc id. [mcsavvy]
+* Streaming Response 💥💫 [mcsavvy]
 
-Other
-~~~~~
-- Merge 8912804e2de31ea4492f4151614a656c9ff30e12 into
-  877ea26be07928294028d781b15149791135c120. [mcsavvy]
-- Merge pull request #19 from Mcsavvy/dev. [mcsavvy]
+
+## 0.2.4 (2023-09-29)
+
+### Changes
+
+* Chore(spec): regenerated openapi schema. [mcsavvy]
+
+* Refactor(workflow): change heroku app. [mcsavvy]
+
+### Fix
+
+* Missing import. [mcsavvy]
+
+* Fix(ci): Updated bump doc id. [mcsavvy]
+
+### Other
+
+* Merge 8912804e2de31ea4492f4151614a656c9ff30e12 into 877ea26be07928294028d781b15149791135c120. [mcsavvy]
+
+* Merge pull request #19 from Mcsavvy/dev. [mcsavvy]
 
   Bump version to 0.2.3
-- Bump version to 0.2.2. [github-actions[bot]]
-- Bump version to 0.2.1. [github-actions[bot]]
-- Bump version to 0.2.0. [github-actions[bot]]
+
+* Bump version to 0.2.2. [github-actions[bot]]
+
+* Bump version to 0.2.1. [github-actions[bot]]
+
+* Bump version to 0.2.0. [github-actions[bot]]
 
 
-0.2.3 (2023-09-29)
-------------------
+## 0.2.3 (2023-09-29)
 
-Changes
-~~~~~~~
-- Chore: change gunicorn bind & server url. [mcsavvy]
+### Changes
 
-Fix
-~~~
-- Create a workaround for user_type bug. [mcsavvy]
+* Chore: change gunicorn bind & server url. [mcsavvy]
 
+### Fix
 
-0.2.2 (2023-08-28)
-------------------
-
-New
-~~~
-- LLM Response Streaming. [mcsavvy]
-
-Changes
-~~~~~~~
-- Chore(coverage): configured coverage. [mcsavvy]
-
-Fix
-~~~
-- API Definition. [mcsavvy]
-
-Other
-~~~~~
-- Merged changes. [mcsavvy]
+* Create a workaround for user_type bug. [mcsavvy]
 
 
-0.2.0 (2023-08-26)
-------------------
+## 0.2.2 (2023-08-28)
 
-Breaking Changes
-~~~~~~~~~~~~~~~~
-- BREAKING CHANGE: removed user info. [mcsavvy]
+### New
+
+* LLM Response Streaming. [mcsavvy]
+
+### Changes
+
+* Chore(coverage): configured coverage. [mcsavvy]
+
+### Fix
+
+* API Definition. [mcsavvy]
+
+### Other
+
+* Merged changes. [mcsavvy]
+
+
+## 0.2.0 (2023-08-26)
+
+### Breaking Changes
+
+* BREAKING CHANGE: removed user info. [mcsavvy]
 
   - removed `UserInfo` database model
   - removed enums and schemas
@@ -401,175 +395,232 @@ Breaking Changes
   User info came from a different app and I do not see a reason to
   maintain or refactor it.
 
-New
-~~~
-- Feat: add .gitchangelog.rc file. [mcsavvy]
-- Feat(ci): Add API documentation deployment and API diff check.
-  [mcsavvy]
-- Feature: added openapi specifications. [mcsavvy]
-- Feat: Add devcontainer.json for Python 3. [mcsavvy]
-- Feat(utils): add utility functions for API response management.
-  [mcsavvy]
-- Feat: added chatbot  💬🤖 [mcsavvy]
-- Feat: Update dependencies. [mcsavvy]
+### New
 
-Changes
-~~~~~~~
-- Refactor: Remove unused make targets and clean up Makefile. [mcsavvy]
-- Chore(deploy.yml): Update env_file to .env.production. [mcsavvy]
-- Chore: Update workflow names. [mcsavvy]
-- Chore: Update activation script for different environments. [mcsavvy]
-- Ci: Upload coverage reports to Codecov. [mcsavvy]
-- Chore: Update prompts for ai chatbot. [mcsavvy]
-- Refactor(auth): modified user types. [mcsavvy]
+* Feat: add .gitchangelog.rc file. [mcsavvy]
+
+* Feat(ci): Add API documentation deployment and API diff check. [mcsavvy]
+
+* Feature: added openapi specifications. [mcsavvy]
+
+* Feat: Add devcontainer.json for Python 3. [mcsavvy]
+
+* Feat(utils): add utility functions for API response management. [mcsavvy]
+
+* Feat: added chatbot  💬🤖 [mcsavvy]
+
+* Feat: Update dependencies. [mcsavvy]
+
+### Changes
+
+* Refactor: Remove unused make targets and clean up Makefile. [mcsavvy]
+
+* Chore(deploy.yml): Update env_file to .env.production. [mcsavvy]
+
+* Chore: Update workflow names. [mcsavvy]
+
+* Chore: Update activation script for different environments. [mcsavvy]
+
+* Ci: Upload coverage reports to Codecov. [mcsavvy]
+
+* Chore: Update prompts for ai chatbot. [mcsavvy]
+
+* Refactor(auth): modified user types. [mcsavvy]
 
   - removed patient
   - replaced  with
-- Refactor(config): move hooks to validators, add custom settings class.
-  [mcsavvy]
-- Refactor(config): remove unused hooks and simplify tests. [mcsavvy]
-- Chore(db): created intial migration script. [mcsavvy]
-- Chore: deleted old tests. [mcsavvy]
-- Chore: pinned project dependencies. [mcsavvy]
-- Refactor(app): refactor app initialization and configuration.
-  [mcsavvy]
-- Refactor: improved authentication logic. [mcsavvy]
-- Chore: moved user logic into auth. [mcsavvy]
-- Chore: Update exclude paths in pyproject.toml. [mcsavvy]
-- Refactor: improve extensions & remove unused. [mcsavvy]
-- Chore: Update VSCode launch and settings configurations. [mcsavvy]
-- Chore: Update settings.toml. [mcsavvy]
-- Refactor(config): refactor config file and add hooks. [mcsavvy]
-- Chore: removed all migration scripts. [mcsavvy]
-- Chore: Update .gitignore file. [mcsavvy]
-- Chore: Remove LICENSE and MANIFEST.in files. [mcsavvy]
-- Chore: Add pyproject.toml configuration file. [mcsavvy]
-- Refactor: improve Makefile formatting and linting. [mcsavvy]
-- Chore: Update python version and install command. [mcsavvy]
 
-Fix
-~~~
-- Export ENV_PREFIX after activation. [mcsavvy]
+* Refactor(config): move hooks to validators, add custom settings class. [mcsavvy]
 
-Docs
-~~~~
-- Docs: Add documentation for user_type field. [mcsavvy]
-- Docs: Update AI assistant description in API documentation. [mcsavvy]
-- Docs: add Openapi Specification Docs. [mcsavvy]
+* Refactor(config): remove unused hooks and simplify tests. [mcsavvy]
 
-Tests
-~~~~~
-- Tests: tested entire codebase. [mcsavvy]
+* Chore(db): created intial migration script. [mcsavvy]
 
-Style
-~~~~~
-- Style: update formatting of fake_data.py. [mcsavvy]
-- Style: simplify timedelta conversion in to_timedelta function.
-  [mcsavvy]
-- Style: reorder import statements in __init__.py. [mcsavvy]
-- Style: Improve code quality. [mcsavvy]
+* Chore: deleted old tests. [mcsavvy]
+
+* Chore: pinned project dependencies. [mcsavvy]
+
+* Refactor(app): refactor app initialization and configuration. [mcsavvy]
+
+* Refactor: improved authentication logic. [mcsavvy]
+
+* Chore: moved user logic into auth. [mcsavvy]
+
+* Chore: Update exclude paths in pyproject.toml. [mcsavvy]
+
+* Refactor: improve extensions & remove unused. [mcsavvy]
+
+* Chore: Update VSCode launch and settings configurations. [mcsavvy]
+
+* Chore: Update settings.toml. [mcsavvy]
+
+* Refactor(config): refactor config file and add hooks. [mcsavvy]
+
+* Chore: removed all migration scripts. [mcsavvy]
+
+* Chore: Update .gitignore file. [mcsavvy]
+
+* Chore: Remove LICENSE and MANIFEST.in files. [mcsavvy]
+
+* Chore: Add pyproject.toml configuration file. [mcsavvy]
+
+* Refactor: improve Makefile formatting and linting. [mcsavvy]
+
+* Chore: Update python version and install command. [mcsavvy]
+
+### Fix
+
+* Export ENV_PREFIX after activation. [mcsavvy]
+
+### Docs
+
+* Docs: Add documentation for user_type field. [mcsavvy]
+
+* Docs: Update AI assistant description in API documentation. [mcsavvy]
+
+* Docs: add Openapi Specification Docs. [mcsavvy]
+
+### Tests
+
+* Tests: tested entire codebase. [mcsavvy]
+
+### Style
+
+* Style: update formatting of fake_data.py. [mcsavvy]
+
+* Style: simplify timedelta conversion in to_timedelta function. [mcsavvy]
+
+* Style: reorder import statements in __init__.py. [mcsavvy]
+
+* Style: Improve code quality. [mcsavvy]
 
 
-0.1.13 (2023-07-28)
--------------------
-- Tested Config Extension. [mcsavvy]
-- Refactor config.py to use lowercase env variable. [mcsavvy]
-- Refactored BaseModel. [mcsavvy]
+## 0.1.13 (2023-07-28)
+
+### Other
+
+* Tested Config Extension. [mcsavvy]
+
+* Refactor config.py to use lowercase env variable. [mcsavvy]
+
+* Refactored BaseModel. [mcsavvy]
 
   - made  not nullable
   - made  not nullable
-- Added Config Extension. [mcsavvy]
-- Added Management Script. [mcsavvy]
-- Added Release Command To Procfile. [mcsavvy]
-- Refactored JtwToken Model. [mcsavvy]
+
+* Added Config Extension. [mcsavvy]
+
+* Added Management Script. [mcsavvy]
+
+* Added Release Command To Procfile. [mcsavvy]
+
+* Refactored JtwToken Model. [mcsavvy]
 
   - made `access_token` not nullable
   - made `active` not nullable
-- Added Initial Migration. [mcsavvy]
+
+* Added Initial Migration. [mcsavvy]
 
 
-0.1.12 (2023-07-25)
--------------------
-- Fixed Workflow. [mcsavvy]
+## 0.1.12 (2023-07-25)
+
+### Other
+
+* Fixed Workflow. [mcsavvy]
 
 
-0.1.11 (2023-07-25)
--------------------
-- Added Python Version Constraint. [mcsavvy]
+## 0.1.11 (2023-07-25)
+
+### Other
+
+* Added Python Version Constraint. [mcsavvy]
 
 
-0.1.10 (2023-07-25)
--------------------
-- Added Heroku Git Remote. [mcsavvy]
+## 0.1.10 (2023-07-25)
+
+### Other
+
+* Added Heroku Git Remote. [mcsavvy]
 
 
-0.1.9 (2023-07-25)
-------------------
-- Update Heroku app name to "my-kitchen-power" [mcsavvy]
+## 0.1.9 (2023-07-25)
+
+### Other
+
+* Update Heroku app name to "my-kitchen-power" [mcsavvy]
 
 
-0.1.6 (2023-07-23)
-------------------
-- Update Python version to 3.9.16. [mcsavvy]
-- Removed Python Version Constraint. [mcsavvy]
-- Release a new version and create a PR to main branch. [mcsavvy]
-- Add automerge action for pull requests into dev branch. [mcsavvy]
-- Added Deployment Workflow. [mcsavvy]
+## 0.1.6 (2023-07-23)
+
+### Other
+
+* Update Python version to 3.9.16. [mcsavvy]
+
+* Removed Python Version Constraint. [mcsavvy]
+
+* Release a new version and create a PR to main branch. [mcsavvy]
+
+* Add automerge action for pull requests into dev branch. [mcsavvy]
+
+* Added Deployment Workflow. [mcsavvy]
 
 
-0.1.5 (2023-07-21)
-------------------
-- Updated Permissions For Release Workflow. [mcsavvy]
-- Add SQLA to Flask Admin. [mcsavvy]
-- Added Tests For Authentication. [mcsavvy]
-- Added Validators For User Data. [mcsavvy]
-- Fix linter and test commands in Makefile. [mcsavvy]
-- Refactored User Model. [mcsavvy]
+## 0.1.5 (2023-07-21)
+
+### Other
+
+* Updated Permissions For Release Workflow. [mcsavvy]
+
+* Add SQLA to Flask Admin. [mcsavvy]
+
+* Added Tests For Authentication. [mcsavvy]
+
+* Added Validators For User Data. [mcsavvy]
+
+* Fix linter and test commands in Makefile. [mcsavvy]
+
+* Refactored User Model. [mcsavvy]
 
   - Added Serialization
   - Added Validation
   - Added support for jwt tokens
-- Refactored BaseModel. [mcsavvy]
+
+* Refactored BaseModel. [mcsavvy]
 
   - Added CreateError & UpdateError
   - Added serializable_keys attribute
-- Refactor auth initialization and user loader. [mcsavvy]
-- Add cov.xml to .gitignore. [mcsavvy]
-- Use .venv file for virtual environment prefix. [mcsavvy]
-- Added Git pre-commit Hook. [mcsavvy]
-- Added Dependency For Migrations. [mcsavvy]
-- Run tests with coverage report in XML format. [mcsavvy]
-- Add "active" and "access_token" to serializable keys. [mcsavvy]
-- Added Authentication Blueprint. [mcsavvy]
-- Update JWT configuration and database URIs. [mcsavvy]
-- Add VS Code launch and settings configurations. [mcsavvy]
-- Added Migration & Customized Database Class. [mcsavvy]
-- Update lint and test targets in Makefile. [mcsavvy]
+
+* Refactor auth initialization and user loader. [mcsavvy]
+
+* Add cov.xml to .gitignore. [mcsavvy]
+
+* Use .venv file for virtual environment prefix. [mcsavvy]
+
+* Added Git pre-commit Hook. [mcsavvy]
+
+* Added Dependency For Migrations. [mcsavvy]
+
+* Run tests with coverage report in XML format. [mcsavvy]
+
+* Add "active" and "access_token" to serializable keys. [mcsavvy]
+
+* Added Authentication Blueprint. [mcsavvy]
+
+* Update JWT configuration and database URIs. [mcsavvy]
+
+* Add VS Code launch and settings configurations. [mcsavvy]
+
+* Added Migration & Customized Database Class. [mcsavvy]
+
+* Update lint and test targets in Makefile. [mcsavvy]
 
 
-0.1.4 (2023-07-12)
-------------------
-- Refactor test_api.py and conftest.py. [mcsavvy]
-- Added githooks. [mcsavvy]
+## 0.1.4 (2023-07-12)
 
+### Other
 
-0.1.1 (2023-07-11)
-------------------
-- Refactor tests and release workflows. [mcsavvy]
-- Add release workflow and update code formatting and linting. [mcsavvy]
-- Update Python version to 3.10.5. [mcsavvy]
-- Modified main workflow. [mcsavvy]
-- Delete Unused Workflows. [mcsavvy]
-- Added User App. [mcsavvy]
-- Configured application entrypoint. [mcsavvy]
-- Added application config file. [mcsavvy]
-- Added Makefile. [mcsavvy]
-- Configured Extensions. [mcsavvy]
-- Renamed models.py -> base.py. [mcsavvy]
-- Added project deps. [mcsavvy]
-- Ignored all databases. [mcsavvy]
-- Removed unused files. [mcsavvy]
-- ✅ Ready to clone and code. [Mcsavvy]
-- Initial commit. [† dave †]
+* Refactor test_api.py and conftest.py. [mcsavvy]
+
+* Added githooks. [mcsavvy]
 
 
