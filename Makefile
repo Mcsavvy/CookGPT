@@ -25,8 +25,8 @@ requirements:     ## Generate requirements files.
 	@poetry export --only test --without-hashes -o requirements-test.txt
 
 
-.PHONY: install
-install:          ## Install dependencies.
+.PHONY: init
+init:          ## Initialize the project.
 	@# check if virtual environment exists
 	@if [ ! -d "$(ENV_PREFIX)" ]; then
 		@echo "Creating virtual environment..."
