@@ -1,6 +1,6 @@
 .ONESHELL:
-ENV_PREFIX=$(shell if [ -z "$$PIPENV_ACTIVE" ]; then pipenv --venv; else echo "$$ENV_PREFIX"; fi)/bin
-FILES="."
+ENV_PREFIX=.venv/bin
+FILES='.'
 PYTEST_ARGS=--cov-config .coveragerc --cov-report xml --cov=cookgpt --cov-append --cov-report term-missing --cov-fail-under=95 --no-cov-on-fail
 
 
@@ -19,25 +19,26 @@ show:             ## Show the current environment.
 	@$(ENV_PREFIX)/python -m site
 
 .PHONY: requirements
-requirements:     ## Generate requirements.txt.
-	@pipenv requirements > requirements.txt
-	@pipenv requirements --dev-only >> requirements-dev.txt
+requirements:     ## Generate requirements files.
+	@poetry export --without-hashes -o requirements.txt
+	@poetry export --only dev --without-hashes -o requirements-dev.txt
+	@poetry export --only test --without-hashes -o requirements-test.txt
+
+
+.PHONY: install
+install:          ## Install dependencies.
+	@# check if virtual environment exists
+	@if [ ! -d "$(ENV_PREFIX)" ]; then
+		@echo "Creating virtual environment..."
+		@python3 -m venv .venv
+	fi
+	@echo "Installing dependencies..."
+	@poetry self add poetry-plugin-export
+	@poetry install --with dev,test
 
 .PHONY: run
 run:              ## Run the project.	
 	$(ENV_PREFIX)/gunicorn -c gunicorn.conf.py
-
-.PHONY: fmt
-fmt:              ## Format code using black & isort.
-	$(ENV_PREFIX)/ruff check --fix $(FILES)
-	$(ENV_PREFIX)/isort $(FILES)
-	$(ENV_PREFIX)/black $(FILES)
-
-.PHONY: lint
-lint:             ## Run pep8, black, mypy linters.
-	$(ENV_PREFIX)/ruff check $(FILES) || exit $$?
-	$(ENV_PREFIX)/black --check $(FILES) || exit $$?
-	$(ENV_PREFIX)/mypy $(FILES) || exit $$?
 
 .PHONY: test
 test:             ## Run tests and generate coverage report.

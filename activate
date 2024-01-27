@@ -1,44 +1,37 @@
 #!/usr/bin/env bash
 # activate the virtualenv
-# if it's not already activated
+
 if [ "$1" = 'production' ]; then
-	DOTENV_FILE=".env.production"
+	DOTENV_FILE=".env.prod"
 elif [ "$1" = 'development' ] || [ -z "$1" ]; then
-	DOTENV_FILE=".env.development"
+	DOTENV_FILE=".env"
 elif [ "$1" = 'testing' ]; then
-	DOTENV_FILE=".env.testing"
+	DOTENV_FILE=".env.test"
 fi
 
+ENV_PREFIX="$(pwd)/.venv"
+if ! [ -d "$ENV_PREFIX" ]; then
+	echo 'No virtualenv found. Use `make init` to create one.' >&2
+	return 1
+fi
 
 # if the virtualenv is already activated
-# then reactivate it
+# ignore this script
 if ! [ -z "$VIRTUAL_ENV" ]; then
-	deactivate
-	unalias deactivate 2>/dev/null
-fi
-
-
-if [ -f ".venv" ]; then
-	ENV_PREFIX="$(cat .venv)"
-else
-	ENV_PREFIX="$(pipenv --venv 2>/dev/null)"
-	echo "$ENV_PREFIX" > .venv
+	echo "Virtualenv $VIRTUAL_ENV already activated" >&2
+	return
 fi
 
 export ENV_PREFIX
-
 echo "Activating virtualenv $(basename $ENV_PREFIX)"
-
-# set the pipenv active flag
-export PIPENV_ACTIVE=1
 
 # activate virtualenv
 source $ENV_PREFIX/bin/activate
 
-# create a wrapper around the `deactivate` command
-# to unset the PIPENV_ACTIVE flag
-alias deactivate="unset PIPENV_ACTIVE ENV_PREFIX; unalias deactivate; deactivate"
-
 # load env vars
-export $(cat $DOTENV_FILE | xargs)
+# if the env file exists and is not empty
+if [ -s "$DOTENV_FILE" ]; then
+	echo "Loading environment variables from $DOTENV_FILE"
+	export $(grep -v '^#' $DOTENV_FILE | xargs -d '\n')
+fi
 unset DOTENV_FILE
