@@ -65,7 +65,8 @@ exclude = [
     "__pycache__",
     "tests/old",
     "cookgpt/old",
-    "migrations/*"
+    "migrations/*",
+    ".venv",
 ]
 
 [tool.black]
@@ -78,6 +79,7 @@ exclude = """
     | tests/old/.*
     | cookgpt/old/.*
     | migrations
+    | .venv
 )
 """
 
@@ -89,7 +91,8 @@ exclude = [
     "\\.mypy_cache",
     "__pycache__",
     "migrations/.*",
-    "test_streaming.py"
+    "test_streaming.py",
+    ".venv",
 ]
 
 [tool.pytest.ini_options]
@@ -117,5 +120,6 @@ omit = [
     "cookgpt/logging.py",
     "cookgpt/sentry.py",
     "cookgpt/auth/models/whatsapp.py",
+    ".venv/*",
 ]
 
