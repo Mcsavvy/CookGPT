@@ -1,14 +1,9 @@
-"""
-Since the APIs currently being used are stateless, it makes sense that
-we create our own chat memory implementation and do that efficiently too.
-
-SqlConversationMemory:
-    this memory stores each input from the user and the output from
-    the assistant in an SQL database augmented with Flask-SqlAlchemy
-"""
+"""Chatbot memory module."""
 import datetime
-from typing import Any, Dict, Iterable, cast
+from collections.abc import Iterable
+from typing import Any, cast
 
+import pydantic.v1 as pydantic_v1
 from langchain.memory import ConversationBufferMemory
 from langchain.memory.chat_message_histories.in_memory import (
     ChatMessageHistory,
@@ -19,7 +14,6 @@ from langchain.schema import (
     HumanMessage,
     get_buffer_string,
 )
-from pydantic import BaseModel, Field, root_validator
 
 from cookgpt import logging
 from cookgpt.chatbot.models import Chat, MessageType
@@ -37,45 +31,46 @@ from cookgpt.globals import (
 
 
 def get_memory_key() -> str:
-    """get chat memory key"""
+    """Get chat memory key."""
     return config["CHATBOT_MEMORY_KEY"]
 
 
 def get_human_prefix() -> str:  # pragma: no cover
-    """get chat memory human prefix"""
+    """Get chat memory human prefix."""
     return config["CHATBOT_MEMORY_HUMAN_PREFIX"]
 
 
 def get_ai_prefix() -> str:  # pragma: no cover
-    """get chat memory ai prefix"""
+    """Get chat memory ai prefix."""
     return config["CHATBOT_MEMORY_AI_PREFIX"]
 
 
 def get_memory_input_key() -> str:
-    """get chat memory input key"""
+    """Get chat memory input key."""
     return config["CHATBOT_CHAIN_INPUT_KEY"]
 
 
-class SingleThreadHistory(ChatMessageHistory, BaseModel):
-    """An SqlAlchemy models backed chat history"""
+class SingleThreadHistory(ChatMessageHistory, pydantic_v1.BaseModel):
+    """A conversation thread backed memory."""
 
     @property
     def query_cost(self) -> int:
-        """return query cost"""
+        """Return query cost."""
         return chat_cost[0]
 
     @property
     def response_cost(self) -> int:
-        """return response cost"""
+        """Return response cost."""
         return chat_cost[1]
 
     def __getattribute__(self, __name: str) -> Any:
+        """Get attribute."""
         if __name == "messages":
             setattr(self, __name, self.get_messages())
         return super().__getattribute__(__name)
 
     def get_messages(self) -> "list[BaseMessage]":  # pragma: no cover
-        """get all messages in thread"""
+        """Get all messages in thread."""
         chats: "list[BaseMessage]" = []
         # non-empty chats
         chats_query = Chat.query.filter(
@@ -94,8 +89,8 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
             )
         return chats
 
-    def add_user_message(self, message: str) -> None:
-        """add the user's query to the database"""
+    def add_user_message(self, message: str) -> None:  # type: ignore[override]
+        """Add the user's query to the database."""
         logging.debug("Adding user message to database...")
         extra: dict[str, Any] = {"cost": self.query_cost}
         if q_time := getvar("query_time", datetime.datetime):
@@ -108,8 +103,8 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
         query.update(content=message, **extra)
         return None
 
-    def add_ai_message(self, message: str) -> None:
-        """add the ai's response to the database"""
+    def add_ai_message(self, message: str) -> None:  # type: ignore[override]
+        """Add the ai's response to the database."""
         logging.debug("Adding ai message to database...")
         extra: dict[str, Any] = {"cost": self.response_cost}
         if r_time := getvar("response_time", datetime.datetime):
@@ -123,34 +118,33 @@ class SingleThreadHistory(ChatMessageHistory, BaseModel):
         response.update(content=message, **extra)
 
     def clear(self) -> None:  # pragma: no cover
-        """Clear all messages in the thread"""
+        """Clear all messages in the thread."""
         return thread.clear()
 
 
 class BaseMemory(ConversationBufferMemory):
-    """
-    A conversation memory that is user aware
-    """
+    """A conversation memory that is user-aware."""
 
-    memory_key: str = Field(default_factory=get_memory_key)
-    input_key: str = Field(default_factory=get_memory_input_key)
-    human_prefix: str = Field(default_factory=get_human_prefix)
-    ai_prefix: str = Field(default_factory=get_ai_prefix)
+    memory_key: str = pydantic_v1.Field(default_factory=get_memory_key)
+    input_key: str = pydantic_v1.Field(default_factory=get_memory_input_key)
+    human_prefix: str = pydantic_v1.Field(default_factory=get_human_prefix)
+    ai_prefix: str = pydantic_v1.Field(default_factory=get_ai_prefix)
 
     @property
     def user(self) -> str:
-        """return current user's name"""
+        """Return current user's name."""
         return user.first_name
 
-    @root_validator
-    def set_context(cls, values):
-        """set context"""
+    @pydantic_v1.root_validator
+    @classmethod
+    def set_context(cls, values: dict[str, Any]) -> dict[str, Any]:
+        """Set context for memory."""
         setvar("history", values["chat_memory"])
         return values
 
     @property
     def buffer_as_str(self) -> str:  # pragma: no cover
-        """return buffer as string"""
+        """Return buffer as string."""
         return get_buffer_string(
             self.chat_memory.messages,
             human_prefix=self.human_prefix,
@@ -159,25 +153,25 @@ class BaseMemory(ConversationBufferMemory):
 
     @property
     def memory_variables(self) -> "list[str]":
-        """return list of memory variables"""
+        """Return list of memory variables."""
         return [self.memory_key, "user"]
 
-    def load_memory_variables(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
-        """return chat thread and user's name"""
+    def load_memory_variables(self, inputs: dict[str, Any]) -> dict[str, Any]:
+        """Return chat thread and user's name."""
         logging.debug("Loading memory variables...")
         return {"user": self.user, self.memory_key: self.buffer_as_messages}
 
 
-class ThreadMemory(BaseMemory, BaseModel):
-    """A conversation thread memory"""
+class ThreadMemory(BaseMemory):
+    """A conversation thread memory."""
 
-    chat_memory: "SingleThreadHistory" = Field(
+    chat_memory: "SingleThreadHistory" = pydantic_v1.Field(
         default_factory=SingleThreadHistory
     )
     return_message: bool = False
 
     def save_context(
-        self, inputs: Dict[str, Any], outputs: Dict[str, str]
+        self, inputs: dict[str, Any], outputs: dict[str, str]
     ) -> None:
         """Save context from this conversation to database."""
         input = inputs[self.input_key]

@@ -1,25 +1,29 @@
-from typing import Any, Dict, Iterator, List, Optional, Type, Union
+"""Chain for the chatbot."""
 
+from collections.abc import Iterator
+from typing import Any, cast
+
+import pydantic.v1 as pydantic_v1
 from langchain.callbacks.base import Callbacks
 from langchain.callbacks.manager import CallbackManagerForLLMRun
 from langchain.chains import ConversationChain
-from langchain.chat_models import ChatOpenAI, FakeListChatModel
-from langchain.chat_models.base import BaseChatModel, BaseMessage
+from langchain.chat_models.base import BaseChatModel
 from langchain.schema.output import ChatGenerationChunk, ChatResult
 from langchain.schema.prompt_template import BasePromptTemplate
-from pydantic import Field, root_validator
+from langchain_community.chat_models import ChatOpenAI, FakeListChatModel
+from langchain_core.messages import BaseMessage
 
 from cookgpt import logging
 from cookgpt.chatbot.data.fake_data import responses
-from cookgpt.chatbot.data.prompts import prompt as PROMPT
+from cookgpt.chatbot.data.prompts import prompt
 from cookgpt.chatbot.memory import BaseMemory, ThreadMemory
 from cookgpt.ext.config import config
 from cookgpt.globals import getvar, setvar
 
 
 def get_llm() -> BaseChatModel:  # pragma: no cover
-    """returns the language model"""
-    llm_cls: Type[LLM | FakeLLM]
+    """Returns the language model."""
+    llm_cls: type[LLM | FakeLLM]
     if config.USE_OPENAI:
         llm_cls = LLM
     else:
@@ -28,39 +32,40 @@ def get_llm() -> BaseChatModel:  # pragma: no cover
 
 
 def get_chain_input_key() -> str:
-    """returns the input key for the chain"""
+    """Returns the input key for the chain."""
     return config.CHATBOT_CHAIN_INPUT_KEY
 
 
 class FakeLLM(FakeListChatModel):
-    """fake language model for testing purposes"""
+    """Fake language model for the chatbot."""
 
     streaming: bool
-    responses: List = responses
+    responses: list = responses
     i: int = 0
 
     def _stream(
         self,
-        messages: List[BaseMessage],
-        stop: Union[List[str], None] = None,
-        run_manager: Union[CallbackManagerForLLMRun, None] = None,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
+        run_manager: CallbackManagerForLLMRun | None = None,
         **kwargs: Any,
     ) -> Iterator[ChatGenerationChunk]:
         for c in super()._stream(messages, stop, run_manager, **kwargs):
             yield c
             if run_manager:
-                run_manager.on_llm_new_token(c.message.content)
+                content = cast(str, c.message.content)
+                run_manager.on_llm_new_token(content)
 
     def _generate(
         self,
-        messages: List[BaseMessage],
-        stop: List[str] | None = None,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
         run_manager: CallbackManagerForLLMRun | None = None,
         **kwargs: Any,
     ) -> ChatResult:
         if self.streaming:
             logging.debug("Streaming FakeLLM...")
-            generation: Optional[ChatGenerationChunk] = None
+            generation: ChatGenerationChunk | None = None
             for chunk in self._stream(messages, stop, run_manager, **kwargs):
                 if generation is None:
                     generation = chunk
@@ -74,40 +79,40 @@ class FakeLLM(FakeListChatModel):
 
 
 class LLM(ChatOpenAI):
-    """language model for the chatbot"""
-
-    ...
+    """Language model for the chatbot."""
 
 
 class ThreadChain(ConversationChain):
-    """custom chain for the language model"""
+    """Chain for the chatbot."""
 
-    input_key: str = Field(default_factory=get_chain_input_key)
-    llm: "BaseChatModel" = Field(default_factory=get_llm)
-    prompt: "BasePromptTemplate" = PROMPT
-    memory: "BaseMemory" = Field(default_factory=ThreadMemory)
+    input_key: str = pydantic_v1.Field(default_factory=get_chain_input_key)
+    llm: "BaseChatModel" = pydantic_v1.Field(default_factory=get_llm)
+    prompt: "BasePromptTemplate" = prompt
+    memory: "BaseMemory" = pydantic_v1.Field(default_factory=ThreadMemory)
 
-    @root_validator
+    @pydantic_v1.root_validator
+    @classmethod
     def set_context(cls, values):
-        """set context"""
+        """Set context."""
         setvar("memory", values["memory"])
         return values
 
     def reload(self):  # pragma: no cover
-        """reload variables"""
+        """Reload the chain."""
         self.input_key = get_chain_input_key()
         self.llm = get_llm()
 
     def __call__(
         self,
-        inputs: Dict[str, Any] | Any,
+        inputs: dict[str, Any] | Any,
         return_only_outputs: bool = False,
         callbacks: Callbacks = None,
         *,
-        tags: List[str] | None = None,
-        metadata: Dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
         include_run_info: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
+        """Call the chain."""
         from langchain.schema import HumanMessage
 
         from cookgpt.chatbot.models import Chat
