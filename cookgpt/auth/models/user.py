@@ -1,14 +1,16 @@
-"""User Database Models"""
+"""User Database Models."""
 
-from typing import TYPE_CHECKING, List, Optional, cast
+from typing import TYPE_CHECKING, cast
 
 from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
+# from cookgpt.ext.auth import bcrypt
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from cookgpt.auth.data.enums import UserType
 from cookgpt.auth.models.tokens import TokenMixin
 from cookgpt.chatbot.models import ThreadMixin
-from cookgpt.ext.auth import bcrypt
 from cookgpt.ext.database import db
 
 if TYPE_CHECKING:
@@ -17,7 +19,7 @@ if TYPE_CHECKING:
 
 
 def get_max_chat_cost() -> int:
-    """get the max chat cost from the app config"""
+    """Get the max chat cost from the app config."""
     from cookgpt.globals import current_app as app
 
     return cast(int, app.config["MAX_CHAT_COST"])
@@ -28,19 +30,19 @@ class User(
     TokenMixin,
     ThreadMixin,
 ):
-    """An authenticated user"""
+    """An authenticated user."""
 
     serialize_rules = ("-password",)
 
     first_name: Mapped[str] = mapped_column(db.String(30))
-    last_name: Mapped[Optional[str]] = mapped_column(db.String(30))
+    last_name: Mapped[str | None] = mapped_column(db.String(30))
     user_type: Mapped[UserType] = mapped_column(
         Enum(UserType), default=UserType.COOK
     )
-    username: Mapped[Optional[str]] = mapped_column(db.String(80), unique=True)
+    username: Mapped[str | None] = mapped_column(db.String(80), unique=True)
     email: Mapped[str] = mapped_column(db.String(120), unique=True)
     password: Mapped[str] = mapped_column(db.String(120))
-    tokens: Mapped[List["Token"]] = db.relationship(  # type: ignore
+    tokens: Mapped[list["Token"]] = db.relationship(  # type: ignore
         back_populates="user",
         lazy=True,
         cascade="all, delete-orphan",
@@ -48,7 +50,7 @@ class User(
 
     max_chat_cost: Mapped[int] = mapped_column(default=get_max_chat_cost)
     threads: Mapped[
-        List["Thread"]
+        list["Thread"]
     ] = db.relationship(  # type: ignore[assignment]
         back_populates="user",
         lazy=True,
@@ -56,6 +58,7 @@ class User(
     )
 
     def __repr__(self):
+        """Get a string representation of the user."""
         return "{}[{}](name={}, email={}, threads={}, tokens={})".format(
             self.type.name,
             self.uid,
@@ -67,7 +70,7 @@ class User(
 
     @property
     def name(self):
-        """get user's name"""
+        """Get user's name."""
         name = self.first_name
         if self.last_name:
             name += " " + self.last_name
@@ -75,7 +78,7 @@ class User(
 
     @property
     def profile_picture(self):
-        """get the user's profile picture"""
+        """Get the user's profile picture."""
         # hash the user's email to get a gravatar
         from hashlib import sha256
 
@@ -86,8 +89,7 @@ class User(
 
     @property
     def type(self) -> UserType:  # pragma: no cover
-        """
-        get the user's type
+        """Get the user's type.
 
         BUG: this is a workaround for a bug where user_type was returned as
              a string instead of an enum
@@ -100,13 +102,13 @@ class User(
             return self.user_type
 
     def validate_password(self, password):
-        """verify that a password can be used to authenticate as this user"""
-        return bcrypt.check_password_hash(self.password, password)
+        """Verify that a password can be used to authenticate as this user."""
+        return check_password_hash(self.password, password)
+        # return bcrypt.check_password_hash(self.password, password)
 
     @classmethod
     def create(cls, commit=True, **kwargs) -> "User":
-        """create a new user"""
-
+        """Create a new user."""
         if (
             "username" in kwargs
             and cls.query.filter_by(username=kwargs["username"]).first()
@@ -118,13 +120,14 @@ class User(
         ):
             raise cls.CreateError("email is taken")
         if "password" in kwargs:
-            kwargs["password"] = bcrypt.generate_password_hash(
-                kwargs["password"]
-            )
+            kwargs["password"] = generate_password_hash(kwargs["password"])
+            # kwargs["password"] = bcrypt.generate_password_hash(
+            #     kwargs["password"]
+            # )
         return super().create(commit, **kwargs)
 
     def update(self, commit=True, **kwargs) -> "User":
-        """update a user"""
+        """Update a user."""
         # if username is used by a different user, raise error
         if (
             "username" in kwargs
@@ -141,7 +144,8 @@ class User(
             raise self.UpdateError("email is taken")
         if "password" in kwargs:
             # if password is being updated, hash it
-            kwargs["password"] = bcrypt.generate_password_hash(
-                kwargs["password"]
-            )
+            kwargs["password"] = generate_password_hash(kwargs["password"])
+            # kwargs["password"] = bcrypt.generate_password_hash(
+            # kwargs["password"]
+            # )
         return super().update(commit, **kwargs)
