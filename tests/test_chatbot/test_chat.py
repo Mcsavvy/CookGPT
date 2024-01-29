@@ -1,3 +1,5 @@
+"""Tests for Chat model."""
+
 import pytest
 from sqlalchemy.exc import IntegrityError
 
@@ -6,7 +8,10 @@ from cookgpt.ext import db
 
 
 class TestChatModel:
+    """Test Chat model."""
+
     def test_create_chat(self, thread: "Thread"):
+        """Test creating a chat."""
         chat = Chat.create(
             content="Hello, World!",
             cost=10,
@@ -24,6 +29,7 @@ class TestChatModel:
         assert chat.order == 1
 
     def test_get_next_chat_id(self, thread: "Thread"):
+        """Test getting next chat id."""
         chat1 = Chat.create(
             content="Hello, World!",
             cost=10,
@@ -43,6 +49,7 @@ class TestChatModel:
         assert chat2.next_chat_id is None
 
     def test_unique_order_per_thread(self, thread: "Thread"):
+        """Test unique order per thread."""
         Chat.create(
             content="Hello, World!",
             cost=10,
@@ -61,6 +68,7 @@ class TestChatModel:
         db.session.rollback()
 
     def test_delete_chat(self, thread: "Thread"):
+        """Test deleting a chat."""
         chat = Chat.create(
             content="Hello, World!",
             cost=10,

@@ -1,3 +1,5 @@
+"""tests for `auth`'s CLI."""
+
 from typing import cast
 
 import pytest
@@ -10,10 +12,10 @@ from cookgpt.auth.models.user import User
 
 @pytest.mark.usefixtures("app")
 class TestCreateAdmin:
-    """test `auth create-admin`"""
+    """test `auth create-admin`."""
 
     def test_payload_validation(self, faker):
-        """test that the payload is being validated"""
+        """Test that the payload is being validated."""
         uname = faker.user_name()
         pword = "2short"  # too short
         fname = "John."  # invalid
@@ -40,8 +42,7 @@ class TestCreateAdmin:
         assert len(excinfo.value.messages_dict) == 2
 
     def test_create_success(self, faker):
-        """test creating an admin"""
-
+        """Test creating an admin."""
         uname = faker.unique.user_name()
         pword = faker.password()
         fname = faker.first_name()
@@ -74,8 +75,7 @@ class TestCreateAdmin:
         assert user.user_type == UserType.ADMIN
 
     def test_create_no_lastname(self, faker):
-        """test creating an admin without last name"""
-
+        """Test creating an admin without last name."""
         fname = faker.first_name()
         email = faker.unique.email()
         pword = faker.password()
@@ -95,8 +95,7 @@ class TestCreateAdmin:
         assert user.password != pword
 
     def test_create_no_username(self, faker):
-        """test creating an admin without username"""
-
+        """Test creating an admin without username."""
         fname = faker.first_name()
         lname = faker.last_name()
         email = faker.unique.email()
@@ -117,10 +116,7 @@ class TestCreateAdmin:
         assert user.user_type == UserType.ADMIN
 
     def test_create_taken_username(self, faker, user):
-        """
-        test creating an admin when `username`
-        has been used by another user
-        """
+        """Test creating an admin with `username` that is taken."""
         from contextlib import redirect_stdout
         from io import StringIO
 
@@ -176,10 +172,7 @@ class TestCreateAdmin:
         assert "user with that username already exists" in (buffer.read())
 
     def test_create_taken_email(self, faker, user):
-        """
-        test creating an admin when `email`
-        has been used by another user
-        """
+        """Test creating an admin with `email` that is taken."""
         from contextlib import redirect_stdout
         from io import StringIO
 
@@ -211,10 +204,7 @@ class TestCreateAdmin:
         assert "user with that email already exists" in (buffer.read())
 
     def test_create_taken_username_and_email(self, user, faker):
-        """
-        test creating an admin when `username` and `email`
-        has been used by another user
-        """
+        """Test creating an admin with `username` and `email` that are taken."""
         from contextlib import redirect_stdout
         from io import StringIO
 
@@ -250,11 +240,10 @@ class TestCreateAdmin:
 
 @pytest.mark.usefixtures("app")
 class TestCreateCook:
-    """test `auth create-cook`"""
+    """test `auth create-cook`."""
 
     def test_create_success(self, faker):
-        """test creating a cook"""
-
+        """Test creating a cook."""
         uname = faker.unique.user_name()
         pword = faker.password()
         fname = faker.first_name()
@@ -288,8 +277,10 @@ class TestCreateCook:
 
 
 class TestGetAccessToken:
+    """Test `auth get-access-token`."""
+
     def test_get_existing_token(self, user: User):
-        """test getting an existing token"""
+        """Test getting an existing token."""
         from click.testing import CliRunner
 
         from cookgpt.auth import app
@@ -309,7 +300,7 @@ class TestGetAccessToken:
         assert token.access_token in result.output
 
     def test_get_new_token(self, user: User):
-        """test getting a new token"""
+        """Test getting a new token."""
         from click.testing import CliRunner
 
         from cookgpt.auth import app
@@ -332,7 +323,7 @@ class TestGetAccessToken:
         assert len(user.tokens) == 2  # type: ignore
 
     def test_get_new_token_no_user(self):
-        """test getting a new token for a non-existent user"""
+        """Test getting a new token for a non-existent user."""
         from click.testing import CliRunner
 
         from cookgpt.auth import app

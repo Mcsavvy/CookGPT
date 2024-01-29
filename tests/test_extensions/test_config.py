@@ -1,3 +1,4 @@
+"""Tests for config extension."""
 import os
 
 import pytest
@@ -8,6 +9,7 @@ from cookgpt.ext.config import export_to_env, set_langchain_verbosity
 
 @pytest.fixture(scope="function")
 def config(monkeypatch):
+    """Config fixture."""
     monkeypatch.setenv("FLASK_ENV", "testing")
     config = Dynaconf(
         ENVVAR_PREFIX="FLASK",
@@ -22,12 +24,14 @@ def config(monkeypatch):
 
 
 def test_export_to_env_hook(config: Dynaconf):
+    """Test export to env hook."""
     config.OPENAI_API_KEY = "myapikey"
     export_to_env(config)
     assert os.environ["OPENAI_API_KEY"] == "myapikey"
 
 
 def test_langchain_verbosity_hook(config: Dynaconf):
+    """Test langchain verbosity hook."""
     import langchain
 
     config.LANGCHAIN_VERBOSE = True

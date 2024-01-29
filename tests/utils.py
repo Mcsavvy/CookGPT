@@ -1,4 +1,4 @@
-"""utilities for testing"""
+"""utilities for testing."""
 from contextlib import contextmanager
 from typing import Any
 
@@ -14,7 +14,7 @@ _Missing = object()
 
 @contextmanager
 def mock_config(config, **vars):
-    """update the app's config temporarily"""
+    """Update the app's config temporarily."""
     undefined = object()
     old_config = {}
     for k, v in vars.items():
@@ -31,21 +31,21 @@ def mock_config(config, **vars):
 
 
 class Random:
-    """a namespace for random data"""
+    """a namespace for random data."""
 
     @classmethod
     def first_name(cls):
-        """return a random first name"""
+        """Return a random first name."""
         return fake.first_name()
 
     @classmethod
     def last_name(cls):
-        """return a random last name"""
+        """Return a random last name."""
         return fake.last_name()
 
     @classmethod
     def username(cls):
-        """return a random username"""
+        """Return a random username."""
         username = fake.user_name()
         while len(username) < 5:
             username = fake.user_name()
@@ -53,12 +53,12 @@ class Random:
 
     @classmethod
     def email(cls):
-        """return a random email"""
+        """Return a random email."""
         return fake.email()
 
     @classmethod
     def password(cls):
-        """return a random password"""
+        """Return a random password."""
         return fake.password()
 
     @classmethod
@@ -71,7 +71,7 @@ class Random:
         username=_Missing,
         save=True,
     ):
-        """create a random user"""
+        """Create a random user."""
         from cookgpt.auth.models import User
 
         return User.create(
@@ -96,7 +96,7 @@ class Random:
         password: Any = True,
         username: Any = True,
     ):
-        """return random user data"""
+        """Return random user data."""
         data: "dict[str, str]" = {}
         if first_name is not False:
             data["first_name"] = (
@@ -130,7 +130,7 @@ class Random:
         order=_Missing,
         save=True,
     ):
-        """create a random chat"""
+        """Create a random chat."""
         from random import choice
         from uuid import uuid4
 
@@ -153,8 +153,7 @@ class Random:
 
 
 def extract_cookie(response, name):
-    """
-    Extract's a set cookie from a server response
+    """Extract's a set cookie from a server response.
 
     Args:
         response: a flask response
@@ -171,6 +170,5 @@ def extract_cookie(response, name):
 
 
 def extract_access_token(response):
-    """extract access token from response"""
-
+    """Extract access token from response."""
     return response.headers["Set-Cookie"].split(";")[0].split("=")[1]

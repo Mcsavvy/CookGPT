@@ -1,4 +1,7 @@
-from typing import Callable, cast
+"""Test auth views."""
+
+from collections.abc import Callable
+from typing import cast
 
 from flask import url_for
 from flask.testing import FlaskClient as Client
@@ -9,8 +12,10 @@ from tests.utils import Random
 
 
 class TestLoginView:
+    """Test login logic."""
+
     def test_login_valid_email(self, client: "Client", user: "User"):
-        """Test login with valid email"""
+        """Test login with valid email."""
         data = {"login": user.email, "password": "JohnDoe1234"}
         response = client.post(url_for("auth.login"), json=data)
         json = cast(dict, response.json)
@@ -29,7 +34,7 @@ class TestLoginView:
             assert key in json["auth_info"], f"{key} not in response body"
 
     def test_login_valid_username(self, client, user: "User"):
-        """Test login with valid username"""
+        """Test login with valid username."""
         data = {"login": user.username, "password": "JohnDoe1234"}
         response = client.post(url_for("auth.login"), json=data)
         json = cast(dict, response.json)
@@ -48,7 +53,7 @@ class TestLoginView:
             assert key in json["auth_info"], f"{key} not in response body"
 
     def test_tokens_valid(self, client: "Client", user: "User"):
-        """Test that the access token returned is valid"""
+        """Test that the access token returned is valid."""
         data = {"login": user.email, "password": "JohnDoe1234"}
         response = client.post(url_for("auth.login"), json=data)
         json = cast(dict, response.json)
@@ -63,7 +68,7 @@ class TestLoginView:
         assert token.active is True
 
     def test_login_invalid_login(self, client: "Client"):
-        """Test login with invalid login"""
+        """Test login with invalid login."""
         data = {"login": "invalid", "password": "JohnDoe1234"}
         response = client.post(url_for("auth.login"), json=data)
         json = cast(dict, response.json)
@@ -71,7 +76,7 @@ class TestLoginView:
         assert json["message"] == "User does not exist"
 
     def test_login_invalid_password(self, client: "Client", user: "User"):
-        """Test login with invalid password"""
+        """Test login with invalid password."""
         data = {"login": user.email, "password": "Password1234"}
         response = client.post(url_for("auth.login"), json=data)
         json = cast(dict, response.json)
@@ -80,10 +85,10 @@ class TestLoginView:
 
 
 class TestLogoutView:
-    """Test logout route"""
+    """Test logout route."""
 
     def test_logout(self, client: "Client", user: "User"):
-        """Test logout"""
+        """Test logout."""
         token = user.request_token()
         headers = {"Authorization": f"Bearer {token.access_token}"}
         response = client.post(url_for("auth.logout"), headers=headers)
@@ -95,17 +100,17 @@ class TestLogoutView:
 
 
 class TestSignupView:
-    """Test signup logic"""
+    """Test signup logic."""
 
     def test_signup_valid_data(self, client: "Client"):
-        """Test signup with valid data"""
+        """Test signup with valid data."""
         data = Random.user_data()
         response = client.post(url_for("auth.signup"), json=data)
         assert response.status_code == 201
         assert response.json == {"message": "Successfully signed up"}
 
     def test_signup_firstname_split(self, client: "Client"):
-        """Test signup with firstname split"""
+        """Test signup with firstname split."""
         data = Random.user_data()
         first_name = data["first_name"]
         last_name = data["last_name"]
@@ -121,19 +126,19 @@ class TestSignupView:
         )
 
     def test_signup_missing_data(self, client: "Client"):
-        """Test signup with missing data"""
+        """Test signup with missing data."""
         data = Random.user_data(email=False)
         response = client.post(url_for("auth.signup"), json=data)
         assert response.status_code == 406
 
     def test_signup_invalid_data(self, client: "Client"):
-        """Test signup with invalid data"""
+        """Test signup with invalid data."""
         data = Random.user_data(password="pass")
         response = client.post(url_for("auth.signup"), json=data)
         assert response.status_code == 406
 
     def test_signup_existing_user(self, client: "Client", user: "User"):
-        """Test signup with existing user"""
+        """Test signup with existing user."""
         data = Random.user_data(email=user.email)
         response = client.post(url_for("auth.signup"), json=data)
         assert response.status_code == 422
@@ -146,13 +151,12 @@ class TestSignupView:
 
 
 class TestRefreshView:
-    """Test token refresh view"""
+    """Test token refresh view."""
 
     def test_refresh_access_token(
         self, user: "User", client: "Client", add_jwt_salt: Callable[[], None]
     ):
-        """test refresh access token"""
-
+        """Test refresh access token."""
         token = user.create_token()
         atoken = token.access_token
         rtoken = token.refresh_token

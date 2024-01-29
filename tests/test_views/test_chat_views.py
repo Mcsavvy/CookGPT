@@ -1,3 +1,5 @@
+"""Test the chat views."""
+
 from time import sleep
 from typing import cast
 from uuid import uuid4
@@ -13,7 +15,7 @@ from tests.utils import Random
 
 
 class TestChatsView:
-    """Test the thread view"""
+    """Test the thread view."""
 
     def test_get_all_chats_in_thread(
         self,
@@ -22,7 +24,7 @@ class TestChatsView:
         query: "Chat",
         thread: Thread,
     ):
-        """Test that a user can get all the chats in a thread"""
+        """Test that a user can get all the chats in a thread."""
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.get(
             url_for("chatbot.all_chats", thread_id=thread.id),
@@ -46,7 +48,7 @@ class TestChatsView:
     def test_delete_all_chats_in_thread(
         self, client: "FlaskClient", access_token: str, thread: "Thread"
     ):
-        """Test that a user can delete all chats in a thread"""
+        """Test that a user can delete all chats in a thread."""
         for i in range(2):
             Random.chat(thread_id=thread.id, order=i)
 
@@ -65,12 +67,12 @@ class TestChatsView:
 
 
 class TestChatView:
-    """Test the chat view"""
+    """Test the chat view."""
 
     def test_get_chat(
         self, client: "FlaskClient", access_token: str, query: "Chat"
     ):
-        """test get a chat"""
+        """Test get a chat."""
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.get(
             url_for("chatbot.single_chat", chat_id=query.id), headers=headers
@@ -91,7 +93,7 @@ class TestChatView:
     def test_get_non_existent_chat(
         self, client: "FlaskClient", access_token: str
     ):
-        """test get a chat that does not exist"""
+        """Test get a chat that does not exist."""
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.get(
             url_for("chatbot.single_chat", chat_id=uuid4()), headers=headers
@@ -108,7 +110,7 @@ class TestChatView:
         access_token: str,
         thread: "Thread",
     ):
-        """test delete a chat"""
+        """Test delete a chat."""
         query = Random.chat(thread_id=thread.id, order=0)
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.delete(
@@ -123,7 +125,7 @@ class TestChatView:
     def test_delete_non_existent_chat(
         self, client: "FlaskClient", access_token
     ):
-        """test delete a chat that does not exist"""
+        """Test delete a chat that does not exist."""
         headers = {"Authorization": f"Bearer {access_token}"}
         response = client.delete(
             url_for("chatbot.single_chat", chat_id=uuid4()), headers=headers
@@ -137,7 +139,7 @@ class TestChatView:
     def test_send_query(
         self, client: "FlaskClient", access_token: str, thread: "Thread"
     ):
-        """Send a query to the chatbot"""
+        """Send a query to the chatbot."""
         headers = {"Authorization": f"Bearer {access_token}"}
         data = {"query": "test query", "thread_id": str(thread.id)}
         response = client.post(
@@ -182,7 +184,7 @@ class TestChatView:
     def test_send_query__non_existent_thread(
         self, client: "FlaskClient", auth_header: dict
     ):
-        """Send query to chatbot using a non-existent thread"""
+        """Send query to chatbot using a non-existent thread."""
         data = {"query": "test query", "thread_id": uuid4()}
         response = client.post(
             url_for("chatbot.query", stream=False),
@@ -198,7 +200,7 @@ class TestChatView:
     def test_send_query__no_thread_id(
         self, client: "FlaskClient", auth_header: dict
     ):
-        """Test implicit thread creation"""
+        """Test implicit thread creation."""
         data = {"query": "test query"}
         response = client.post(
             url_for("chatbot.query", stream=False),
@@ -219,7 +221,7 @@ class TestChatView:
         auth_header: dict[str, str],
         thread: "Thread",
     ):
-        """Test sending a query when there are existing chats in the thread"""
+        """Test sending a query when there are existing chats in the thread."""
         data = {"query": "I'm great, you?", "thread_id": str(thread.id)}
         thread.add_query("Hi")
         thread.add_response("How are you?")
@@ -245,7 +247,7 @@ class TestChatView:
         access_token: str,
         thread: "Thread",
     ):
-        """Send a query to the chatbot"""
+        """Send a query to the chatbot."""
         headers = {"Authorization": f"Bearer {access_token}"}
         data = {"query": "test query", "thread_id": str(thread.id)}
         response = client.post(
@@ -294,10 +296,7 @@ class TestChatView:
     def test_send_query_exceeded_max_chat_cost(
         self, client: "FlaskClient", access_token: str, thread: "Thread"
     ):
-        """
-        Test that a user gets dummy response when they
-        exceed max chat cost
-        """
+        """Test for response when user exceeds max chat cost."""
         thread.user.update(max_chat_cost=0)
         headers = {"Authorization": f"Bearer {access_token}"}
         data = {"query": "test query", "thread_id": str(thread.id)}
@@ -334,10 +333,7 @@ class TestChatView:
     def test_send_query_exceeded_max_chat_cost__streaming(
         self, client: "FlaskClient", access_token: str, thread: "Thread"
     ):
-        """
-        Test that a user gets dummy response when they
-        exceed max chat cost while streaming
-        """
+        """Test for response when user exceeds max chat cost."""
         thread.user.update(max_chat_cost=0)
         headers = {"Authorization": f"Bearer {access_token}"}
         data = {"query": "test query", "thread_id": str(thread.id)}
@@ -373,10 +369,7 @@ class TestChatView:
     def test_read_stream(
         self, access_token: str, thread: "Thread", client: "FlaskClient"
     ):
-        """
-        Test that a user can read a chat as a stream
-        when the chat was sent as a stream
-        """
+        """Test that a user can read a stream."""
         query = Random.chat(
             thread_id=thread.id, order=0, chat_type=MessageType.QUERY
         )
@@ -395,10 +388,7 @@ class TestChatView:
     def test_read_stream__non_existent_chat(
         self, access_token: str, client: "FlaskClient"
     ):
-        """
-        Test that a user gets 404 when they try to read
-        a stream that does not exist
-        """
+        """Test that a user can't read non-existing stream."""
         from uuid import uuid4
 
         response = client.get(
@@ -415,11 +405,7 @@ class TestChatView:
         client: "FlaskClient",
         celery_worker,
     ):
-        """
-        Test that a when a user sends a query in streaming mode,
-        they can read the response as it comes in
-        """
-
+        """Test that a user can read a streaming chat."""
         from cookgpt.chatbot.utils import get_stream_name
 
         client.post(
@@ -451,4 +437,4 @@ class TestChatView:
 
 
 class TestChatStreaming:
-    """Test the chat streaming view"""
+    """Test the chat streaming view."""

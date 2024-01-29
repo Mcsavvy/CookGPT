@@ -1,3 +1,5 @@
+"""Tests for Thread model."""
+
 from typing import cast
 from uuid import uuid4
 
@@ -9,21 +11,24 @@ from tests.utils import Random
 
 
 class TestThreadModel:
-    def test_create_thread(self, user):
-        user_id = user.id
+    """Test Thread model."""
+
+    def test_create_thread(self, user: User):
+        """Test creating a thread."""
         thread = Thread.create(
             title="Test Thread",
-            user_id=user_id,
+            user_id=user.id,
             closed=False,
             commit=True,
         )
 
         assert thread.id is not None
         assert thread.title == "Test Thread"
-        assert thread.user_id == user_id
+        assert thread.user_id == user.id
         assert thread.closed is False
 
     def test_add_chat(self, thread: Thread):
+        """Test add_chat method."""
         thread2 = Random.user().create_thread(
             title="Test Thread 2", closed=False
         )
@@ -54,6 +59,7 @@ class TestThreadModel:
         exc_info.match("previous_chat not in same thread")
 
     def test_add_query(self, thread: Thread):
+        """Test add_query method."""
         chat = thread.add_query(
             content="What's your name?",
             cost=5,
@@ -69,6 +75,7 @@ class TestThreadModel:
         assert chat.cost == 5
 
     def test_add_response(self, thread: Thread):
+        """Test add_response method."""
         query = thread.add_query(
             content="What's your name?",
             cost=5,
@@ -90,10 +97,12 @@ class TestThreadModel:
         assert response.order == 1
 
     def test_close_thread(self, thread: Thread):
+        """Test close_thread method."""
         thread.close()
         assert thread.closed is True
 
     def test_chat_threading(self, thread: Thread, faker):
+        """Test ordering of chats."""
         for i in range(10):
             thread.add_query(
                 content=faker.sentence(),
@@ -113,6 +122,7 @@ class TestThreadModel:
             assert chats[i].next_chat == (chats[i + 1] if i < 9 else None)
 
     def test_clear_thread(self, thread: Thread, faker):
+        """Test clear method."""
         for i in range(10):
             thread.add_query(
                 content=faker.sentence(),
@@ -125,7 +135,10 @@ class TestThreadModel:
 
 
 class TestThreadMixin:
+    """Test ThreadMixin."""
+
     def test_create_thread(self, user: "User"):
+        """Test create_thread method."""
         thread = user.create_thread(
             title="Test Thread",
             closed=False,
@@ -137,6 +150,7 @@ class TestThreadMixin:
         assert thread.closed is False
 
     def test_get_threads(self, user: "User"):
+        """Test threads property."""
         thread1 = user.create_thread(
             title="Test Thread 1",
             closed=False,
@@ -153,6 +167,7 @@ class TestThreadMixin:
         assert thread2 in threads
 
     def test_add_query_message(self, user: "User"):
+        """Test add_message method."""
         thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_message(
             content="What's your name?",
@@ -172,6 +187,7 @@ class TestThreadMixin:
         assert query.cost == 10
 
     def test_add_response_message_using_previous_chat(self, user: "User"):
+        """Test add_message method."""
         thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_message(
             content="What's your name?",
@@ -199,6 +215,7 @@ class TestThreadMixin:
         assert response.previous_chat_id == query.id
 
     def test_add_query_message_using_thread_id(self, user: "User"):
+        """Test add_message method."""
         thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_message(
             content="What's your name?",
@@ -214,6 +231,7 @@ class TestThreadMixin:
         assert query.order == 0
 
     def test_add_message_to_non_existent_thread(self, user: "User"):
+        """Test add_message method."""
         with pytest.raises(ValueError) as exc_info:
             user.add_message(
                 content="My name is Bot.",
@@ -225,6 +243,7 @@ class TestThreadMixin:
         exc_info.match("thread_id is invalid")
 
     def test_add_message_to_another_users_thread(self, user: "User"):
+        """Test add_message method."""
         user2 = Random.user()
         thread2 = user2.create_thread(title="Test Thread 2", closed=False)
         with pytest.raises(ValueError) as exc_info:
@@ -238,7 +257,7 @@ class TestThreadMixin:
         exc_info.match("thread not owned by user")
 
     def test_add_message__no_thread_id_or_previous_chat(self, user: "User"):
-        """test add_message method with no thread_id or previous_chat"""
+        """Test add_message method with no thread_id or previous_chat."""
         with pytest.raises(RuntimeError) as exc_info:
             user.add_message(
                 content="My name is Bot.",
@@ -249,7 +268,7 @@ class TestThreadMixin:
         exc_info.match("thread_id or previous_chat must be given")
 
     def test_add_query(self, user: "User"):
-        """test add_query method"""
+        """Test add_query method."""
         thread = user.create_thread(title="Test Thread", closed=False)
         query = user.add_query(
             content="What's your name?",
@@ -267,7 +286,7 @@ class TestThreadMixin:
         assert query.cost == 5
 
     def test_add_response(self, user: "User"):
-        """test add_response method"""
+        """Test add_response method."""
         thread = user.create_thread(
             title="Test Thread",
             closed=False,
@@ -297,7 +316,7 @@ class TestThreadMixin:
         assert response.previous_chat_id == query.id
 
     def test_total_chat_cost(self, user: "User"):
-        """test total_chat_cost property"""
+        """Test total_chat_cost property."""
         for t in range(5):
             thread = user.create_thread(
                 title=f"Test Thread {t}",
@@ -309,8 +328,7 @@ class TestThreadMixin:
         assert user.total_chat_cost == 125
 
     def test_clear_chats(self, user: "User"):
-        """test clear_chats method"""
-
+        """Test clear_chats method."""
         for t in range(5):
             thread = user.create_thread(
                 title=f"Test Thread {t}",

@@ -1,4 +1,4 @@
-"""test validators"""
+"""test validators."""
 import pytest
 
 from cookgpt.auth.data.validators import (
@@ -20,16 +20,16 @@ login_validator = Login()
 
 
 class TestUsernameValidator:
-    """Test username validator"""
+    """Test username validator."""
 
     def test_valid_username(self):
-        """Test valid usernames"""
+        """Test valid usernames."""
         valid_inputs = ["johndoe", "john_doe", "john1", "john-doe"]
         for username in valid_inputs:
             assert username_validator(username) == username
 
     def test_invalid_username(self):
-        """test different invalid usernames"""
+        """Test different invalid usernames."""
         invalid_inputs = [
             ["_john", Username.START_ERR],
             ["j", Username.LENGTH_ERR],
@@ -44,10 +44,10 @@ class TestUsernameValidator:
 
 
 class TestPasswordValidator:
-    """Test password validator"""
+    """Test password validator."""
 
     def test_password_validator_too_short(self):
-        """Test a password that is too short"""
+        """Test a password that is too short."""
         password = "passwrd"
         with pytest.raises(ValidationError) as excinfo:
             password_validator(password)
@@ -55,74 +55,73 @@ class TestPasswordValidator:
 
     @pytest.mark.skip(reason="Disabled validation for now")
     def test_invalid_password(self):
-        """Test a password that doesn't contain uppercase"""
-        P = Password
+        """Test a password that doesn't contain uppercase."""
         invalid_inputs = [
             [
                 "password",
                 (  # only lowercase
-                    P.UPPERCASE_ERR,
-                    P.DIGIT_ERR,
-                    P.PUNCTUATION_ERR,
+                    Password.UPPERCASE_ERR,
+                    Password.DIGIT_ERR,
+                    Password.PUNCTUATION_ERR,
                 ),
             ],
             [
                 "password123",
                 (  # only lowercase and digits
-                    P.UPPERCASE_ERR,
-                    P.PUNCTUATION_ERR,
+                    Password.UPPERCASE_ERR,
+                    Password.PUNCTUATION_ERR,
                 ),
             ],
             [
                 "password!",
                 (  # only lowercase and punctuation
-                    P.UPPERCASE_ERR,
-                    P.DIGIT_ERR,
+                    Password.UPPERCASE_ERR,
+                    Password.DIGIT_ERR,
                 ),
             ],
             [
                 "PASSWORD",
                 (  # only uppercase
-                    P.LOWERCASE_ERR,
-                    P.DIGIT_ERR,
-                    P.PUNCTUATION_ERR,
+                    Password.LOWERCASE_ERR,
+                    Password.DIGIT_ERR,
+                    Password.PUNCTUATION_ERR,
                 ),
             ],
             [
                 "PASSWORD123",
                 (  # only uppercase and digits
-                    P.LOWERCASE_ERR,
-                    P.PUNCTUATION_ERR,
+                    Password.LOWERCASE_ERR,
+                    Password.PUNCTUATION_ERR,
                 ),
             ],
             [
                 "PASSWORD!",
                 (  # only uppercase and punctuation
-                    P.LOWERCASE_ERR,
-                    P.DIGIT_ERR,
+                    Password.LOWERCASE_ERR,
+                    Password.DIGIT_ERR,
                 ),
             ],
             [
                 "12345678",
                 (  # only digits
-                    P.UPPERCASE_ERR,
-                    P.LOWERCASE_ERR,
-                    P.PUNCTUATION_ERR,
+                    Password.UPPERCASE_ERR,
+                    Password.LOWERCASE_ERR,
+                    Password.PUNCTUATION_ERR,
                 ),
             ],
             [
                 "12345678!",
                 (  # only digits and punctuation
-                    P.UPPERCASE_ERR,
-                    P.LOWERCASE_ERR,
+                    Password.UPPERCASE_ERR,
+                    Password.LOWERCASE_ERR,
                 ),
             ],
             [
                 "!@#$%^&*()",
                 (  # only punctuation
-                    P.UPPERCASE_ERR,
-                    P.LOWERCASE_ERR,
-                    P.DIGIT_ERR,
+                    Password.UPPERCASE_ERR,
+                    Password.LOWERCASE_ERR,
+                    Password.DIGIT_ERR,
                 ),
             ],
         ]
@@ -134,8 +133,7 @@ class TestPasswordValidator:
                 assert error in excinfo.value.messages
 
     def test_valid_password(self):
-        """Test that a password is valid"""
-
+        """Test that a password is valid."""
         valid_passwords = [
             "Password123!",  # lowercase, uppercase, digits, punctuation
             "Password!",  # lowercase, uppercase, punctuation
@@ -149,15 +147,15 @@ class TestPasswordValidator:
 
 
 class TestEmailValidator:
-    """Test email validator"""
+    """Test email validator."""
 
     def test_valid_email(self):
-        """Test a valid email"""
+        """Test a valid email."""
         email = "john.doe@example.com"
         assert email_validator(email) is email
 
     def test_invalid_email(self):
-        """Test an invalid email"""
+        """Test an invalid email."""
         email = "johndoe@example"
         with pytest.raises(ValidationError) as excinfo:
             email_validator(email)
@@ -165,10 +163,10 @@ class TestEmailValidator:
 
 
 class TestFirstnameValidator:
-    """Test firstname validator"""
+    """Test firstname validator."""
 
     def test_invalid_first_names(self):
-        """Test invalid first names"""
+        """Test invalid first names."""
         invalid_inputs = [
             ["John_", FirstName.CHARSET_ERR],
             ["John1", FirstName.CHARSET_ERR],
@@ -181,18 +179,17 @@ class TestFirstnameValidator:
             assert expected_error in excinfo.value.messages
 
     def test_valid_first_names(self, faker):
-        """Test valid first names"""
-
+        """Test valid first names."""
         for _ in range(10):
             fname = faker.first_name()
             assert firstname_validator(fname) == fname
 
 
 class TestLastnameValidator:
-    """Test firstname validator"""
+    """Test firstname validator."""
 
     def test_invalid_lastnames(self):
-        """Test invalid first names"""
+        """Test invalid first names."""
         invalid_inputs = [
             ["John_", FirstName.CHARSET_ERR],
             ["John1", FirstName.CHARSET_ERR],
@@ -205,26 +202,27 @@ class TestLastnameValidator:
             assert expected_error in excinfo.value.messages
 
     def test_valid_lastnames(self, faker):
-        """Test valid first names"""
-
+        """Test valid first names."""
         for _ in range(10):
             lname = faker.last_name()
             assert firstname_validator(lname) == lname
 
 
 class TestLoginValidator:
+    """Test login validator."""
+
     def test_login_validator_valid_email(self):
-        """Test a valid email login"""
+        """Test a valid email login."""
         email = "john.doe@example.com"
         assert login_validator(email) == email
 
     def test_login_validator_valid_username(self):
-        """Test a valid username login"""
+        """Test a valid username login."""
         username = "johndoe"
         assert login_validator(username) == username
 
     def test_login_validator_invalid(self):
-        """Test an invalid login"""
+        """Test an invalid login."""
         login = "johndoe@example"
         with pytest.raises(ValidationError) as excinfo:
             login_validator(login)

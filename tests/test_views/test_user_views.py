@@ -1,3 +1,5 @@
+"""Test user views."""
+
 from typing import Any, cast
 
 import pytest
@@ -10,12 +12,16 @@ from tests.utils import Random
 
 
 def get_headers(user: User):
+    """Get headers for user."""
     return {"Authorization": f"Bearer {user.request_token().access_token}"}
 
 
 @pytest.mark.usefixtures("app")
 class TestUserView:
+    """Test user views."""
+
     def test_get_user(self, client: FlaskClient, random_user: User):
+        """Test getting user."""
         headers = get_headers(random_user)
         response = client.get(url_for("auth.user"), headers=headers)
         assert response.status_code == 200
@@ -35,6 +41,7 @@ class TestUserView:
     def test_patch_user(
         self, client: FlaskClient, random_user: User, faker: Faker
     ):
+        """Test updating user."""
         headers = get_headers(random_user)
         new_email = faker.email()
         old_profile_picture = random_user.profile_picture
@@ -77,6 +84,7 @@ class TestUserView:
     def test_update_user__existing_email(
         self, client: FlaskClient, random_user: User, faker: Faker
     ):
+        """Test updating user with existing email."""
         # when email is already taken by another user
         email = Random.user().email
         headers = get_headers(random_user)
@@ -101,6 +109,7 @@ class TestUserView:
     def test_update_user__existing_username(
         self, client: FlaskClient, random_user: User, faker: Faker
     ):
+        """Test updating user with existing username."""
         # when username is already taken by another user
         username = Random.user().username
         headers = get_headers(random_user)
@@ -123,6 +132,7 @@ class TestUserView:
         assert response.status_code == 200
 
     def test_delete_user(self, client: FlaskClient, random_user: User):
+        """Test deleting user."""
         headers = get_headers(random_user)
         response = client.delete(url_for("auth.user"), headers=headers)
         assert response.status_code == 422

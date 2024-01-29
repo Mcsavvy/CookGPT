@@ -1,5 +1,8 @@
+"""Pytest configuration file."""
+
+from collections.abc import Generator
 from random import randint
-from typing import TYPE_CHECKING, Generator
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -19,7 +22,7 @@ pytest_plugins = ("celery.contrib.pytest",)
 
 @pytest.fixture(scope="session")
 def app() -> Generator["App", None, None]:
-    """An instance of the Flask application"""
+    """An instance of the Flask application."""
     old_env = config.current_env
     config.setenv("testing")
     app = create_app()
@@ -34,7 +37,7 @@ def app() -> Generator["App", None, None]:
 
 @pytest.fixture(scope="module", autouse=True)
 def database(app: "App"):
-    """The database"""
+    """The database."""
     db.create_all()
     yield db.session
     db.session.rollback()
@@ -43,7 +46,7 @@ def database(app: "App"):
 
 @pytest.fixture(scope="function")
 def user(app: "App") -> Generator[User, None, None]:
-    """An instance of a User"""
+    """An instance of a User."""
     user = User.create(
         first_name="John",
         last_name="Doe",
@@ -58,7 +61,7 @@ def user(app: "App") -> Generator[User, None, None]:
 
 @pytest.fixture(scope="function")
 def random_user(app: "App", database):
-    """A random user"""
+    """A random user."""
     user = Random.user()
     yield user
     user.delete()
@@ -66,13 +69,13 @@ def random_user(app: "App", database):
 
 @pytest.fixture(scope="session")
 def faker_seed():
-    """A seed for the faker instance"""
+    """A seed for the faker instance."""
     return randint(1000, 99999)
 
 
 @pytest.fixture(scope="session")
 def faker():
-    """An instance of the Faker class"""
+    """An instance of the Faker class."""
     from faker import Faker
 
     return Faker()
@@ -80,13 +83,13 @@ def faker():
 
 @pytest.fixture(scope="function")
 def access_token(user: User) -> str:
-    """A valid access token for the user"""
+    """A valid access token for the user."""
     return user.create_token().access_token
 
 
 @pytest.fixture(scope="function")
 def thread(user: User) -> Generator[Thread, None, None]:
-    """An instance of a Thread"""
+    """An instance of a Thread."""
     thread = Thread.create(
         user_id=user.id,
         title="Test Thread",
@@ -98,7 +101,7 @@ def thread(user: User) -> Generator[Thread, None, None]:
 
 @pytest.fixture(scope="function")
 def response(thread: Thread):
-    """An AI response"""
+    """An AI response."""
     response = Chat.create(
         content="Hello, how are you doing today?",
         cost=10,
@@ -113,7 +116,7 @@ def response(thread: Thread):
 
 @pytest.fixture(scope="function")
 def query(thread: Thread):
-    """A user query"""
+    """A user query."""
     query = Chat.create(
         content="Hi!",
         cost=5,
@@ -128,7 +131,7 @@ def query(thread: Thread):
 
 @pytest.fixture(scope="function")
 def random_chat(thread: Thread):
-    """A random chat"""
+    """A random chat."""
     chat = Random.chat(thread_id=thread.id)
     yield chat
     chat.delete()
@@ -136,6 +139,7 @@ def random_chat(thread: Thread):
 
 @pytest.fixture(scope="session")
 def celery_worker_parameters():
+    """Celery worker parameters."""
     return {
         "perform_ping_check": False,
         "loglevel": "INFO",
@@ -144,7 +148,7 @@ def celery_worker_parameters():
 
 @pytest.fixture(scope="session")
 def celery_app(app: "App"):
-    """An instance of the Celery application"""
+    """An instance of the Celery application."""
     from redisflow import celeryapp
 
     celeryapp.init_app(app)
@@ -163,9 +167,7 @@ def celery_worker_pool():
 
 @pytest.fixture(scope="function")
 def add_jwt_salt():
-    """
-    Add salt to jwt claims
-    """
+    """Add salt to jwt claims."""
     from random import choices
     from string import ascii_letters, digits
 
@@ -175,8 +177,7 @@ def add_jwt_salt():
     charset = ascii_letters + digits
 
     def salt_adder():
-        """Helper function that adds salt to jwt claims"""
-
+        """Helper function that adds salt to jwt claims."""
         salt = "".join(choices(charset, k=5))
 
         def add_salt_to_claims(user_data):
@@ -193,5 +194,5 @@ def add_jwt_salt():
 
 @pytest.fixture(scope="function")
 def auth_header(access_token: str) -> dict[str, str]:
-    """An authorization header"""
+    """An authorization header."""
     return {"Authorization": f"Bearer {access_token}"}

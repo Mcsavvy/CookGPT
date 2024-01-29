@@ -1,3 +1,5 @@
+"""Tests for thread views."""
+
 from typing import cast
 from uuid import uuid4
 
@@ -13,9 +15,12 @@ from tests.utils import Random
 
 @pytest.mark.usefixtures("user")
 class TestThreadView:
+    """Test thread views."""
+
     def test_get_thread(
         self, client: FlaskClient, user: "User", auth_header: dict[str, str]
     ):
+        """Test getting a thread."""
         thread = user.create_thread(title="Test Thread")
         for i in range(2):
             Random.chat(thread_id=thread.id, order=i)
@@ -35,6 +40,7 @@ class TestThreadView:
     def test_get_thread_not_found(
         self, client: FlaskClient, auth_header: dict
     ):
+        """Test getting a thread that doesn't exist."""
         response = client.get(
             url_for("chatbot.single_thread", thread_id=uuid4()),
             headers=auth_header,
@@ -42,6 +48,7 @@ class TestThreadView:
         assert response.status_code == 404
 
     def test_create_thread(self, client: FlaskClient, auth_header: dict):
+        """Test creating a thread."""
         response = client.post(
             url_for("chatbot.create_thread"),
             json={"title": "New Thread"},
@@ -62,6 +69,7 @@ class TestThreadView:
     def test_update_thread(
         self, client: FlaskClient, user: "User", auth_header: dict
     ):
+        """Test updating a thread."""
         thread = user.create_thread(title="Test Thread")
         response = client.patch(
             url_for("chatbot.single_thread", thread_id=thread.id),
@@ -81,6 +89,7 @@ class TestThreadView:
     def test_delete_thread(
         self, client: FlaskClient, user: "User", auth_header: dict
     ):
+        """Test deleting a thread."""
         thread = user.create_thread(title="Test Thread")
         for i in range(3):
             Random.chat(thread_id=thread.id, order=i)
@@ -95,10 +104,12 @@ class TestThreadView:
 
 @pytest.mark.usefixtures("user")
 class TestThreadsView:
+    """Test threads views."""
+
     def test_get_threads(
         self, client: FlaskClient, user: User, auth_header: dict
     ):
-        """Test getting all threads"""
+        """Test getting all threads."""
         # delete all threads
         response = client.get(
             url_for("chatbot.all_threads"), headers=auth_header
@@ -122,8 +133,7 @@ class TestThreadsView:
     def test_delete_threads(
         self, client: FlaskClient, user: User, auth_header: dict
     ):
-        """Test deleting all threads"""
-
+        """Test deleting all threads."""
         user.create_thread(title="Test Thread 1")
         user.create_thread(title="Test Thread 2")
         response = client.delete(
