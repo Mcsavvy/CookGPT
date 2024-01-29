@@ -65,7 +65,11 @@ def init_app(app: "App"):
     cache.init_app(
         app,
         config={
-            "CACHE_TYPE": "flask_caching.backends.RedisCache",
+            "CACHE_TYPE": (
+                "flask_caching.backends.RedisCache"
+                if app.config.USE_CACHE
+                else "flask_caching.backends.NullCache"
+            ),
             "CACHE_REDIS_URL": app.config["REDIS_URL"],
             "CACHE_DEFAULT_TIMEOUT": app.config["CACHE_DEFAULT_TIMEOUT"],
         },
