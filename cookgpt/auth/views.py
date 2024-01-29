@@ -1,4 +1,6 @@
-from typing import Any, Optional, cast
+"""Views for authentication."""
+
+from typing import Any, cast
 from uuid import UUID
 
 from apiflask.views import MethodView
@@ -45,7 +47,7 @@ def login(json_data: dict) -> Any:
 
     login: str = json_data["login"]
     password: str = json_data["password"]
-    user: Optional[User]
+    user: User | None
 
     logging.info("Attempting to log in user: %s", login)
     if "@" in login:
@@ -163,7 +165,7 @@ def refresh() -> Any:
 
 
 class UserView(MethodView):
-    """User view"""
+    """User view."""
 
     decorators = [auth_required()]
 
@@ -174,7 +176,7 @@ class UserView(MethodView):
     )
     @app.doc(tags=["user"], description=docs.USER_INFO)
     def get(self):
-        """Get user's information"""
+        """Get user's information."""
         user = get_current_user()
         user.user_type = user.type
         return user
@@ -193,7 +195,7 @@ class UserView(MethodView):
     )
     @app.doc(tags=["user"], description=docs.USER_UPDATE)
     def patch(self, json_data):
-        """Update user's information"""
+        """Update user's information."""
         from cookgpt.auth.models import User
 
         user: User = get_current_user()  # type: ignore
@@ -218,7 +220,7 @@ class UserView(MethodView):
     )
     @app.doc(tags=["user"], description=docs.USER_DELETE)
     def delete(self):
-        """Delete a user"""
+        """Delete a user."""
         abort(422, "Cannot delete user")
 
 

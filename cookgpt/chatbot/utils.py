@@ -1,6 +1,9 @@
+"""Chatbot utilities."""
+
+from collections.abc import Sequence
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Literal, Optional, Sequence, cast
+from typing import TYPE_CHECKING, Literal, cast
 from uuid import UUID, uuid4
 
 import tiktoken
@@ -23,6 +26,40 @@ if TYPE_CHECKING:
 encoding = tiktoken.get_encoding("cl100k_base")
 
 
+def _get_msg_cost_from_cache(id: str) -> int:
+    """Get message cost from cache."""
+    cache_key = f"chat:{id}:cost"
+    if cache.has(cache_key):
+        logging.debug("Using cached message cost for chat %r", id[:6])
+        return cast(int, cache.get(cache_key))
+    return 0
+
+
+def _set_msg_cost_in_cache(id: str, cost: int):
+    """Set message cost in cache."""
+    cache_key = f"chat:{id}:cost"
+    logging.debug("Caching cost for message %r", id[:6])
+    cache.set(cache_key, cost, timeout=0)
+
+
+def _get_system_msg_cost_from_cache(user: "User") -> int:
+    """Get system message cost from cache."""
+    cache_key = f"system_msg:{user.uid}:cost"
+    if cache.has(cache_key):
+        logging.debug(
+            "Using cached system message cost for user %r", user.name
+        )
+        return cast(int, cache.get(cache_key))
+    return 0
+
+
+def _set_system_msg_cost_in_cache(user: "User", cost: int):
+    """Set system message cost in cache."""
+    cache_key = f"system_msg:{user.uid}:cost"
+    logging.debug("Caching system message cost for user %r", user.name)
+    cache.set(cache_key, cost, timeout=0)
+
+
 def num_tokens_from_messages(
     messages: Sequence[dict], model="gpt-3.5-turbo-0613"
 ):
@@ -30,33 +67,26 @@ def num_tokens_from_messages(
     from cookgpt.auth.models import User
 
     num_tokens = 0
+    user = getvar("user", _default=None, _type=User)
     for message in messages:
         role = cast(Literal["user", "assistant", "system"], message["role"])
         cost = 4
 
         # check if message is cached
-        if "id" in message:
-            id = cast(str, message["id"])
-            cache_key = f"chat:{id}:cost"
-            if cache.has(cache_key):
-                logging.debug(
-                    "Using cached %s message cost for chat %r", role, id[:6]
-                )
-                num_tokens += cast(int, cache.get(cache_key))
-                continue  # pragma: no cover
+        if "id" in message and (
+            cost := _get_msg_cost_from_cache(message["id"])
+        ):
+            num_tokens += cost
+            continue  # pragma: no cover
 
         # check if system message is cached
-        elif role == "system" and (
-            user := getvar("user", _default=None, _type=User)
+        elif (
+            role == "system"
+            and user
+            and (cost := _get_system_msg_cost_from_cache(user))
         ):
-            id = user.pk
-            cache_key = f"system_msg:{id}:cost"
-            if cache.has(cache_key):
-                logging.debug(
-                    "Using cached system message cost for %r", user.name
-                )
-                num_tokens += cast(int, cache.get(cache_key))
-                continue
+            num_tokens += cost
+            continue
         else:  # pragma: no cover
             if role == "system":
                 logging.warning("Working outside of user context. ")
@@ -69,30 +99,21 @@ def num_tokens_from_messages(
         logging.debug("Computed cost for %s message: %s", role, cost)
         # cache the cost
         if "id" in message:
-            id = cast(str, message["id"])
-            cache_key = f"chat:{id}:cost"
-            logging.debug("Caching cost for %s message %r", role, id[:6])
-            cache.set(cache_key, cost, timeout=0)
+            _set_msg_cost_in_cache(message["id"], cost)
         # cache the system message cost
-        elif role == "system" and (
-            user := getvar("user", _default=None, _type=User)
-        ):
-            id = user.pk
-            cache_key = f"system_msg:{id}:cost"
-            logging.debug("Caching system message cost for %r", user.name)
-            cache.set(cache_key, cost, timeout=0)
+        if user and role == "system":
+            _set_system_msg_cost_in_cache(user, cost)
         else:  # pragma: no cover
             logging.warning(
                 "Unable to cache cost for %s message: %r", role, message
             )
-
         num_tokens += cost
     num_tokens += 2  # every reply is primed with <im_start>assistant
     return num_tokens
 
 
 def convert_message_to_dict(message: "BaseMessage") -> dict:
-    """convert message to dict"""
+    """Convert message to dict."""
     converted = openai.convert_message_to_dict(message)
     if "id" in message.additional_kwargs:
         converted["id"] = message.additional_kwargs["id"]
@@ -105,16 +126,15 @@ def get_stream_name(user: "User", chat: "Chat") -> str:
 
 
 def get_chat_callback():  # pragma: no cover
-    """returns the callbacks for the chain"""
+    """Returns the callbacks for the chain."""
     from cookgpt.chatbot.callback import ChatCallbackHandler
 
     return ChatCallbackHandler()
 
 
 @contextmanager
-def use_chat_callback(cb: "Optional[ChatCallbackHandler]" = None):
-    """use chat callback"""
-
+def use_chat_callback(cb: "ChatCallbackHandler | None" = None):
+    """Use chat callback."""
     cb = cb or get_chat_callback()
     try:
         cb.register()
@@ -124,7 +144,7 @@ def use_chat_callback(cb: "Optional[ChatCallbackHandler]" = None):
 
 
 def get_thread(thread_id: str | UUID, required=True):
-    """Get a thread using it's ID"""
+    """Get a thread using it's ID."""
     if isinstance(thread_id, str):  # pragma: no cover
         thread_id = UUID(thread_id)
     thread = db.session.get(Thread, thread_id)
@@ -135,17 +155,16 @@ def get_thread(thread_id: str | UUID, required=True):
 
 def make_dummy_chat(
     response: str,
-    id: Optional[UUID] = None,
-    previous_chat_id: Optional[UUID] = None,
-    next_chat_id: Optional[UUID] = None,
-    thread_id: Optional[UUID] = None,
-    sent_time: Optional[datetime] = None,
+    id: UUID | None = None,
+    previous_chat_id: UUID | None = None,
+    next_chat_id: UUID | None = None,
+    thread_id: UUID | None = None,
+    sent_time: datetime | None = None,
     chat_type: MessageType = MessageType.RESPONSE,
     cost: int = 0,
     streaming: bool = False,
 ):
-    """make fake response"""
-
+    """Make fake response."""
     return {
         "chat": {
             "id": id or uuid4(),

@@ -1,12 +1,15 @@
+"""Config extension."""
+
 from typing import Any
 
 from dynaconf import Dynaconf, Validator
 
 
 def to_timedelta(value: Any):
+    """Convert value to timedelta."""
     from datetime import timedelta
 
-    if isinstance(value, (float, int)):  # pragma: no cover
+    if isinstance(value, float | int):  # pragma: no cover
         value = timedelta(seconds=value)
     elif isinstance(value, dict):  # pragma: no cover
         value = timedelta(**value)
@@ -39,7 +42,7 @@ SENTRY = Validator(
 
 
 def export_to_env(config: Dynaconf):
-    """export specific config vars to the environment"""
+    """Export specific config vars to the environment."""
     import os
 
     if "OPENAI_API_KEY" in config:
@@ -47,17 +50,17 @@ def export_to_env(config: Dynaconf):
 
 
 def set_langchain_verbosity(config: Dynaconf):
-    """configure langchain verbosity"""
+    """Configure langchain verbosity."""
     import langchain
 
     langchain.verbose = config.LANGCHAIN_VERBOSE
 
 
 class Settings(Dynaconf):
-    """Custom Dynaconf settings class"""
+    """Custom Dynaconf settings class."""
 
     def reload(self, env=None, silent=True):
-        """reload setings and run validators"""
+        """Reload setings and run validators."""
         self._wrapped.reload(env=env, silent=silent)
         self.validators.validate(
             only=self._validate_only,
@@ -66,7 +69,7 @@ class Settings(Dynaconf):
         )
 
     def setenv(self, env=None, clean=True, silent=True, filename=None):
-        """set new environment and run validators"""
+        """Set new environment and run validators."""
         self._wrapped.setenv(
             env=env, clean=clean, silent=silent, filename=filename
         )
@@ -77,7 +80,7 @@ class Settings(Dynaconf):
         )
 
     def init_app(self, app):
-        """initialize the app"""
+        """Initialize the app."""
         self.validators.validate()
 
 

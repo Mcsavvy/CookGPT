@@ -1,5 +1,7 @@
-"""Chatbot chat views"""
-from typing import TYPE_CHECKING, Any
+"""Chatbot chat views."""
+from collections.abc import Generator
+from time import sleep
+from typing import TYPE_CHECKING, Any, TypeAlias
 from uuid import UUID
 
 from apiflask.views import MethodView
@@ -27,8 +29,12 @@ if TYPE_CHECKING:
     from cookgpt.auth.models import User
 
 
+StreamEntryT = dict[bytes, bytes | int]
+StreamOutputT: TypeAlias = list[tuple[bytes, list[tuple[bytes, StreamEntryT]]]]
+
+
 class ChatsView(MethodView):
-    """chats endpoints"""
+    """chats endpoints."""
 
     decorators = [auth_required()]
 
@@ -78,7 +84,7 @@ class ChatsView(MethodView):
 
 
 class ChatView(MethodView):
-    """Chat endpoints"""
+    """Chat endpoints."""
 
     decorators = [auth_required()]
 
@@ -183,6 +189,7 @@ class ChatView(MethodView):
         q = thread.add_query("")
         r = thread.add_response("", previous_chat=q)
         stream = get_stream_name(user, r)
+        app.redis.set(f"{stream}:status", "PENDING")
         if stream_response:
             # Run the task in the background
             logging.info("Sending query to AI in background")
@@ -204,6 +211,65 @@ class ChatView(MethodView):
         }, 201
 
 
+def clear_stream(stream: str):
+    """Clear a stream."""
+    from cookgpt.globals import current_app as app
+
+    logging.debug("Clearing stream %s", stream)
+    app.redis.xtrim(stream, 0)
+
+
+def stream_existing_chat(chat: Chat) -> Generator[str, Any, None]:
+    """Stream an existing chat.
+
+    Args:
+        chat (Chat): the chat to stream
+    Yields:
+        str: a character from the chat
+    """
+    logging.debug("streaming existing chat %s", chat.id)
+    yield from iter(chat.content)
+
+
+def stream_from_redis(
+    stream: str, entry_id: bytes = b"0-0"
+) -> Generator[bytes, Any, None]:
+    """Reads outputs from the AI via redis stream.
+
+    Args:
+        stream (str): the name of the redis stream
+        entry_id (bytes): the entry to start reading from
+
+    Yields:
+        bytes: a token from the AI
+    """
+    from cookgpt.globals import current_app as app
+
+    logging.debug("Streaming %r from %s", stream, entry_id)
+    if not app.redis.exists(stream):
+        # stream does not exist
+        logging.debug(f"Stream {stream:r} does not exist")
+        abort(404, "Stream does not exist")
+    while 1:
+        # check if there are any new entries in the stream
+        entries: StreamOutputT = app.redis.xread(  # type: ignore[assignment]
+            {stream: entry_id}
+        )
+        if entries:
+            # there are new entries in the stream
+            logging.debug("New entries in stream")
+            _, data = entries[0]
+            for entry_id, entry in data:
+                yield entry[b"token"]  # type: ignore[misc]
+        if app.redis.get(f"{stream}:status") in ("COMPLETED", b"COMPLETED"):
+            # task is complete, stop streaming
+            logging.debug("Task is complete")
+            # clear the stream
+            clear_stream(stream)
+            break
+        sleep(0.1)
+
+
 @app.get("stream/<uuid:chat_id>")
 @api_output(
     {},
@@ -214,71 +280,36 @@ class ChatView(MethodView):
 @app.doc(description=docs.CHAT_READ_STREAM)
 # @auth_required()
 def read_stream(chat_id: UUID):
-    """Read a streamed response bit by bit."""
-    from time import sleep
+    """Read a streamed response bit by bit.
 
+    Args:
+        chat_id (UUID): the chat to stream
+    Yields:
+        str | bytes: a token from the AI
+    """
     from flask import Response
 
     from cookgpt.ext import db
     from cookgpt.globals import current_app as app
-    from redisflow import celeryapp
 
     logging.info("GET stream for chat %s", chat_id)
-    OutputT = list[tuple[bytes, list[tuple[bytes, dict[bytes, bytes]]]]]
 
     chat = db.session.get(Chat, chat_id)
     if not chat:
         abort(404, "Chat does not exist.")
-    logging.debug("Using thread %s", chat.thread.id)
-    user: "User" = chat.thread.user
+
+    user = chat.thread.user
     stream = get_stream_name(user, chat)
-
-    if chat.content != "" or not (
-        app.redis.exists(stream) and app.redis.exists(f"{stream}:task")
-    ):  # chat has been streamed
+    if chat.content:
+        # chat has already been streamed
         logging.debug("Chat has already been streamed")
-        entries: list[str] = []
-        for word in chat.content.split(" "):
-            entries.extend((word, " "))
-        # remove trailing space
-        if entries:
-            entries.pop()
-
-        return Response(iter(entries), status=200)
-
-    def get_stream(entry_id: bytes):
-        logging.debug("Streaming %r from %s", stream, entry_id)
-
-        task_id = app.redis.get(f"{stream}:task")
-
-        while True:
-            # check if there are any new entries in the stream
-            entries: OutputT = app.redis.xread(  # type: ignore
-                {stream: entry_id}
-            )
-            if entries:
-                # there are new entries in the stream
-                logging.debug("New entries in stream")
-                _, data = entries[0]
-                for entry_id, entry in data:
-                    yield entry[b"token"]
-            elif task_id:
-                # there are no new entries in the stream, check if task is
-                # complete
-                logging.debug("No new entries in stream")
-                task = celeryapp.AsyncResult(task_id)
-                if task.ready():
-                    # task is complete, stop streaming
-                    logging.debug("Task is complete")
-                    break
-            else:  # pragma: no cover
-                # there are no new entries in the stream and no task
-                # running, stop streaming
-                logging.debug("No task running")
-                break
-            sleep(0.1)
-
-    return Response(stream_with_context(get_stream(b"0-0")), status=200)
+        return Response(stream_with_context(stream_existing_chat(chat)), 200)
+    if app.redis.exists(stream):
+        # chat is currently being streamed
+        logging.debug("Chat is currently being streamed")
+        return Response(stream_with_context(stream_from_redis(stream)), 200)
+    logging.warning("Chat is not being streamed")
+    abort(400, "Chat is not being streamed")
 
 
 app.add_url_rule(

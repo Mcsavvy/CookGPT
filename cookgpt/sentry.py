@@ -1,6 +1,4 @@
-"""
-Monitoring and Error Tracking Using Sentry.
-"""
+"""Monitoring and Error Tracking Using Sentry."""
 
 from logging import ERROR, INFO
 from socket import gethostname
@@ -20,7 +18,7 @@ if TYPE_CHECKING:
 
 
 def get_centry_integration(config: "Dynaconf"):
-    """Get Sentry integrations"""
+    """Get Sentry integrations."""
     flask = FlaskIntegration(
         transaction_style=config.get("SENTRY_TRANSACTION_STYLE", "url")
     )
@@ -51,7 +49,7 @@ def get_centry_integration(config: "Dynaconf"):
 
 
 def setup(config: "Dynaconf"):
-    """Initialize Sentry"""
+    """Initialize Sentry."""
     from cookgpt.app import VERSION
 
     if not config.get("SENTRY_DSN"):  # pragma: no cover

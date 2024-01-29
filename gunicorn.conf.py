@@ -1,3 +1,5 @@
+"""Gunicorn configuration file."""
+
 import os
 
 # Server Socket

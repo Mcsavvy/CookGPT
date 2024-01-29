@@ -1,4 +1,4 @@
-# ruff: noqa
+"""Prompts for the chatbot."""
 from pathlib import Path
 
 from langchain.prompts import (

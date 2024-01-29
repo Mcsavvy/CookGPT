@@ -1,12 +1,11 @@
-"""schema validators"""
+"""schema validators."""
 
 from apiflask import validators as v
 from marshmallow.exceptions import SCHEMA, ValidationError
 
 
-def useValidator(validator, field_name: str = SCHEMA, *args, **kwargs):
-    """Allows you use a builtin validator and pass in `field_name`"""
-
+def use_validator(validator, field_name: str = SCHEMA, *args, **kwargs):
+    """Allows you use a builtin validator and pass in `field_name`."""
     validate = validator(*args, **kwargs)
 
     def helper(value):
@@ -21,37 +20,41 @@ def useValidator(validator, field_name: str = SCHEMA, *args, **kwargs):
 
 
 class Name(v.Validator):
-    """first name validator"""
+    """first name validator."""
 
     LENGTH_ERR = ""
     CHARSET_ERR = ""
 
     def __init__(self, field_name="name"):
+        """Initialize the validator."""
         self.field_name = field_name
 
     def __call__(self, value: str) -> str:
-        useValidator(
+        """Validate the value."""
+        use_validator(
             v.Length,
             min=2,
             max=25,
             error=self.LENGTH_ERR,
             field_name=self.field_name,
         )(value)
-        useValidator(
+        use_validator(
             v.Regexp, self.field_name, r"^[a-zA-Z]+$", error=self.CHARSET_ERR
         )(value)
         return value
 
 
 class FirstNameOrFullName(v.Validator):
-    """full name or first name validator"""
+    """full name or first name validator."""
 
     FORMAT_ERR = "Name must be a valid name or full name"
 
     def __init__(self, field_name="name"):
+        """Initialize the validator."""
         self.field_name = field_name
 
     def __call__(self, value: str):
+        """Validate the value."""
         fname = lname = None
         name = value.strip().split(" ")
         if len(name) == 2:
@@ -67,42 +70,46 @@ class FirstNameOrFullName(v.Validator):
 
 
 class FirstName(Name):
-    """first name validator"""
+    """first name validator."""
 
     LENGTH_ERR = "Name must be between 2 and 25 characters long"
     CHARSET_ERR = "Name can only contain letters"
 
     def __init__(self, field_name="name"):
+        """Initialize the validator."""
         super().__init__(field_name)
 
 
 class LastName(Name):
-    """last name validator"""
+    """last name validator."""
 
     LENGTH_ERR = "Last Name must be between 2 and 25 characters long"
     CHARSET_ERR = "Last Name can only contain letters"
 
     def __init__(self, field_name="last_name"):
+        """Initialize the validator."""
         super().__init__(field_name)
 
 
 class Email(v.Validator):
-    """email validator"""
+    """email validator."""
 
     FORMAT_ERR = "Email is not a valid email address"
 
     def __init__(self, field_name="email"):
+        """Initialize the validator."""
         self.field_name = field_name
 
     def __call__(self, value):
-        useValidator(
+        """Validate the value."""
+        use_validator(
             v.Email, error=self.FORMAT_ERR, field_name=self.field_name
         )(value)
         return value
 
 
 class Username(v.Validator):
-    """username validator"""
+    """username validator."""
 
     LENGTH_ERR = "Username must be between 5 and 45 characters long"
     CHARSET_ERR = (
@@ -113,19 +120,21 @@ class Username(v.Validator):
     START_ERR = "Username must start with a letter"
 
     def __init__(self, field_name="username"):
+        """Initialize the validator."""
         self.field_name = field_name
 
     def __call__(self, value):
+        """Validate the value."""
         import string
 
-        useValidator(
+        use_validator(
             v.Length,
             min=2,
             max=45,
             error=self.LENGTH_ERR,
             field_name=self.field_name,
         )(value)
-        useValidator(
+        use_validator(
             v.Regexp,
             self.field_name,
             r"^[a-zA-Z0-9_-]+$",
@@ -141,7 +150,7 @@ class Username(v.Validator):
 
 
 class Password(v.Validator):
-    """password validator"""
+    """password validator."""
 
     UPPERCASE_ERR = "Password should contain an uppercase character"
     LOWERCASE_ERR = "Password should contain a lowercase character"
@@ -150,15 +159,17 @@ class Password(v.Validator):
     LENGTH_ERR = "Password must be at least 8 characters long"
 
     def __init__(self, min_length=8, field_name="password"):
+        """Initialize the validator."""
         self.min_length = min_length
         self.field_name = field_name
 
     def __call__(self, value):
+        """Validate the value."""
         # import string
 
         # errors = []
         # checks = 0
-        useValidator(
+        use_validator(
             v.Length, min=8, error=self.LENGTH_ERR, field_name=self.field_name
         )(value)
         # if any(char in string.ascii_lowercase for char in value):
@@ -185,14 +196,16 @@ class Password(v.Validator):
 
 
 class Login(v.Validator):
-    """login validator"""
+    """login validator."""
 
     FORMAT_ERR = "Login must be a valid email address or username"
 
     def __init__(self, field_name="login"):
+        """Initialize the validator."""
         self.field_name = field_name
 
     def __call__(self, value):
+        """Validate the value."""
         try:
             Username()(value)
             return value

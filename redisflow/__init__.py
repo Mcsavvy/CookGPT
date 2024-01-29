@@ -1,4 +1,6 @@
-from typing import TYPE_CHECKING, Type, cast
+"""Celery app."""
+
+from typing import TYPE_CHECKING, cast
 
 from celery.app.base import Celery as CeleryBase
 
@@ -9,13 +11,12 @@ if TYPE_CHECKING:
 
 
 class Celery(CeleryBase):
-    """Celery app"""
+    """Celery app."""
 
     webapp: "WebApp"
 
     def init_app(self, app: "WebApp"):
-        """initialize celery"""
-
+        """Initialize celery."""
         if hasattr(self, "webapp"):
             logging.debug("Celery already initialized")
             return
@@ -25,13 +26,13 @@ class Celery(CeleryBase):
         logging.info("Setting celery config")
         self.conf.update(app.config.get_namespace("CELERY_"))
         logging.info("Setting celery task base")
-        TaskBase = cast(Type, self.Task)
+        TaskBase = cast(type, self.Task)  # noqa: N806
         all_tasks = list(app.config.CELERY_TASKS)
         logging.info("Autodiscovering tasks: %r", all_tasks)
         self.autodiscover_tasks(all_tasks, force=True)
 
         class ContextTask(TaskBase):  # type: ignore
-            """Task that run within app context"""
+            """Task that run within app context."""
 
             def __call__(self, *args, **kwargs):
                 with app.app_context():

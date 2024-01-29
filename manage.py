@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Management script for the cookgpt application."""
 import click
 from flask.cli import FlaskGroup
 

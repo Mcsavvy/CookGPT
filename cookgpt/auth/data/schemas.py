@@ -1,4 +1,4 @@
-"""data validation & serialization schemas"""
+"""data validation & serialization schemas."""
 from apiflask import Schema, fields
 
 from cookgpt.auth.data.enums import UserType as UserT
@@ -90,7 +90,7 @@ TotalChatCost = make_field(
 
 
 class UserSchema(Schema):
-    """user schema"""
+    """user schema."""
 
     id = UserID()
     first_name = FirstName()
@@ -104,7 +104,7 @@ class UserSchema(Schema):
 
 
 class AuthInfoSchema(Schema):
-    """user auth info schema"""
+    """user auth info schema."""
 
     user_id = UserID()
     user_name = UserName()
@@ -138,10 +138,14 @@ class AuthInfoSchema(Schema):
 
 
 class Auth:
-    """user data"""
+    """User authentication operations group."""
 
     class Signup:
+        """User signup operations schema."""
+
         class Body(Schema):
+            """User signup request body schema."""
+
             first_name = UserName(required=True)
             last_name = LastName(required=False, allow_none=True)
             email = Email(required=True)
@@ -149,6 +153,8 @@ class Auth:
             username = Username(allow_none=True, required=False)
 
         class Response(Schema):
+            """User signup response schema."""
+
             message = fields.String(
                 metadata={
                     "description": "success message",
@@ -157,6 +163,8 @@ class Auth:
             )
 
         class Error(Schema):
+            """User signup error schema."""
+
             message = fields.String(
                 metadata={
                     "description": "error message",
@@ -165,11 +173,17 @@ class Auth:
             )
 
     class Login:
+        """User login operations schema."""
+
         class Body(Schema):
+            """User login request body schema."""
+
             login = Login(required=True)
             password = Password(required=True)
 
         class Response(Schema):
+            """User login response schema."""
+
             message = fields.String(
                 metadata={
                     "description": "success message",
@@ -179,6 +193,8 @@ class Auth:
             auth_info = fields.Nested(AuthInfoSchema)
 
         class NotFound(Schema):
+            """User login not found error schema."""
+
             message = fields.String(
                 metadata={
                     "description": "error message",
@@ -187,6 +203,8 @@ class Auth:
             )
 
         class Unauthorized(Schema):
+            """User login unauthorized error schema."""
+
             message = fields.String(
                 metadata={
                     "description": "error message",
@@ -195,7 +213,11 @@ class Auth:
             )
 
     class Logout:
+        """User logout operations schema."""
+
         class Response(Schema):
+            """User logout response schema."""
+
             message = fields.String(
                 metadata={
                     "description": "success message",
@@ -204,7 +226,11 @@ class Auth:
             )
 
     class Refresh:
+        """User token refresh operations schema."""
+
         class Response(Schema):
+            """User token refresh response schema."""
+
             message = fields.String(
                 metadata={
                     "description": "success message",
@@ -215,18 +241,22 @@ class Auth:
 
 
 class User:
-    """User data"""
+    """User operations group."""
 
     class Info:
-        """Get user data"""
+        """User info operations schema."""
 
         class Response(UserSchema):
+            """User info response schema."""
+
             pass
 
     class Update:
-        """Update user data"""
+        """User update operations schema."""
 
         class Body(Schema):
+            """User update request body schema."""
+
             first_name = FirstName()
             last_name = LastName()
             email = Email()
@@ -234,6 +264,8 @@ class User:
             username = Username()
 
         class Response(Schema):
+            """User update response schema."""
+
             message = fields.String(
                 metadata={
                     "description": "success message",
@@ -242,6 +274,8 @@ class User:
             )
 
         class Error(Schema):
+            """User update error schema."""
+
             message = fields.String(
                 metadata={
                     "description": "error message",
@@ -250,9 +284,11 @@ class User:
             )
 
     class Delete:
-        """Delete user data"""
+        """Delete user data."""
 
         class Response(Schema):
+            """User delete response schema."""
+
             message = fields.String(
                 metadata={
                     "description": "success message",
@@ -261,6 +297,8 @@ class User:
             )
 
         class Error(Schema):
+            """User delete error schema."""
+
             message = fields.String(
                 metadata={
                     "description": "error message",

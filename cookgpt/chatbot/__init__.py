@@ -1,3 +1,5 @@
+"""Chatbot API Blueprint."""
+
 from apiflask import APIBlueprint
 
 from cookgpt import docs
@@ -11,6 +13,5 @@ app = APIBlueprint(
 )
 
 
-from cookgpt.chatbot import cli  # noqa: E402, F401
-from cookgpt.chatbot import views  # noqa: E402, F401
+from cookgpt.chatbot import cli, views  # noqa: E402, F401
 from cookgpt.chatbot.models import Chat, Thread  # noqa: E402, F401

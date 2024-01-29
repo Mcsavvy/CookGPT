@@ -1,3 +1,5 @@
+"""chatbot tasks."""
+
 from typing import Any
 from uuid import UUID
 
@@ -11,8 +13,7 @@ def send_query(
     thread_id: UUID,
     kwargs: "dict[str, Any]",
 ):
-    """send query to ai and process response"""
-
+    """Send query to ai and process response."""
     from cookgpt import logging
     from cookgpt.chatbot.callback import ChatCallbackHandler
     from cookgpt.chatbot.chain import ThreadChain
@@ -35,6 +36,9 @@ def send_query(
     thread = db.session.get(Thread, thread_id) or response.thread
     assert thread, "Thread for task does not exist"
 
+    stream = get_stream_name(thread.user, response)
+    app.redis.set(f"{stream}:status", "STARTED")
+
     setvar("thread", thread)
     setvar("chain", chain)
     setvar("query", query)
@@ -44,10 +48,10 @@ def send_query(
     with use_chat_callback(ChatCallbackHandler()):
         chain.predict(**kwargs)
 
-    stream = get_stream_name(thread.user, response)
     logging.info(f"Adding stream {stream!r} to completed streams")
     logging.debug(f"redis: {app.redis}")
     # FIXME: redis has been unset
+    app.redis.set(f"{stream}:status", "COMPLETED")
     app.redis.lpush("streams:completed", stream)
 
     resetvar("thread")

@@ -1,6 +1,7 @@
 """Chatbot models."""
+from collections.abc import Sequence
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Sequence, cast
+from typing import TYPE_CHECKING, Optional, cast
 from uuid import UUID, uuid4
 
 from sqlalchemy import Enum, ForeignKey, Text
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 
 
 class Chat(db.Model):  # type: ignore
-    """A single chat in a thread"""
+    """A single chat in a thread."""
 
     serialize_rules = "-thread"
 
@@ -32,7 +33,7 @@ class Chat(db.Model):  # type: ignore
     cost: Mapped[int] = mapped_column(default=0)
     chat_type: Mapped[MessageType] = mapped_column(Enum(MessageType))
     thread_id: Mapped[UUID] = mapped_column(db.ForeignKey("thread.id"))
-    previous_chat_id: Mapped[Optional[UUID]] = mapped_column(
+    previous_chat_id: Mapped[UUID | None] = mapped_column(
         db.ForeignKey("chat.id")
     )
     previous_chat: Mapped[
@@ -60,6 +61,7 @@ class Chat(db.Model):  # type: ignore
     )
 
     def __repr__(self):
+        """Get the string representation of the chat."""
         return "{}[{}](user={}, cost={}, thread={}, prev={}, next={})".format(
             self.chat_type.value.title(),
             self.id.hex[:6],
@@ -72,14 +74,14 @@ class Chat(db.Model):  # type: ignore
 
     @property
     def next_chat_id(self) -> "UUID | None":
-        """get the next chat's id"""
+        """Get the next chat's id."""
         if self.next_chat:
             return self.next_chat.id
         return None
 
     @classmethod
-    def create(self, commit=True, **attrs):
-        """Create the chat"""
+    def create(cls, commit=True, **attrs):
+        """Create the chat."""
         chat = super().create(commit, **attrs)
         if commit:
             cache.delete(chats_cache_key(thread_id=chat.thread.pk))
@@ -88,7 +90,7 @@ class Chat(db.Model):  # type: ignore
         return chat
 
     def update(self, commit=True, **attrs):
-        """Update the chat"""
+        """Update the chat."""
         super().update(commit, **attrs)
         if commit:
             cache.delete(chat_cache_key(chat_id=self.pk))
@@ -96,7 +98,7 @@ class Chat(db.Model):  # type: ignore
         return self
 
     def delete(self, commit=True):
-        """Delete the chat"""
+        """Delete the chat."""
         super().delete(commit)
         if commit:
             cache.delete(chat_cache_key(chat_id=self.pk))
@@ -109,12 +111,12 @@ class Chat(db.Model):  # type: ignore
 
 
 class Thread(db.Model):  # type: ignore
-    """A conversation thread"""
+    """A conversation thread."""
 
     serialize_rules = ("-user",)
 
     title: Mapped[str] = mapped_column(db.String(80))
-    chats: Mapped[List["Chat"]] = db.relationship(  # type: ignore[assignment]
+    chats: Mapped[list["Chat"]] = db.relationship(  # type: ignore[assignment]
         back_populates="thread",
         cascade="all, delete-orphan",
         order_by="Chat.order",
@@ -129,6 +131,7 @@ class Thread(db.Model):  # type: ignore
     closed: Mapped[bool] = mapped_column(default=False)
 
     def __repr__(self):
+        """Get the string representation of the thread."""
         num_chats = len(self.chats)  # type: ignore
         return "Thread[{}](user={}, chats={}, closed={})".format(
             self.id.hex[:6],
@@ -139,17 +142,17 @@ class Thread(db.Model):  # type: ignore
 
     @property
     def cost(self) -> int:
-        """total cost of all messages"""
+        """Total cost of all messages."""
         return sum(chat.cost for chat in self.chats)  # type: ignore
 
     @property
     def chat_count(self) -> int:
-        """number of messages in the thread"""
+        """Number of messages in the thread."""
         return len(self.chats)  # type: ignore
 
     @property
     def last_chat(self) -> "Chat":
-        """get the last chat in the thread"""
+        """Get the last chat in the thread."""
         return (
             Chat.query.filter(Chat.thread_id == self.id, ~Chat.next_chat.has())
             .order_by(Chat.order.desc())
@@ -165,7 +168,7 @@ class Thread(db.Model):  # type: ignore
         commit=True,
         **attrs,
     ) -> "Chat":
-        """Add a chat to the thread"""
+        """Add a chat to the thread."""
         logging.debug(
             "adding %s to thread %s: %s",
             chat_type.value.lower(),
@@ -202,7 +205,7 @@ class Thread(db.Model):  # type: ignore
         commit=True,
         **attrs,
     ) -> "Chat":
-        """Add a query to the thread"""
+        """Add a query to the thread."""
         return self.add_chat(
             content, MessageType.QUERY, cost, previous_chat, commit, **attrs
         )
@@ -215,18 +218,18 @@ class Thread(db.Model):  # type: ignore
         commit=True,
         **attrs,
     ) -> "Chat":
-        """Add a response to the thread"""
+        """Add a response to the thread."""
         return self.add_chat(
             content, MessageType.RESPONSE, cost, previous_chat, commit, **attrs
         )
 
     def close(self):
-        """Close the thread"""
+        """Close the thread."""
         logging.debug("closing thread %s", self.id.hex[:6])
         self.update(closed=True)
 
     def clear(self):
-        """Clear all messages in the thread"""
+        """Clear all messages in the thread."""
         logging.debug(
             "clearing %d chats from thread %s",
             len(self.chats),
@@ -239,15 +242,15 @@ class Thread(db.Model):  # type: ignore
             cast(Chat, chat).delete()
 
     @classmethod
-    def create(self, commit=True, **attrs):
-        """Create the thread"""
+    def create(cls, commit=True, **attrs):
+        """Create the thread."""
         thread = super().create(commit, **attrs)
         if commit:
             cache.delete(threads_cache_key(user_id=thread.user.pk))
         return thread
 
     def update(self, commit=True, **attrs):
-        """Update the thread"""
+        """Update the thread."""
         thread = super().update(commit, **attrs)
         if commit:
             cache.delete(thread_cache_key(thread_id=self.pk))
@@ -255,7 +258,7 @@ class Thread(db.Model):  # type: ignore
         return thread
 
     def delete(self, commit=True):
-        """Delete the thread"""
+        """Delete the thread."""
         super().delete(commit)
         if commit:
             cache.delete(thread_cache_key(thread_id=self.pk))
@@ -263,17 +266,17 @@ class Thread(db.Model):  # type: ignore
 
 
 class ThreadMixin:
-    """Mixin class for handling threads"""
+    """Mixin class for handling threads."""
 
     id: "UUID"
 
     @property
     def total_chat_cost(self):
-        """total cost of all messages"""
+        """Total cost of all messages."""
         return sum(trd.cost for trd in self.threads)  # type: ignore
 
     def create_thread(self, title: str, closed=False, commit=True):
-        """Create a new thread"""
+        """Create a new thread."""
         logging.debug(
             "creating thread: %r for %s %s",
             title,
@@ -293,11 +296,11 @@ class ThreadMixin:
         chat_type: MessageType,
         cost: int = 0,
         previous_chat: "Chat | None" = None,
-        thread_id: Optional[UUID] = None,
+        thread_id: UUID | None = None,
         commit=True,
         **attrs,
     ) -> "Chat":
-        """Add a message to the thread"""
+        """Add a message to the thread."""
         if thread_id is None:
             if previous_chat:
                 thread = previous_chat.thread
@@ -306,7 +309,7 @@ class ThreadMixin:
         else:
             try:
                 thread = Thread.query.get(thread_id)
-            except Thread.DoesNotExist:
+            except Thread.DoesNotExistError:
                 raise ValueError("thread_id is invalid")
             if thread.user != self:
                 raise ValueError("thread not owned by user")
@@ -324,11 +327,11 @@ class ThreadMixin:
         content: str,
         cost: int = 0,
         previous_chat: "Chat | None" = None,
-        thread_id: Optional[UUID] = None,
+        thread_id: UUID | None = None,
         commit=True,
         **attrs,
     ) -> "Chat":
-        """Add a query to the thread"""
+        """Add a query to the thread."""
         return self.add_message(
             content,
             MessageType.QUERY,
@@ -344,11 +347,11 @@ class ThreadMixin:
         content: str,
         cost: int = 0,
         previous_chat: "Chat | None" = None,
-        thread_id: Optional[UUID] = None,
+        thread_id: UUID | None = None,
         commit=True,
         **attrs,
     ) -> "Chat":
-        """Add a response to the thread"""
+        """Add a response to the thread."""
         return self.add_message(
             content,
             MessageType.RESPONSE,
@@ -360,7 +363,7 @@ class ThreadMixin:
         )
 
     def clear_chats(self, threads: Sequence[Thread]):
-        """Clear all messages in specified threads"""
+        """Clear all messages in specified threads."""
         logging.debug(
             "clearing %d threads for %s %r",
             len(threads),
@@ -371,7 +374,7 @@ class ThreadMixin:
             thread.clear()
 
     def get_active_threads(self) -> Sequence[Thread]:
-        """Get all active threads"""
+        """Get all active threads."""
         return Thread.query.filter(
             Thread.user_id == self.id, Thread.closed == False  # noqa: E712
         ).all()

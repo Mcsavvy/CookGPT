@@ -1,4 +1,4 @@
-"""Chat Thread views"""
+"""Chat Thread views."""
 from typing import TYPE_CHECKING
 from uuid import UUID
 
@@ -12,15 +12,18 @@ from cookgpt.chatbot.data import schemas as sc
 from cookgpt.chatbot.models import Thread
 from cookgpt.chatbot.utils import get_thread
 from cookgpt.ext.auth import auth_required
-from cookgpt.ext.cache import thread_cache_key  # noqa
-from cookgpt.ext.cache import cache, threads_cache_key
+from cookgpt.ext.cache import (
+    cache,
+    thread_cache_key,  # noqa
+    threads_cache_key,
+)
 
 if TYPE_CHECKING:
     from cookgpt.auth.models.user import User
 
 
 class ThreadView(MethodView):
-    """Thread endpoints"""
+    """Thread endpoints."""
 
     decorators = [auth_required(), app.doc(tags=["thread"])]
 
@@ -36,7 +39,7 @@ class ThreadView(MethodView):
     @app.output(sc.Thread.Post.Response, 201, example=ex.Thread.Post.Response)
     def post(self, json_data: dict):
         """Create a new thread.
-        
+
         You can optionally supply the title of the thread to create by \
         supplying the `title` field in the body of the request
         """
@@ -52,7 +55,7 @@ class ThreadView(MethodView):
     @app.input(sc.Thread.Patch.Body, example=ex.Thread.Patch.Body)
     @app.output(sc.Thread.Patch.Response, example=ex.Thread.Patch.Response)
     def patch(self, thread_id: UUID, json_data: dict):
-        """Modify a thread's information"""
+        """Modify a thread's information."""
         title = json_data.get("title")
         logging.info(f"PATCH thread {title!r}")
         thread = get_thread(thread_id)
@@ -65,7 +68,7 @@ class ThreadView(MethodView):
 
     @app.output(sc.Thread.Delete.Response, example=ex.Thread.Delete.Response)
     def delete(self, thread_id: UUID):
-        """Delete a thread and all chats within it"""
+        """Delete a thread and all chats within it."""
         logging.info(f"DELETE thread {thread_id!r}")
         thread = get_thread(thread_id)
         thread.delete()
@@ -73,14 +76,14 @@ class ThreadView(MethodView):
 
 
 class ThreadsView(MethodView):
-    """Threads endpoint"""
+    """Threads endpoint."""
 
     decorators = [auth_required(), app.doc(tags=["thread"])]
 
     @app.output(sc.Threads.Get.Response, example=ex.Threads.Get.Response)
     @cache.cached(timeout=0, make_cache_key=threads_cache_key)
     def get(self) -> dict:
-        """Get all threads"""
+        """Get all threads."""
         user: "User" = get_current_user()
         logging.info("GET all threads")
         return sc.Threads.Get.Response().dump(
@@ -89,7 +92,7 @@ class ThreadsView(MethodView):
 
     @app.output(sc.Threads.Delete.Response)
     def delete(self):
-        """Delete all threads"""
+        """Delete all threads."""
         logging.info("DELETE all threads")
         all_threads = list(
             Thread.query.filter(Thread.closed.__eq__(False)).all()

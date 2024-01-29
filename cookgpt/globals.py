@@ -1,5 +1,6 @@
+"""Global variables."""
 from contextvars import ContextVar, Token
-from typing import TYPE_CHECKING, Optional, Type, TypeVar, cast, overload
+from typing import TYPE_CHECKING, TypeVar, cast, overload
 
 from flask.globals import _no_app_msg
 from flask.globals import current_app as _current_app
@@ -35,10 +36,10 @@ _history_var: ContextVar["SingleThreadHistory"] = ContextVar("history")
 _chat_cost_var: ContextVar["tuple[int, int]"] = ContextVar(
     "chat_cost", default=(0, 0)
 )
-_query_time_var: ContextVar["Optional[datetime]"] = ContextVar(
+_query_time_var: ContextVar["datetime | None"] = ContextVar(
     "query_time", default=None
 )
-_response_time_var: ContextVar["Optional[datetime]"] = ContextVar(
+_response_time_var: ContextVar["datetime | None"] = ContextVar(
     "response_time", default=None
 )
 _query_var: ContextVar["Chat"] = ContextVar("query")
@@ -56,10 +57,10 @@ history: "SingleThreadHistory" = LocalProxy(  # type: ignore[assignment]
     _history_var
 )
 user: "User" = LocalProxy(_user_var)  # type: ignore[assignment]
-query_time: "Optional[datetime]" = LocalProxy(  # type: ignore[assignment]
+query_time: "datetime | None" = LocalProxy(  # type: ignore[assignment]
     _query_time_var
 )
-response_time: "Optional[datetime]" = LocalProxy(  # type: ignore[assignment]
+response_time: "datetime | None" = LocalProxy(  # type: ignore[assignment]
     _response_time_var
 )
 query: "Chat" = LocalProxy(_query_var)  # type: ignore[assignment]
@@ -70,7 +71,7 @@ chat_cost: "tuple[int, int]" = LocalProxy(  # type: ignore[assignment]
 
 
 def setvar(var: "ContextVar[T] | str", value: "T") -> None:
-    """set context variable"""
+    """Set context variable."""
     logging.debug(f"Setting context variable {var!r}")
     if isinstance(var, str):
         if not var.startswith("_"):
@@ -83,7 +84,7 @@ def setvar(var: "ContextVar[T] | str", value: "T") -> None:
 
 
 def resetvar(var: "ContextVar[T] | str") -> None:
-    """reset context variable"""
+    """Reset context variable."""
     logging.debug(f"Resetting context variable {var!r}")
     if isinstance(var, str):
         if not var.startswith("_"):
@@ -105,7 +106,7 @@ def getvar(var: ContextVar[T], _default: T) -> T:
 
 
 @overload
-def getvar(var: str, _type: Type[T]) -> T:
+def getvar(var: str, _type: type[T]) -> T:
     ...
 
 
@@ -115,12 +116,12 @@ def getvar(var: str, _default: D) -> D:
 
 
 @overload
-def getvar(var: str, _type: Type[T], _default: D) -> T | D:
+def getvar(var: str, _type: type[T], _default: D) -> T | D:
     ...
 
 
 def getvar(var, _type=None, _default=Missing):
-    """get context variable"""
+    """Get context variable."""
     logging.debug(f"Getting context variable {var!r}")
     if isinstance(var, str):
         if not var.startswith("_"):

@@ -1,5 +1,8 @@
+"""Tokens model."""
+
+from collections.abc import Iterable
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING, Iterable, List, cast
+from typing import TYPE_CHECKING, cast
 from uuid import UUID, uuid4
 
 from flask_jwt_extended import (
@@ -20,7 +23,7 @@ if TYPE_CHECKING:
 
 
 class Token(db.Model):  # type: ignore
-    """Json Web Token model"""
+    """Json Web Token model."""
 
     serialize_rules = ("-user",)
 
@@ -34,6 +37,7 @@ class Token(db.Model):  # type: ignore
     )
 
     def __repr__(self):
+        """Repr."""
         return "Token[{}](user={}, active={}, revoked={})".format(
             self.uid,
             self.user.name,
@@ -42,25 +46,25 @@ class Token(db.Model):  # type: ignore
         )
 
     def refresh(self):
-        """refresh access token"""
+        """Refresh access token."""
         access_token = create_access_token(
             self.user_id.hex, additional_claims={"jti": self.id.hex}
         )
         self.update(access_token=access_token)
 
     def atoken_has_expired(self):
-        """Checks if access token has expired"""
+        """Checks if access token has expired."""
         expiry = self.atoken_expiry
         return expiry <= utcnow()
 
     def rtoken_has_expired(self):
-        """Checks if refresh token has expired"""
+        """Checks if refresh token has expired."""
         expiry = self.rtoken_expiry
         return expiry <= utcnow()
 
     @property
     def atoken_expiry(self):
-        """Gets access_token expiry time"""
+        """Gets access_token expiry time."""
         key = f"atoken_expiry:{self.access_token}"
         if cache.has(key):
             return datetime.fromtimestamp(cache.get(key), tz=timezone.utc)
@@ -70,7 +74,7 @@ class Token(db.Model):  # type: ignore
 
     @property
     def rtoken_expiry(self):
-        """Gets refresh_token expiry time"""
+        """Gets refresh_token expiry time."""
         key = f"rtoken_expiry:{self.refresh_token}"
         if cache.has(key):  # pragma: no cover
             return datetime.fromtimestamp(cache.get(key), tz=timezone.utc)
@@ -80,7 +84,7 @@ class Token(db.Model):  # type: ignore
 
     @classmethod
     def create(cls, user_id, commit=True) -> "Token":  # type: ignore
-        """Creates jwt token"""
+        """Creates jwt token."""
         id = uuid4()
         atoken = create_access_token(
             user_id.hex, additional_claims={"jti": id.hex}
@@ -99,41 +103,41 @@ class Token(db.Model):  # type: ignore
 
 
 class TokenMixin:
-    """TokenMixin"""
+    """TokenMixin."""
 
     id: "UUID"
-    tokens: "List[Token]"
+    tokens: "list[Token]"
 
     def revoke_all_tokens(self):
-        """Revokes all jwt tokens"""
+        """Revokes all jwt tokens."""
         for token in cast(Iterable[Token], self.tokens):
             token.update(revoked=True, commit=False)
         db.session.commit()
 
     def revoke_expired_tokens(self):
-        """Revokes expired jwt tokens"""
+        """Revokes expired jwt tokens."""
         for token in cast(Iterable[Token], self.tokens):
             if token.atoken_has_expired():
                 token.update(revoked=True, commit=False)
         db.session.commit()
 
     def revoke_token(self, token: "Token"):
-        """Revokes jwt token"""
+        """Revokes jwt token."""
         token.update(revoked=True)
 
     def deactivate_token(self, token: "Token"):
-        """Deactivate jwt token"""
+        """Deactivate jwt token."""
         token.update(active=False)
 
     def create_token(self):
-        """Creates jwt token"""
+        """Creates jwt token."""
         token = Token.create(user_id=self.id, commit=True)
         return token
 
     def get_token(
         self, atoken: "str|None" = None, rtoken: "str|None" = None
     ) -> "Token":
-        """Gets jwt token"""
+        """Gets jwt token."""
         if not (atoken or rtoken):  # pragma: no cover
             raise ValueError("atoken or rtoken must be supplied")
         if atoken and rtoken:
@@ -147,11 +151,11 @@ class TokenMixin:
         return Token.query.filter_by(user=self, refresh_token=rtoken).first()
 
     def get_all_tokens(self) -> "list[Token]":
-        """Gets all jwt tokens"""
+        """Gets all jwt tokens."""
         return self.tokens  # type: ignore
 
     def get_active_tokens(self, with_expired=False):
-        """Gets active jwt tokens"""
+        """Gets active jwt tokens."""
         active_tokens = Token.query.filter_by(
             user=self, active=True, revoked=False
         )
@@ -160,7 +164,7 @@ class TokenMixin:
                 yield token
 
     def get_inactive_tokens(self, with_expired=False):
-        """Gets expired jwt tokens"""
+        """Gets expired jwt tokens."""
         inactive_tokens = Token.query.filter_by(
             user=self, active=False, revoked=False
         )
@@ -169,8 +173,7 @@ class TokenMixin:
                 yield token
 
     def request_token(self) -> "Token":
-        """Requests a jwt token"""
-
+        """Requests a jwt token."""
         token: "Token"
         leeway: timedelta = app.config["JWT_ACCESS_TOKEN_LEEWAY"]
         active_tokens = Token.query.filter_by(

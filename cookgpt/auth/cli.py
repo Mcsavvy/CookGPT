@@ -1,4 +1,6 @@
-from typing import Literal, Optional
+"""Command line interface for the auth module."""
+
+from typing import Literal
 
 import click
 from marshmallow.utils import INCLUDE
@@ -29,7 +31,7 @@ from cookgpt.auth.models import User
     type=click.Choice(["ADMIN", "COOK"], False),
 )
 def create_user(
-    fname: Optional[str],
+    fname: str | None,
     lname: str,
     email: str,
     password: str,
@@ -37,7 +39,7 @@ def create_user(
     allow_existing: bool,
     user_type: Literal["ADMIN", "COOK"],
 ):
-    """Create a new user"""
+    """Create a new user."""
     user = None
     if username:
         user = User.query.filter(
@@ -50,18 +52,16 @@ def create_user(
     if user is not None:
         if email == user.email and (username and user.username == username):
             click.echo(
-                (
-                    f"{user.type.name} user "
-                    "with that username and email already exists"
-                )
+                f"{user.type.name} user "
+                "with that username and email already exists"
             )
         elif email == user.email:
             click.echo(
-                (f"{user.type.name} user " "with that email already exists")
+                f"{user.type.name} user " "with that email already exists"
             )
         else:
             click.echo(
-                (f"{user.type.name} user " "with that username already exists")
+                f"{user.type.name} user " "with that username already exists"
             )
         if allow_existing:
             return
@@ -98,7 +98,7 @@ def create_user(
     help="don't raise an error is admin already exists",
 )
 def create_admin(fname, lname, email, password, username, allow_existing):
-    """Create an administrative user"""
+    """Create an administrative user."""
     create_user.callback(
         fname=fname,
         lname=lname,
@@ -124,7 +124,7 @@ def create_admin(fname, lname, email, password, username, allow_existing):
     help="don't raise an error if cook already exists",
 )
 def create_cook(fname, lname, email, password, username, allow_existing):
-    """Create a cook"""
+    """Create a cook."""
     create_user.callback(
         fname=fname,
         lname=lname,
@@ -142,6 +142,7 @@ def create_cook(fname, lname, email, password, username, allow_existing):
     "--new", "-n", is_flag=True, default=False, help="create a new token"
 )
 def get_access_token(identity: str, new: bool) -> None:
+    """Get an access token for a user."""
     user: "User"
 
     user = User.query.filter(

@@ -1,7 +1,9 @@
+"""Database extension."""
+
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional, Type, Union, cast
+from typing import cast
 from uuid import UUID, uuid4
 
 import click
@@ -19,15 +21,15 @@ from typing_extensions import deprecated
 
 from cookgpt import logging
 
-IDENT = Union[Union[UUID, str], tuple[Union[UUID, str], ...]]
+IDENT = UUID | str | tuple[UUID | str, ...]
 
 
 class BaseQuery(Query):
-    """Base Query"""
+    """Base Query."""
 
     @property
     def tables(self) -> set[type[BaseModel]]:
-        """Get tables"""
+        """Get tables."""
         from sqlalchemy.sql.schema import Table
 
         _tables: set[type[BaseModel]] = set()
@@ -41,22 +43,21 @@ class BaseQuery(Query):
         return _tables
 
     @property
-    def model(self) -> "Optional[Type[BaseModel]]":
-        """Get model class"""
+    def model(self) -> type[BaseModel] | None:
+        """Get model class."""
         tables = self.tables
         if len(tables) == 1:
             return tables.pop()
         return None
 
-    def get(self, ident: IDENT) -> "BaseModel":
-        """Get a model by id"""
-
+    def get(self, ident: IDENT) -> BaseModel:
+        """Get a model by id."""
         if isinstance(ident, str):
             ident = UUID(ident)
         rv = super().get(ident)
         if rv is None:
             if model := self.model:
-                raise model.DoesNotExist
+                raise model.DoesNotExistError
             sentry_sdk.set_context(
                 "query",
                 {
@@ -66,31 +67,31 @@ class BaseQuery(Query):
                 },
             )
             sentry_sdk.capture_message("Multiple models used for one query")
-            raise BaseModel.DoesNotExist
+            raise BaseModel.DoesNotExistError
         return rv
 
 
 class ModelErrorMixin:
-    """Model Errors"""
+    """Model Errors."""
 
-    class DoesNotExist(Exception):
-        """Does not exist"""
+    class DoesNotExistError(Exception):
+        """Does not exist."""
 
     class CreateError(Exception):
-        """Error creating"""
+        """Error creating."""
 
     class UpdateError(Exception):
-        """Error updating"""
+        """Error updating."""
 
     class DeleteError(Exception):
-        """Error deleting"""
+        """Error deleting."""
 
     def __init_subclass__(cls) -> None:
-        """Initialize subclass"""
+        """Initialize subclass."""
         super().__init_subclass__()
-        cls.DoesNotExist = type(  # type: ignore[assignment,misc]
+        cls.DoesNotExistError = type(  # type: ignore[assignment,misc]
             f"{cls.__name__}.DoesNotExist",
-            (cls.DoesNotExist,),
+            (cls.DoesNotExistError,),
             {"__doc__": f"{cls.__name__} does not exist"},
         )
         cls.CreateError = type(  # type: ignore[assignment,misc]
@@ -111,9 +112,9 @@ class ModelErrorMixin:
 
 
 class BaseModel(ModelErrorMixin, Model, SerializerMixin):
-    """Base model"""
+    """Base model."""
 
-    query: "BaseQuery"  # type: ignore[misc]
+    query: BaseQuery  # type: ignore[misc]
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     created_at: Mapped[datetime] = mapped_column(
@@ -124,22 +125,23 @@ class BaseModel(ModelErrorMixin, Model, SerializerMixin):
     )
 
     def __repr__(self):
+        """Return repr."""
         return f"<{self.__class__.__name__} {self.id}>"  # pragma: no cover
 
     @property
     @deprecated("Use .uid instead")
     def pk(self):
-        """Returns primary key"""
+        """Returns primary key."""
         return str(self.id)
 
     @property
     def uid(self):
-        """Returns string id"""
+        """Returns string id."""
         return str(self.id)
 
     @classmethod
     def create(cls, commit=True, **kwargs):
-        """Creates model"""
+        """Creates model."""
         logging.debug("Creating %s with attributes: %s", cls.__name__, kwargs)
         instance = cls(**kwargs)
         if commit:
@@ -147,7 +149,7 @@ class BaseModel(ModelErrorMixin, Model, SerializerMixin):
         return instance
 
     def update(self, commit=True, **kwargs):
-        """Updates model"""
+        """Updates model."""
         logging.debug("Updating %s with attributes: %s", self, kwargs)
         for attr, value in kwargs.items():
             setattr(self, attr, value)
@@ -156,13 +158,13 @@ class BaseModel(ModelErrorMixin, Model, SerializerMixin):
         return self
 
     def save(self):
-        """Saves model"""
+        """Saves model."""
         logging.debug(f"Saving {self.__class__}...")
         db.session.add(self)
         db.session.commit()
 
     def delete(self, commit=True):
-        """Deletes model"""
+        """Deletes model."""
         logging.debug(f"Deleting {self}...")
         db.session.delete(self)
         if commit:
@@ -170,20 +172,20 @@ class BaseModel(ModelErrorMixin, Model, SerializerMixin):
 
 
 class Database(SQLAlchemy):
-    """Database"""
+    """Database."""
 
-    session: "scoped_session"
-    Model: Type[BaseModel]
+    session: scoped_session
+    Model: type[BaseModel]
 
     def create_all(self, *args, **kwargs):
-        """Creates all"""
+        """Creates all."""
         from cookgpt.auth.models import Token, User  # noqa: F401
         from cookgpt.chatbot.models import Chat, Thread  # noqa: F401
 
         super().create_all(*args, **kwargs)
 
     def drop_all(self, *args, **kwargs):
-        """Drops all"""
+        """Drops all."""
         from cookgpt.auth.models import Token, User  # noqa: F401
         from cookgpt.chatbot.models import Chat, Thread  # noqa: F401
 
@@ -198,7 +200,7 @@ migrate = Migrate()
 @click.option("-d", "drop", is_flag=True, help="Drop all tables in database")
 @with_appcontext
 def initdb(drop):
-    """Initialize database"""
+    """Initialize database."""
     if drop:
         click.echo("Dropping database...")
         db.drop_all()
@@ -209,11 +211,12 @@ def initdb(drop):
 @db_cli_group.command()
 @with_appcontext
 def dropall():
-    """drop all tables in database"""
+    """Drop all tables in database."""
     click.echo("Dropping database...")
     db.drop_all()
 
 
 def init_app(app):
+    """Initialize app."""
     db.init_app(app)
     migrate.init_app(app, db)

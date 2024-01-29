@@ -1,4 +1,4 @@
-"""schema and fields examples"""
+"""schema and fields examples."""
 
 UserType = "COOK"
 FirstName = "John"
@@ -41,9 +41,11 @@ AuthInfo = {
 
 
 class Auth:
-    """User signup data examples"""
+    """User signup data examples."""
 
     class Signup:
+        """User signup data examples."""
+
         Body = {
             "first_name": FirstName,
             "last_name": LastName,
@@ -58,6 +60,8 @@ class Auth:
         Error = {"message": "email is taken"}
 
     class Login:
+        """User login data examples."""
+
         Body = {
             "login": Username,
             "password": Password,
@@ -74,9 +78,13 @@ class Auth:
         }
 
     class Logout:
+        """User logout data examples."""
+
         Response = {"message": "Logged out user"}
 
     class Refresh:
+        """Token refresh data examples."""
+
         Response = {
             "message": "Refreshed access token",
             "auth_info": AuthInfo,
@@ -84,12 +92,16 @@ class Auth:
 
 
 class User:
-    """User data examples"""
+    """User data examples."""
 
     class Info:
+        """User info data examples."""
+
         Response = UserInfo
 
     class Update:
+        """User update data examples."""
+
         Body = {
             "first_name": FirstName,
             "last_name": LastName,
@@ -103,12 +115,14 @@ class User:
         Error = {"message": "email is taken"}
 
     class Delete:
+        """User delete data examples."""
+
         Response = {"message": "Successfully deleted"}
         Error = {"message": "Cannot delete user"}
 
 
 class UserUpdate:
-    """User update data examples"""
+    """User update data examples."""
 
     In = {
         "first_name": FirstName,

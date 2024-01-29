@@ -1,3 +1,5 @@
+"""Fake data for testing purposes."""
+
 responses = [
     "what ingredients do you have?",
     "what ingredients do you have at hand?",

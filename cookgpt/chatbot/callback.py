@@ -1,6 +1,6 @@
 """Callbacks for the chatbot."""
 
-from typing import Any, Dict, List, cast
+from typing import Any, cast
 from uuid import UUID
 
 from langchain.callbacks import OpenAICallbackHandler
@@ -17,7 +17,7 @@ from cookgpt.utils import utcnow
 
 
 class ChatCallbackHandler(OpenAICallbackHandler):
-    """tracks the cost and time of the conversation"""
+    """tracks the cost and time of the conversation."""
 
     var = None
     verbose: bool = config.LANGCHAIN_VERBOSE
@@ -46,7 +46,7 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         self._query_cost = 0
 
     def compute_prompt_tokens(
-        self, messages: List[BaseMessage], model_name: str
+        self, messages: list[BaseMessage], model_name: str
     ):
         """Compute the cost of the prompt."""
         logging.debug("Computing prompt tokens...")
@@ -63,16 +63,16 @@ class ChatCallbackHandler(OpenAICallbackHandler):
 
     def on_chain_start(
         self,
-        serialized: Dict[str, Any],
-        inputs: Dict[str, Any],
+        serialized: dict[str, Any],
+        inputs: dict[str, Any],
         *,
         run_id: UUID,
         parent_run_id: UUID | None = None,
-        tags: List[str] | None = None,
-        metadata: Dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Any:
-        """create the query and response"""
+        """Create the query and response."""
         logging.info("Starting chain...")
         super().on_chain_start(
             serialized,
@@ -87,16 +87,16 @@ class ChatCallbackHandler(OpenAICallbackHandler):
 
     def on_chat_model_start(
         self,
-        serialized: Dict[str, Any],
-        messages: List[List[BaseMessage]],
+        serialized: dict[str, Any],
+        messages: list[list[BaseMessage]],
         *,
         run_id: UUID,
         parent_run_id: UUID | None = None,
-        tags: List[str] | None = None,
-        metadata: Dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
         **kwargs: Any,
     ) -> Any:
-        """tracks the cost of the query"""
+        """Tracks the cost of the query."""
         logging.info("Starting chat model...")
         self.compute_prompt_tokens(messages[0], "gpt-3.5-turbo-0613")
 
@@ -105,9 +105,9 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         token: str,
         **kwargs: Any,
     ) -> None:
-        """
-        Run on new LLM token.
-        Only available when streaming is enabled.
+        """Run on new LLM token.
+
+        NOTE: Only available when streaming is enabled.
         """
         from cookgpt.chatbot.utils import get_stream_name
         from cookgpt.globals import current_app as app
@@ -123,7 +123,7 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         )
 
     def on_llm_end(self, response: LLMResult, **kwargs: Any) -> None:
-        """tracks the cost of the conversation"""
+        """Tracks the cost of the conversation."""
         logging.info("Ending LLM...")
         setvar("response_time", utcnow())
         assert not response.llm_output, (
@@ -133,15 +133,15 @@ class ChatCallbackHandler(OpenAICallbackHandler):
         self.compute_completion_tokens(response, "gpt-3.5-turbo-0613")
 
     def register(self):
-        """register the callback handler"""
-        from langchain.callbacks.manager import openai_callback_var
+        """Register the callback handler."""
+        from langchain_community.callbacks.manager import openai_callback_var
 
         logging.debug("Registering callback handler...")
         self.var = openai_callback_var.set(self)
 
     def unregister(self):
-        """unregister the callback handler"""
+        """Unregister the callback handler."""
         logging.debug("Unregistering callback handler...")
-        from langchain.callbacks.manager import openai_callback_var
+        from langchain_community.callbacks.manager import openai_callback_var
 
         openai_callback_var.reset(self.var)

@@ -37,7 +37,7 @@ ThreadCost = make_field(
 
 
 def parse_chat(chat: "ChatModel") -> dict[str, Any]:
-    """convert message to dict"""
+    """Convert message to dict."""
     return {
         "id": chat.id,
         "content": chat.content,
@@ -64,7 +64,7 @@ class ChatSchema(Schema):
 
 
 class ThreadSchema(Schema):
-    """Thread Schema"""
+    """Thread Schema."""
 
     id = ThreadId()
     title = ThreadTitle()
@@ -76,7 +76,11 @@ class Chat:
     """Chat schema."""
 
     class Post:
+        """Chat creation schema."""
+
         class Body(Schema):
+            """Data to use in chat creation."""
+
             query = ChatContent(required=True)
             thread_id = ThreadId(
                 metadata={
@@ -88,6 +92,8 @@ class Chat:
             )
 
         class QueryParams(Schema):
+            """Query parameters."""
+
             stream = fields.Boolean(
                 load_default=False,
                 metadata={
@@ -97,6 +103,8 @@ class Chat:
             )
 
         class Response(Schema):
+            """Details of the created chat."""
+
             chat = fields.Nested(ChatSchema)
             streaming = fields.Boolean(
                 dump_default=True,
@@ -107,11 +115,19 @@ class Chat:
             )
 
     class Get:
+        """Chat retrieval schema."""
+
         class Response(ChatSchema):
+            """Details of the chat."""
+
             ...
 
     class Delete(Schema):
+        """Chat deletion schema."""
+
         class Response(Schema):
+            """Details of the chat."""
+
             message = SuccessMessage(
                 metadata={
                     "example": "chat deleted",
@@ -132,13 +148,19 @@ class Chats:
     """Chats schema."""
 
     class Get:
+        """Get all chats in a thread."""
+
         class QueryParams(Schema):
+            """Query parameters."""
+
             thread_id = ThreadId(
                 metadata={"description": "id of thread to get chats from"},
                 required=True,
             )
 
         class Response(Schema):
+            """All chats in the thread."""
+
             chats = fields.List(
                 fields.Nested(ChatSchema),
                 metadata={
@@ -148,13 +170,19 @@ class Chats:
             )
 
     class Delete:
+        """Delete all chats in a thread."""
+
         class Body(Schema):
+            """Data to use in chat deletion."""
+
             thread_id = ThreadId(
                 metadata={"description": "id of thread to be cleared"},
                 required=True,
             )
 
         class Response(Schema):
+            """Details of the chat."""
+
             message = SuccessMessage(
                 metadata={
                     "example": "all chats deleted",
@@ -163,16 +191,18 @@ class Chats:
 
 
 class Thread:
-    """Threads Schema"""
+    """Threads Schema."""
 
     class Post:
+        """Thread creation schema."""
+
         class Body(Schema):
-            """Data to use in thread creation"""
+            """Data to use in thread creation."""
 
             title = ThreadTitle(allow_none=True)
 
         class Response(Schema):
-            """Details of the created thread"""
+            """Details of the created thread."""
 
             message = SuccessMessage(
                 metadata={
@@ -182,22 +212,32 @@ class Thread:
             thread = fields.Nested(ThreadSchema)
 
     class Get:
+        """Thread retrieval schema."""
+
         class Response(ThreadSchema):
-            """Details of the thread"""
+            """Details of the thread."""
 
     class Delete:
+        """Thread deletion schema."""
+
         class Response(Schema):
+            """Details of the thread."""
+
             message = SuccessMessage(metadata={"example": "thread deleted"})
 
     class Patch:
+        """Thread update schema."""
+
         class Body(Schema):
+            """Data to use in thread update."""
+
             title = ThreadTitle(
                 allow_none=True,
                 metadata={"description": "the new name of the thread"},
             )
 
         class Response(Schema):
-            """Details of the thread"""
+            """Details of the thread."""
 
             message = SuccessMessage(
                 metadata={
@@ -217,11 +257,13 @@ class Thread:
 
 
 class Threads:
-    """Multiple threads schema"""
+    """Multiple threads schema."""
 
     class Get:
+        """Get all threads."""
+
         class Response(Schema):
-            """All threads of this user"""
+            """All threads of this user."""
 
             threads = fields.List(
                 fields.Nested(ThreadSchema),
@@ -232,9 +274,11 @@ class Threads:
             )
 
     class Delete:
-        """Delete all threads"""
+        """Delete all threads."""
 
         class Response(Schema):
+            """Details of the chat."""
+
             message = SuccessMessage(
                 metadata={"example": "all threads deleted"}
             )

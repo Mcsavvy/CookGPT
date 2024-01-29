@@ -1,3 +1,5 @@
+"""Logging module."""
+
 import logging
 from logging import Logger, _nameToLevel
 from logging.config import dictConfig
@@ -70,13 +72,13 @@ dictConfig(
 
 
 def get_logger() -> "Logger":
-    """get logger"""
+    """Get logger."""
     return logging.getLogger("cookgpt")
 
 
 @cast_func_to(logging.log)
 def log(level: str, msg: str, *args, **kwargs):
-    """log"""
+    """Log."""
     lvl = _nameToLevel[level.upper()]
     kwargs.setdefault("stacklevel", 2)
     get_logger().log(lvl, msg, *args, **kwargs)
@@ -84,41 +86,41 @@ def log(level: str, msg: str, *args, **kwargs):
 
 @cast_func_to(logging.debug)
 def debug(msg: str, *args, **kwargs):
-    """debug"""
+    """Debug."""
     kwargs.setdefault("stacklevel", 2)
     get_logger().debug(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.info)
 def info(msg, *args, **kwargs):
-    """info"""
+    """Info."""
     kwargs.setdefault("stacklevel", 2)
     get_logger().info(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.warning)
 def warning(msg, *args, **kwargs):
-    """warning"""
+    """Warning"""
     kwargs.setdefault("stacklevel", 2)
     get_logger().warning(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.error)
 def error(msg, *args, **kwargs):
-    """error"""
+    """Error"""
     kwargs.setdefault("stacklevel", 2)
     get_logger().error(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.critical)
 def critical(msg, *args, **kwargs):
-    """critical"""
+    """Critical."""
     kwargs.setdefault("stacklevel", 2)
     get_logger().critical(msg, *args, **kwargs)
 
 
 @cast_func_to(logging.exception)
 def exception(msg, *args, exc_info=True, **kwargs):
-    """exception"""
+    """Exception."""
     kwargs.setdefault("stacklevel", 2)
     get_logger().exception(msg, *args, exc_info=exc_info, **kwargs)

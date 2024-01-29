@@ -1,6 +1,4 @@
-"""
-Application cache.
-"""
+"""Application cache."""
 
 from typing import TYPE_CHECKING
 
@@ -31,13 +29,13 @@ def clear_cache():
 
 
 def thread_cache_key(*args, **kwargs) -> str:
-    """get the cache key for a thread"""
+    """Get the cache key for a thread."""
     thread_id = kwargs.get("thread_id")
     return f"thread:{thread_id}"
 
 
 def threads_cache_key(*args, **kwargs) -> str:
-    """get the cache key for a user's threads"""
+    """Get the cache key for a user's threads."""
     user_id = kwargs.get("user_id")
     if user_id is None:
         user_id = get_current_user().pk
@@ -45,13 +43,13 @@ def threads_cache_key(*args, **kwargs) -> str:
 
 
 def chat_cache_key(*args, **kwargs) -> str:
-    """get the cache key for a chat"""
+    """Get the cache key for a chat."""
     chat_id = kwargs.get("chat_id")
     return f"chat:{chat_id}"
 
 
 def chats_cache_key(*args, **kwargs) -> str:
-    """get the cache key for a thread's chats"""
+    """Get the cache key for a thread's chats."""
     thread_id = kwargs.get("thread_id")
     if thread_id is None:
         thread_id = request.args["thread_id"]
@@ -60,7 +58,6 @@ def chats_cache_key(*args, **kwargs) -> str:
 
 def init_app(app: "App"):
     """Initialize Flask-Caching."""
-
     app.cli.add_command(cache_cli, "cache")
     cache.init_app(
         app,

@@ -1,3 +1,5 @@
+"""Auth blueprint."""
+
 from apiflask import APIBlueprint
 
 from cookgpt import docs
@@ -11,6 +13,5 @@ app = APIBlueprint(
 )
 
 
-from cookgpt.auth import cli  # noqa: E402, F401
-from cookgpt.auth import views  # noqa: E402, F401
-from cookgpt.auth.models import Token, User  # noqa: E402, F401
+from cookgpt.auth import cli, views  # noqa: E402, F401, I001
+from cookgpt.auth.models import Token, User  # noqa: E402, F401, I001

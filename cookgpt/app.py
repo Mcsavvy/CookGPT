@@ -1,3 +1,5 @@
+"""App module."""
+
 from importlib.metadata import EntryPoint
 from pathlib import Path
 from socket import gethostname
@@ -8,14 +10,18 @@ from dynaconf import Dynaconf, FlaskDynaconf
 from flask import current_app as flask_current_app
 from redis import Redis  # type: ignore
 
-from cookgpt import logging  # noqa: F401
-from cookgpt import docs
+from cookgpt import (
+    docs,
+    logging,  # noqa: F401
+)
 from cookgpt.ext.config import config
+from cookgpt.utils import cast_func_to
 
 VERSION = Path(__file__).parent.joinpath("VERSION").read_text().strip()
 
 
 def schema_name_resolver(schema):  # pragma: no cover
+    """Resolve schema name."""
     name = schema.__class__.__qualname__.replace(
         ".", ":"
     )  # get schema class name
@@ -27,12 +33,14 @@ def schema_name_resolver(schema):  # pragma: no cover
 
 
 class App(APIFlask):
-    """App class that extends APIFlask and FlaskDynaconf"""
+    """App class that extends APIFlask and FlaskDynaconf."""
 
     config: "Dynaconf"
     redis: "Redis"
 
+    @cast_func_to(APIFlask.__init__)
     def __init__(self, *args, **kwargs):
+        """Initialize the app."""
         kwargs.update(
             title="CookGPT", version=VERSION, docs_ui="elements", docs_path="/"
         )
@@ -43,10 +51,11 @@ class App(APIFlask):
         FlaskDynaconf(self, dynaconf_instance=config)
 
     def __repr__(self) -> str:
+        """Return a string representation of the app."""
         return f"<App '{self.import_name}' env='{self.config.current_env}'>"
 
     def load_blueprints(self, key="BLUEPRINTS"):
-        """Load blueprints from settings.toml"""
+        """Load blueprints from settings.toml."""
         blueprints = self.config.get(key, [])
         for object_reference in blueprints:
             # parse the entry point specification
@@ -61,7 +70,7 @@ class App(APIFlask):
 
 
 def add_application_info(response):
-    """Add application info to response headers"""
+    """Add application info to response headers."""
     logging.debug("Adding application info to response headers...")
     response.headers["X-HostName"] = gethostname()
     response.headers["X-Application"] = "Cookgpt"
@@ -70,6 +79,7 @@ def add_application_info(response):
 
 
 def create_app(**config):
+    """Create app."""
     import os
 
     from cookgpt import sentry
@@ -92,6 +102,7 @@ def create_app(**config):
 
 
 def create_app_wsgi():  # pragma: no cover
+    """Create app for WSGI."""
     # workaround for Flask issue
     # that doesn't allow **config
     # to be passed to create_app

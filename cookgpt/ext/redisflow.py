@@ -1,3 +1,5 @@
+"""Redisflow extension."""
+
 from typing import TYPE_CHECKING, cast
 
 from redis import Redis  # type: ignore
@@ -9,7 +11,7 @@ if TYPE_CHECKING:
 
 
 def init_app(app: "App"):
-    """initialize celery"""
+    """Initialize celery."""
     from cookgpt import logging
     from redisflow import celeryapp
 
